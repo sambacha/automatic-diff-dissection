@@ -1,7 +1,9 @@
 package add.features.detector.repairpatterns;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import add.features.detector.spoon.SpoonHelper;
@@ -24,13 +26,25 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTry;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtWhile;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.visitor.filter.LineFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 /**
  * Created by fermadeiral
  */
 public class WrapsWithDetector extends AbstractPatternDetector {
+
+	private static final String WRAPS_LOOP = "wrapsLoop";
+	private static final String UNWRAP_METHOD = "unwrapMethod";
+	private static final String UNWRAP_TRY_CATCH = "unwrapTryCatch";
+	private static final String WRAPS_METHOD = "wrapsMethod";
+	private static final String WRAPS_TRY_CATCH = "wrapsTryCatch";
+	private static final String WRAPS_ELSE = "wrapsElse";
+	private static final String WRAPS_IF_ELSE = "wrapsIfElse";
+	private static final String UNWRAP_IF_ELSE = "unwrapIfElse";
+	private static final String WRAPS_IF = "wrapsIf";
 
 	public WrapsWithDetector(List<Operation> operations) {
 		super(operations);
@@ -57,21 +71,47 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					CtBlock thenBlock = ctIf.getThenStatement();
 					CtBlock elseBlock = ctIf.getElseStatement();
 					if (elseBlock == null) {
-						if (thenBlock != null
-								&& RepairPatternUtils.isThereOldStatementInStatementList(thenBlock.getStatements())) {
+						List stmtsMoved = RepairPatternUtils
+								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
+						if (thenBlock != null && !stmtsMoved.isEmpty()) {
 							if (operation instanceof InsertOperation) {
-								repairPatterns.incrementFeatureCounter("wrapsIf", operation);
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF,
+										new PatternInstance(WRAPS_IF, operation, ctIf, stmtsMoved));
 							} else {
-								repairPatterns.incrementFeatureCounter("unwrapIfElse", operation);
+
+								List susp = ctElement.getElements(new TypeFilter<>(CtStatement.class));
+								for (Object object : stmtsMoved) {
+									CtElement e = (CtElement) object;
+									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
+								}
+
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
+										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) stmtsMoved.get(0),
+												susp));
 							}
 						}
 					} else {
-						if (RepairPatternUtils.isThereOldStatementInStatementList(thenBlock.getStatements())
-								|| RepairPatternUtils.isThereOldStatementInStatementList(elseBlock.getStatements())) {
+						List sthen = RepairPatternUtils
+								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
+						List selse = RepairPatternUtils
+								.getIsThereOldStatementInStatementList(elseBlock.getStatements());
+						// selse.addAll(sthen);
+						if (!sthen.isEmpty() || !selse.isEmpty()) {
 							if (operation instanceof InsertOperation) {
-								repairPatterns.incrementFeatureCounter("wrapsIfElse", operation);
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
+										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, selse));
 							} else {
-								repairPatterns.incrementFeatureCounter("unwrapIfElse", operation);
+
+								List susp = ctElement.getElements(new TypeFilter<>(CtStatement.class));
+
+								sthen.addAll(selse);
+								for (Object object : sthen) {
+									CtElement e = (CtElement) object;
+									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
+								}
+
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
+										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) sthen.get(0), susp));
 							}
 						}
 					}
@@ -89,9 +129,11 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								CtBlock thenBlock = ctIfParent.getThenStatement();
 								if (thenBlock != null && RepairPatternUtils
 										.isThereOldStatementInStatementList(thenBlock.getStatements())) {
-									if (RepairPatternUtils
-											.isThereOldStatementInStatementList(elseBlock.getStatements())) {
-										repairPatterns.incrementFeatureCounter("wrapsElse", operation);
+									List selse = RepairPatternUtils
+											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
+									if (!selse.isEmpty()) {
+										repairPatterns.incrementFeatureCounterInstance(WRAPS_ELSE,
+												new PatternInstance(WRAPS_ELSE, operation, ctIfParent, selse));
 									}
 								}
 							}
@@ -108,12 +150,31 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					if (thenExpression.getMetadata("new") == null || elseExpression.getMetadata("new") == null) {
 						CtElement statementParent = ctConditional.getParent(new TypeFilter<>(CtStatement.class));
 						if (operation instanceof InsertOperation) {
+
 							if (statementParent.getMetadata("new") == null) {
-								repairPatterns.incrementFeatureCounter("wrapsIfElse", operation);
+								CtElement susp = (thenExpression.getMetadata("new") != null) ? elseExpression
+										: thenExpression;
+
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
+										new PatternInstance(WRAPS_IF_ELSE, operation, ctConditional, susp));
 							}
 						} else {
 							if (statementParent.getMetadata("delete") == null) {
-								repairPatterns.incrementFeatureCounter("unwrapIfElse", operation);
+								List susps = new ArrayList();
+								CtExpression patch = null;
+								if (thenExpression.getMetadata("new") == null) {
+									patch = thenExpression;
+									susps.add(elseExpression);
+									susps.add(ctConditional.getCondition());
+
+								} else {
+									patch = elseExpression;
+									susps.add(thenExpression);
+									susps.add(ctConditional.getCondition());
+								}
+
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE,
+										new PatternInstance(UNWRAP_IF_ELSE, operation, patch, susps));
 							}
 						}
 					} else {
@@ -124,7 +185,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									CtElement node2 = operation2.getSrcNode();
 									if (((InsertOperation) operation).getParent() != null) {
 										if (node2.getParent() == ((InsertOperation) operation).getParent()) {
-											repairPatterns.incrementFeatureCounter("wrapsIfElse", operation);
+											repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
+													new PatternInstance(WRAPS_IF_ELSE, operation, ctConditional,
+															node2));
 										}
 									}
 								}
@@ -147,12 +210,20 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					List<CtCatch> catchList = ctTry.getCatchers();
 					if (RepairPatternUtils.isThereOnlyNewCatch(catchList)) {
 						CtBlock tryBodyBlock = ctTry.getBody();
-						if (tryBodyBlock != null && RepairPatternUtils
-								.isThereOldStatementInStatementList(tryBodyBlock.getStatements())) {
+
+						List olds = RepairPatternUtils
+								.getIsThereOldStatementInStatementList(tryBodyBlock.getStatements());
+						if (tryBodyBlock != null && !olds.isEmpty()) {
 							if (operation instanceof InsertOperation) {
-								repairPatterns.incrementFeatureCounter("wrapsTryCatch", operation);
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
+										new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry, olds));
 							} else {
-								repairPatterns.incrementFeatureCounter("unwrapTryCatch", operation);
+
+								//
+								List susps = listSuspicions(ctTry, olds);
+								//
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_TRY_CATCH, new PatternInstance(
+										UNWRAP_TRY_CATCH, operation, (CtElement) olds.get(0), susps));
 							}
 						} else { // try to find a move into the body of the try
 							for (Operation operationAux : this.operations) {
@@ -161,7 +232,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									CtTry ctTryParent = ctElementDst.getParent(new TypeFilter<>(CtTry.class));
 									if (ctTryParent != null && ctTryParent == ctTry) {
 										if (operation instanceof InsertOperation) {
-											repairPatterns.incrementFeatureCounter("wrapsTryCatch", operation);
+											repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
+													new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry,
+															ctElementDst));
 										}
 									}
 								}
@@ -171,6 +244,23 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Return a list with the statemetns inside the first parameter, but removing
+	 * those from the second
+	 * 
+	 * @param ctElements
+	 * @param olds
+	 * @return
+	 */
+	private List listSuspicions(CtElement ctElements, List olds) {
+		List susp = ctElements.getElements(new TypeFilter<>(CtStatement.class));
+		for (Object object : olds) {
+			CtElement e = (CtElement) object;
+			susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
+		}
+		return susp;
 	}
 
 	private void detectWrapsMethod(Operation operation, RepairPatterns repairPatterns) {
@@ -184,13 +274,17 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						CtElement ctElement = operation2.getSrcNode();
 
 						if (ctElement instanceof CtVariableRead) {
+							CtElement parent = ctInvocation.getParent(new LineFilter());
 							if (invocationArguments.contains(ctElement)) {
-								repairPatterns.incrementFeatureCounter("wrapsMethod", operation);
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+										new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctElement, parent));
 							}
 						}
 						if (ctElement instanceof CtAssignment) {
+							CtElement parent = ctInvocation.getParent(new LineFilter());
 							if (invocationArguments.contains(((CtAssignment) ctElement).getAssignment())) {
-								repairPatterns.incrementFeatureCounter("wrapsMethod", operation);
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+										new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctElement, parent));
 							}
 						}
 					}
@@ -198,7 +292,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 				for (CtExpression ctExpression : invocationArguments) {
 					if (ctExpression.getMetadata("isMoved") != null) {
-						repairPatterns.incrementFeatureCounter("wrapsMethod", operation);
+						CtElement parent = ctInvocation.getParent(new LineFilter());
+						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, parent));
 					}
 				}
 			} else {
@@ -212,7 +308,10 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						for (CtExpression ctExpression : invocationArguments) {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
-								repairPatterns.incrementFeatureCounter("unwrapMethod", operation);
+
+								CtElement parent = ctInvocation.getParent(new LineFilter());
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
+										UNWRAP_METHOD, operation, statementParent, ctInvocation, parent));
 							}
 						}
 					}
@@ -233,16 +332,20 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						|| (ctLoop instanceof CtWhile && RepairPatternUtils.isNewWhile((CtWhile) ctLoop))) {
 					if (ctLoop.getBody() instanceof CtBlock) {
 						CtBlock bodyBlock = (CtBlock) ctLoop.getBody();
-						if (bodyBlock != null
-								&& RepairPatternUtils.isThereOldStatementInStatementList(bodyBlock.getStatements())) {
-							repairPatterns.incrementFeatureCounter("wrapsLoop", operation);
+						List susp = RepairPatternUtils.getIsThereOldStatementInStatementList(bodyBlock.getStatements());
+						if (bodyBlock != null && !susp.isEmpty()) {
+							repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
+									new PatternInstance(WRAPS_LOOP, operation, ctLoop, susp));
 						} else { // try to find an update inside the body of the loop
 							for (Operation operationAux : this.operations) {
 								if (operationAux instanceof UpdateOperation) {
 									CtElement ctElementDst = operationAux.getDstNode();
 									CtLoop ctLoopParent = ctElementDst.getParent(new TypeFilter<>(CtLoop.class));
 									if (ctLoopParent != null && ctLoopParent == ctLoop) {
-										repairPatterns.incrementFeatureCounter("wrapsLoop", operation);
+
+										CtStatement sparent = getStmtParent(operationAux.getSrcNode());
+										repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
+												new PatternInstance(WRAPS_LOOP, operation, ctLoop, sparent));
 									}
 								}
 							}
@@ -251,6 +354,17 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 				}
 			}
 		}
+	}
+
+	private CtStatement getStmtParent(CtElement srcNode) {
+
+		CtStatement st = srcNode.getParent(CtStatement.class);
+		while (st != null && st.getParent() != null
+				&& !(st.getParent() instanceof CtBlock || st.getParent() instanceof CtClass)) {
+			st = st.getParent(CtStatement.class);
+
+		}
+		return st;
 	}
 
 }

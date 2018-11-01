@@ -3,6 +3,7 @@ package add.features.detector.repairpatterns;
 import java.util.ArrayList;
 import java.util.List;
 
+import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.main.Config;
 import gumtree.spoon.diff.operations.DeleteOperation;
@@ -20,12 +21,14 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.path.CtRole;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.filter.LineFilter;
 
 /**
  * Created by tdurieux
  */
 public class WrongReferenceDetector extends AbstractPatternDetector {
 
+	private static final String WRONG_METHOD_REF = "wrongMethodRef";
 	private Config config;
 
 	public WrongReferenceDetector(Config config, List<Operation> operations) {
@@ -93,7 +96,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					}
 				} else {
 					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
-						repairPatterns.incrementFeatureCounter("wrongMethodRef", operation);
+						repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 					}
 				}
 			}
@@ -125,6 +128,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 					// CtTypeReference srcTypeReference;
 					String srcCallMethodName;
+					CtElement src = srcNode;
 					List<CtTypeReference> srcCallArguments;
 					if (srcNode instanceof CtInvocation) {
 						// srcTypeReference = ((CtInvocation) srcNode).getTarget().getType();
@@ -135,6 +139,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						srcCallArguments = ((CtConstructorCall) srcNode).getExecutable().getParameters();
 					}
 					String dstCallMethodName;
+					CtElement dst = dstNode;
 					List<CtTypeReference> dstCallArguments;
 					if (dstNode instanceof CtInvocation) {
 						dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
@@ -189,11 +194,17 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					}
 
 					if (!wasMethodDefUpdated) {
+						CtElement parent = src.getParent(new LineFilter());
 						if (!srcCallMethodName.equals(dstCallMethodName)) {
-							repairPatterns.incrementFeatureCounter("wrongMethodRef", operation);
+							// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
+							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+									new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parent));
+
 						} else {
 							if (srcCallArguments.size() != dstCallArguments.size()) {
-								repairPatterns.incrementFeatureCounter("wrongMethodRef", operation);
+								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
+								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+										new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parent));
 							}
 						}
 					}

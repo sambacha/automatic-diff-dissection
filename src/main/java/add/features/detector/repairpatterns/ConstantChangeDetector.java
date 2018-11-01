@@ -2,6 +2,7 @@ package add.features.detector.repairpatterns;
 
 import java.util.List;
 
+import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import gumtree.spoon.diff.operations.DeleteOperation;
@@ -12,11 +13,14 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.visitor.filter.LineFilter;
 
 /**
  * Created by tdurieux
  */
 public class ConstantChangeDetector extends AbstractPatternDetector {
+
+	private static final String CONST_CHANGE = "constChange";
 
 	public ConstantChangeDetector(List<Operation> operations) {
 		super(operations);
@@ -32,16 +36,22 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 						|| operation.getSrcNode().getParent().getMetadata("isMoved") != null) {
 					continue;
 				}
+				CtElement parent = srcNode.getParent(new LineFilter());
 				if (srcNode instanceof CtLiteral) {
-					repairPatterns.incrementFeatureCounter("constChange", operation);
+					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent));
 				}
 				if (srcNode instanceof CtVariableAccess
 						&& RepairPatternUtils.isConstantVariableAccess((CtVariableAccess) srcNode)) {
-					repairPatterns.incrementFeatureCounter("constChange", operation);
+					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
+					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent));
 				}
 				if (srcNode instanceof CtTypeAccess
 						&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
-					repairPatterns.incrementFeatureCounter("constChange", operation);
+					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
+					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent));
 				}
 			} else {
 				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtLiteral) {
@@ -60,7 +70,10 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 							}
 							if (((InsertOperation) operation2).getParent() == ctLiteral.getParent()
 									&& isConstantVariable) {
-								repairPatterns.incrementFeatureCounter("constChange", operation);
+								CtElement parent = ctLiteral.getParent(new LineFilter());
+								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE, new PatternInstance(
+										CONST_CHANGE, operation2, operation2.getSrcNode(), ctLiteral, parent));
+								// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
 							}
 						}
 					}

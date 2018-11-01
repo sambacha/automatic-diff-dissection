@@ -9,9 +9,16 @@ public class RepairPatterns extends Feature {
 
 	MapList<String, Operation> operationsPerFeature = new MapList<>();
 
+	MapList<String, PatternInstance> patternInstances = new MapList<>();
+
 	public void incrementFeatureCounter(String key, Operation operations) {
 		super.incrementFeatureCounter(key);
 		operationsPerFeature.add(key, operations);
+	}
+
+	public void incrementFeatureCounterInstance(String key, PatternInstance operations) {
+		super.incrementFeatureCounter(key);
+		patternInstances.add(key, operations);
 	}
 
 	@FeatureAnnotation(key = "condBlockOthersAdd", name = "Conditional block addition")
@@ -98,5 +105,13 @@ public class RepairPatterns extends Feature {
 
 	public void setOperationsPerFeature(MapList<String, Operation> operationsPerFeature) {
 		this.operationsPerFeature = operationsPerFeature;
+	}
+
+	public MapList<String, PatternInstance> getPatternInstances() {
+		return patternInstances;
+	}
+
+	public void setPatternInstances(MapList<String, PatternInstance> patternInstances) {
+		this.patternInstances = patternInstances;
 	}
 }

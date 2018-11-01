@@ -1,10 +1,12 @@
 package add.features.detector.repairpatterns;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import add.features.detector.spoon.SpoonHelper;
@@ -23,6 +25,8 @@ import spoon.reflect.visitor.filter.LineFilter;
  * Created by fermadeiral
  */
 public class MissingNullCheckDetector extends AbstractPatternDetector {
+	private static final String MISS_NULL_CHECK_N = "missNullCheckN";
+	private static final String MISS_NULL_CHECK_P = "missNullCheckP";
 	private static Logger LOGGER = LoggerFactory.getLogger(MissingNullCheckDetector.class);
 
 	public MissingNullCheckDetector(List<Operation> operations) {
@@ -56,24 +60,44 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 									.getVariableFromReferenceExpression(referenceExpression);
 							if (variable == null || (variable != null && !RepairPatternUtils.isNewVariable(variable))) {
 								wasPatternFound = true;
-							} else {
-								CtElement parent = binaryOperator.getParent(new LineFilter());
-								if (parent instanceof CtIf) {
-									CtBlock thenBlock = ((CtIf) parent).getThenStatement();
-									CtBlock elseBlock = ((CtIf) parent).getElseStatement();
-									if ((thenBlock != null && RepairPatternUtils
-											.isThereOldStatementInStatementList(thenBlock.getStatements()))
-											|| (elseBlock != null && RepairPatternUtils
-													.isThereOldStatementInStatementList(elseBlock.getStatements()))) {
+								//
+
+							} // else {
+							CtElement parent = binaryOperator.getParent(new LineFilter());
+							List soldt = null;
+							List soldelse = null;
+							if (parent instanceof CtIf) {
+								CtBlock thenBlock = ((CtIf) parent).getThenStatement();
+								CtBlock elseBlock = ((CtIf) parent).getElseStatement();
+
+								if (thenBlock != null) {
+									soldt = RepairPatternUtils
+											.getIsThereOldStatementInStatementList(thenBlock.getStatements());
+									if (!soldt.isEmpty())
 										wasPatternFound = true;
-									}
+
+								} else if (elseBlock != null) {
+									soldelse = RepairPatternUtils
+											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
+									if (!soldelse.isEmpty())
+										wasPatternFound = true;
 								}
 							}
+							// }
 							if (wasPatternFound) {
+
+								List susp = new ArrayList<>();
+								if (soldt != null)
+									susp.addAll(soldt);
+								if (soldelse != null)
+									susp.addAll(soldelse);
+
 								if (binaryOperator.getKind().equals(BinaryOperatorKind.EQ)) {
-									repairPatterns.incrementFeatureCounter("missNullCheckP", operation);
+									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_P,
+											new PatternInstance(MISS_NULL_CHECK_P, operation, parent, susp));
 								} else {
-									repairPatterns.incrementFeatureCounter("missNullCheckN", operation);
+									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_N,
+											new PatternInstance(MISS_NULL_CHECK_N, operation, parent, susp));
 								}
 							}
 						}
