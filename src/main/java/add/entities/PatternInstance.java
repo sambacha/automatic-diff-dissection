@@ -3,6 +3,8 @@ package add.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.gumtreediff.tree.ITree;
+
 import gumtree.spoon.diff.operations.Operation;
 import spoon.reflect.declaration.CtElement;
 
@@ -15,33 +17,45 @@ public class PatternInstance {
 
 	String patternName;
 	Operation op = null;
-	CtElement nodeAffectedOp;
-	CtElement faultyLine;
+	CtElement solution;
 	List<CtElement> faultyStatements = new ArrayList<>();
+	CtElement faultyLine;
+	ITree faultyTree;
 
 	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp) {
 		super();
 		this.patternName = patternName;
 		this.op = op;
-		this.nodeAffectedOp = nodeAffectedOp;
+		this.solution = nodeAffectedOp;
 	}
 
 	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp, CtElement other) {
 		super();
 		this.patternName = patternName;
 		this.op = op;
-		this.nodeAffectedOp = nodeAffectedOp;
+		this.solution = nodeAffectedOp;
 		this.faultyStatements.add(other);
 	}
 
 	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp, CtElement other,
-			CtElement suspiciousElement) {
+			CtElement faultyLine) {
 		super();
 		this.patternName = patternName;
 		this.op = op;
-		this.nodeAffectedOp = nodeAffectedOp;
+		this.solution = nodeAffectedOp;
 		this.faultyStatements.add(other);
-		this.faultyLine = suspiciousElement;
+		this.faultyLine = faultyLine;
+	}
+
+	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp, CtElement other,
+			CtElement faultyLine, ITree tree) {
+		super();
+		this.patternName = patternName;
+		this.op = op;
+		this.solution = nodeAffectedOp;
+		this.faultyStatements.add(other);
+		this.faultyLine = faultyLine;
+		this.faultyTree = tree;
 	}
 
 	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp,
@@ -49,7 +63,7 @@ public class PatternInstance {
 		super();
 		this.patternName = patternName;
 		this.op = op;
-		this.nodeAffectedOp = nodeAffectedOp;
+		this.solution = nodeAffectedOp;
 		this.faultyStatements = faultyStatements;
 	}
 
@@ -58,9 +72,20 @@ public class PatternInstance {
 		super();
 		this.patternName = patternName;
 		this.op = op;
-		this.nodeAffectedOp = nodeAffectedOp;
+		this.solution = nodeAffectedOp;
 		this.faultyStatements = faultyStatements;
 		this.faultyLine = faultyLine;
+	}
+
+	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp, List<CtElement> faultyStatements,
+			CtElement faultyLine, ITree tree) {
+		super();
+		this.patternName = patternName;
+		this.op = op;
+		this.solution = nodeAffectedOp;
+		this.faultyStatements = faultyStatements;
+		this.faultyLine = faultyLine;
+		this.faultyTree = tree;
 	}
 
 	public String getPatternName() {
@@ -80,11 +105,11 @@ public class PatternInstance {
 	}
 
 	public CtElement getNodeAffectedOp() {
-		return nodeAffectedOp;
+		return solution;
 	}
 
 	public void setNodeAffectedOp(CtElement nodeAffectedOp) {
-		this.nodeAffectedOp = nodeAffectedOp;
+		this.solution = nodeAffectedOp;
 	}
 
 	public List<CtElement> getFaulty() {
@@ -97,8 +122,9 @@ public class PatternInstance {
 
 	@Override
 	public String toString() {
-		return "PatternInstance [\npatternName=" + patternName + ",\n op=" + op + ",\n nodeAffectedOp=" + nodeAffectedOp
-				+ ",\n suspNodes=" + faultyStatements + "\n pattern line= " + faultyLine + "\n]";
+		return "PatternInstance [\npatternName=" + patternName + ",\n op=" + op + ",\n solution=" + solution
+				+ ",\n suspNodes=" + faultyStatements + "\n faulty line= " + faultyLine + "\n]" + "\n tree line= "
+				+ this.faultyTree + "\n]";
 	}
 
 	public CtElement getFaultyLine() {

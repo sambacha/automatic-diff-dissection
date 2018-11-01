@@ -99,6 +99,12 @@ public class RepairPatterns extends Feature {
 	@FeatureAnnotation(key = "notClassified", name = "undefined")
 	private int notClassified = 0;
 
+	@FeatureAnnotation(key = "binOperatorModif", name = "Modify binary operator")
+	private int binOperatorModif = 0;
+
+	@FeatureAnnotation(key = "addassignment", name = "add assignment")
+	private int addassignment = 0;
+
 	public MapList<String, Operation> getOperationsPerFeature() {
 		return operationsPerFeature;
 	}

@@ -3,9 +3,12 @@ package add.features.detector.repairpatterns;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.gumtreediff.tree.ITree;
+
 import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.main.Config;
+import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.operations.DeleteOperation;
 import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
@@ -28,6 +31,7 @@ import spoon.reflect.visitor.filter.LineFilter;
  */
 public class WrongReferenceDetector extends AbstractPatternDetector {
 
+	private static final String WRONG_VAR_REF = "wrongVarRef";
 	private static final String WRONG_METHOD_REF = "wrongMethodRef";
 	private Config config;
 
@@ -39,10 +43,10 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 	@Override
 	public void detect(RepairPatterns repairPatterns) {
 		for (int i = 0; i < operations.size(); i++) {
-			Operation operation = operations.get(i);
-
-			if (operation instanceof DeleteOperation) {
-				CtElement srcNode = operation.getSrcNode();
+			Operation operationDelete = operations.get(i);
+			Operation operationInsert = null;
+			if (operationDelete instanceof DeleteOperation) {
+				CtElement srcNode = operationDelete.getSrcNode();
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
 					if (srcNode.getMetadata("delete") != null) {
 						CtElement statementParent = srcNode.getParent(CtStatement.class);
@@ -53,6 +57,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								Operation operation2 = operations.get(j);
 								if (operation2 instanceof InsertOperation) {
 									CtElement node2 = operation2.getSrcNode();
+									operationInsert = operation2;
 									if (node2 instanceof CtInvocation || node2 instanceof CtConstructorCall) {
 										if (((InsertOperation) operation2).getParent() != null) {
 											if (srcNode.getParent() == ((InsertOperation) operation2).getParent()) {
@@ -90,20 +95,53 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								}
 							}
 							if (!wasVariableWrapped) {
-								repairPatterns.incrementFeatureCounter("wrongVarRef", operation);
+								// repairPatterns.incrementFeatureCounter("wrongVarRef", operation);
+
+								CtElement susp = operationDelete.getSrcNode();
+								CtElement patch = null;
+
+								ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+								if (parentRight != null) {
+									patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+								}
+
+								CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operationDelete.getAction().getNode(), parentLine);
+
+								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF, new PatternInstance(
+										WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree));
+
 							}
 						}
 					}
-				} else {
+				} else {/// WHY??
 					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
-						repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
+
+						CtElement susp = operationDelete.getSrcNode();
+						CtElement patch = null;
+
+						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
+						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+								operationDelete.getAction().getNode(), parentLine);
+
+						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+						if (parentRight != null) {
+							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+						}
+
+						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF, new PatternInstance(
+								WRONG_METHOD_REF, operationDelete, patch, susp, parentLine, lineTree));
+
+						// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operationDelete);
+						// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operationDelete);
 					}
 				}
 			}
 
-			if (operation instanceof UpdateOperation) {
-				CtElement srcNode = operation.getSrcNode();
-				CtElement dstNode = operation.getDstNode();
+			if (operationDelete instanceof UpdateOperation) {
+				CtElement srcNode = operationDelete.getSrcNode();
+				CtElement dstNode = operationDelete.getDstNode();
 				if (dstNode.getParent().getMetadata("new") != null
 						|| dstNode.getParent().getMetadata("isMoved") != null) {
 					continue;
@@ -113,10 +151,25 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					continue;
 				}
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
-					if (operation.getDstNode() instanceof CtVariableAccess
-							|| operation.getDstNode() instanceof CtTypeAccess
-							|| operation.getDstNode() instanceof CtInvocation) {
-						repairPatterns.incrementFeatureCounter("wrongVarRef", operation);
+					if (operationDelete.getDstNode() instanceof CtVariableAccess
+							|| operationDelete.getDstNode() instanceof CtTypeAccess
+							|| operationDelete.getDstNode() instanceof CtInvocation) {
+						// repairPatterns.incrementFeatureCounter(WRONG_VAR_REF, operationUpdate);
+
+						CtElement susp = operationDelete.getSrcNode();
+						CtElement patch = null;
+
+						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
+						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+								operationDelete.getAction().getNode(), parentLine);
+
+						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+						if (parentRight != null) {
+							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+						}
+
+						repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
+								new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree));
 					}
 				}
 				if (!(srcNode instanceof CtInvocation) && !(srcNode instanceof CtConstructorCall)) {
@@ -194,17 +247,23 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					}
 
 					if (!wasMethodDefUpdated) {
-						CtElement parent = src.getParent(new LineFilter());
+						// CtElement parent = src.getParent(new LineFilter());// Is the suspicious or
+						// the fixed?
+
+						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), src);
+						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+								operationDelete.getAction().getNode(), parentLine);
+
 						if (!srcCallMethodName.equals(dstCallMethodName)) {
 							// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
-							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-									new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parent));
+							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF, new PatternInstance(
+									WRONG_METHOD_REF, operationDelete, dst, src, parentLine, lineTree));
 
 						} else {
 							if (srcCallArguments.size() != dstCallArguments.size()) {
 								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
-								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-										new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parent));
+								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF, new PatternInstance(
+										WRONG_METHOD_REF, operationDelete, dst, src, parentLine, lineTree));
 							}
 						}
 					}

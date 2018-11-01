@@ -90,6 +90,11 @@ public class WrongReferenceDetectorTest {
 		RepairPatterns repairPatterns = detector.analyze();
 
 		Assert.assertTrue(repairPatterns.getFeatureCounter("wrongMethodRef") > 0);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongMethodRef");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
 	}
 
 	@Test
@@ -110,6 +115,10 @@ public class WrongReferenceDetectorTest {
 		RepairPatterns repairPatterns = detector.analyze();
 
 		Assert.assertTrue(repairPatterns.getFeatureCounter("wrongVarRef") > 0);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongVarRef");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
 	}
 
 	@Ignore
@@ -131,6 +140,10 @@ public class WrongReferenceDetectorTest {
 		RepairPatterns repairPatterns = detector.analyze();
 
 		Assert.assertTrue(repairPatterns.getFeatureCounter("wrongVarRef") > 0);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongVarRef");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
 	}
 
 	@Test

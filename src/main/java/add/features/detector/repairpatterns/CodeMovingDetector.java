@@ -2,6 +2,9 @@ package add.features.detector.repairpatterns;
 
 import java.util.List;
 
+import com.github.gumtreediff.actions.model.Move;
+
+import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import gumtree.spoon.diff.operations.MoveOperation;
@@ -10,11 +13,14 @@ import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
 
 /**
  * Created by tdurieux
  */
 public class CodeMovingDetector extends AbstractPatternDetector {
+
+	private static final String CODE_MOVE = "codeMove";
 
 	public CodeMovingDetector(List<Operation> operations) {
 		super(operations);
@@ -55,10 +61,23 @@ public class CodeMovingDetector extends AbstractPatternDetector {
 				continue;
 			}
 
+			CtMethod methoddestination = dstNode.getParent(CtMethod.class);
+			CtMethod methodinsrc = srcNode.getParent(CtMethod.class);
+			if (methoddestination != null && methodinsrc != null
+					&& !methodinsrc.getSignature().equals(methoddestination.getSignature()))
+				continue;
+
 			if (!RepairPatternUtils.isThereChangesInChildren(srcNode)) {
 				if (dstParent.getMetadata("new") == null && srcParent.getMetadata("new") == null
 						&& dstNode.getPosition().getSourceStart() != srcNode.getPosition().getSourceStart()) {
-					repairPatterns.incrementFeatureCounter("codeMove", operation);
+
+					Move maction = (Move) operation.getAction();
+					List<CtElement> suspicious = MappingAnalysis.getAllStatementsOfParent(maction);
+					suspicious.remove(srcNode);
+
+					repairPatterns.incrementFeatureCounterInstance(CODE_MOVE, new PatternInstance(CODE_MOVE, operation,
+							dstNode, suspicious, dstParent, maction.getParent()));
+					// repairPatterns.incrementFeatureCounter("codeMove", operation);
 				}
 			}
 		}
