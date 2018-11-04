@@ -6,6 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.gumtreediff.tree.ITree;
+
 import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
@@ -16,6 +18,7 @@ import gumtree.spoon.diff.operations.Operation;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
@@ -56,16 +59,36 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 
 							boolean wasPatternFound = false;
 
+							List soldt = null;
+							List soldelse = null;
+
 							CtVariable variable = RepairPatternUtils
 									.getVariableFromReferenceExpression(referenceExpression);
 							if (variable == null || (variable != null && !RepairPatternUtils.isNewVariable(variable))) {
 								wasPatternFound = true;
 								//
+								if (binaryOperator.getParent() instanceof CtConditional) {
+									CtConditional c = (CtConditional) binaryOperator.getParent();
+									CtElement thenExpr = c.getThenExpression();
+									CtElement elseExp = c.getElseExpression();
+
+									if (thenExpr != null) {
+										soldt = new ArrayList<>();
+										if (thenExpr.getMetadata("new") == null)
+											soldt.add(thenExpr);
+
+									}
+									if (elseExp != null) {
+										soldelse = new ArrayList<>();
+										if (elseExp.getMetadata("new") == null)
+											soldelse.add(elseExp);
+									}
+
+								}
 
 							} // else {
 							CtElement parent = binaryOperator.getParent(new LineFilter());
-							List soldt = null;
-							List soldelse = null;
+
 							if (parent instanceof CtIf) {
 								CtBlock thenBlock = ((CtIf) parent).getThenStatement();
 								CtBlock elseBlock = ((CtIf) parent).getElseStatement();
@@ -83,6 +106,7 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 										wasPatternFound = true;
 								}
 							}
+
 							// }
 							if (wasPatternFound) {
 
@@ -92,12 +116,41 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 								if (soldelse != null)
 									susp.addAll(soldelse);
 
+								CtElement lineP = null;
+								ITree lineTree = null;
+								if (!susp.isEmpty()) {
+
+									lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));
+
+								} else {
+
+									// The next
+									InsertOperation operationIns = (InsertOperation) operation;
+									// lineP = MappingAnalysis.getParentLine(new LineFilter(),
+									// operationIns.getParent());
+									List<CtElement> follow = MappingAnalysis
+											.getFollowStatements(operationIns.getAction());
+									if (!follow.isEmpty()) {
+										lineP = follow.get(0);
+
+									} else {
+										// in case of adding at the end
+										lineP = MappingAnalysis.getParentLine(new LineFilter(),
+												operationIns.getParent());
+									}
+									susp.add(lineP);
+								}
+
+								lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
 								if (binaryOperator.getKind().equals(BinaryOperatorKind.EQ)) {
 									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_P,
-											new PatternInstance(MISS_NULL_CHECK_P, operation, parent, susp));
+											new PatternInstance(MISS_NULL_CHECK_P, operation, parent, susp, lineP,
+													lineTree));
 								} else {
 									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_N,
-											new PatternInstance(MISS_NULL_CHECK_N, operation, parent, susp));
+											new PatternInstance(MISS_NULL_CHECK_N, operation, parent, susp, lineP,
+													lineTree));
 								}
 							}
 						}

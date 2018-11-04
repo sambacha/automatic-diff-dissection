@@ -3,6 +3,8 @@ package add.features.detector.repairpatterns;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.gumtreediff.tree.ITree;
+
 import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
@@ -75,8 +77,12 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
 						if (thenBlock != null && !stmtsMoved.isEmpty()) {
 							if (operation instanceof InsertOperation) {
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										(CtElement) stmtsMoved.get(0));
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF,
-										new PatternInstance(WRAPS_IF, operation, ctIf, stmtsMoved));
+										new PatternInstance(WRAPS_IF, operation, ctIf, stmtsMoved, lineP, lineTree));
 							} else {
 
 								List susp = ctElement.getElements(new TypeFilter<>(CtStatement.class));
@@ -85,9 +91,14 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
 								}
 
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										(CtElement) susp.get(0));
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
+
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
 										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) stmtsMoved.get(0),
-												susp));
+												susp, lineP, lineTree));
 							}
 						}
 					} else {
@@ -98,8 +109,17 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						// selse.addAll(sthen);
 						if (!sthen.isEmpty() || !selse.isEmpty()) {
 							if (operation instanceof InsertOperation) {
+
+								List all = new ArrayList<>();
+								all.addAll(sthen);
+								all.addAll(selse);
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										(CtElement) all.get(0));
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
+
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
-										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, selse));
+										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, all, lineP, lineTree));
 							} else {
 
 								List susp = ctElement.getElements(new TypeFilter<>(CtStatement.class));
@@ -110,8 +130,14 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
 								}
 
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										(CtElement) susp.get(0));
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
+
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
-										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) sthen.get(0), susp));
+										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) sthen.get(0), susp,
+												lineP, lineTree));
 							}
 						}
 					}
@@ -132,8 +158,14 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									List selse = RepairPatternUtils
 											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
 									if (!selse.isEmpty()) {
-										repairPatterns.incrementFeatureCounterInstance(WRAPS_ELSE,
-												new PatternInstance(WRAPS_ELSE, operation, ctIfParent, selse));
+
+										CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+												(CtElement) selse.get(0));
+										ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+												operation.getAction().getNode(), lineP);
+
+										repairPatterns.incrementFeatureCounterInstance(WRAPS_ELSE, new PatternInstance(
+												WRAPS_ELSE, operation, ctIfParent, selse, lineP, lineTree));
 									}
 								}
 							}
@@ -155,8 +187,12 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								CtElement susp = (thenExpression.getMetadata("new") != null) ? elseExpression
 										: thenExpression;
 
-								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
-										new PatternInstance(WRAPS_IF_ELSE, operation, ctConditional, susp));
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), susp);
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
+
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE, new PatternInstance(
+										WRAPS_IF_ELSE, operation, ctConditional, susp, lineP, lineTree));
 							}
 						} else {
 							if (statementParent.getMetadata("delete") == null) {
@@ -172,9 +208,13 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									susps.add(thenExpression);
 									susps.add(ctConditional.getCondition());
 								}
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										(CtElement) susps.get(0));
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
 
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE,
-										new PatternInstance(UNWRAP_IF_ELSE, operation, patch, susps));
+										new PatternInstance(UNWRAP_IF_ELSE, operation, patch, susps, lineP, lineTree));
 							}
 						}
 					} else {
@@ -185,9 +225,14 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									CtElement node2 = operation2.getSrcNode();
 									if (((InsertOperation) operation).getParent() != null) {
 										if (node2.getParent() == ((InsertOperation) operation).getParent()) {
+
+											CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), node2);
+											ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+													operation.getAction().getNode(), lineP);
+
 											repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
-													new PatternInstance(WRAPS_IF_ELSE, operation, ctConditional,
-															node2));
+													new PatternInstance(WRAPS_IF_ELSE, operation, ctConditional, node2,
+															lineP, lineTree));
 										}
 									}
 								}
@@ -214,16 +259,22 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						List olds = RepairPatternUtils
 								.getIsThereOldStatementInStatementList(tryBodyBlock.getStatements());
 						if (tryBodyBlock != null && !olds.isEmpty()) {
+
+							//
+							// List susps = listSuspicions(ctTry, olds);
+							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) olds.get(0));
+							ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+									operation.getAction().getNode(), lineP);
+							//
+
 							if (operation instanceof InsertOperation) {
+
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
-										new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry, olds));
+										new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry, olds, lineP, lineTree));
 							} else {
 
-								//
-								List susps = listSuspicions(ctTry, olds);
-								//
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_TRY_CATCH, new PatternInstance(
-										UNWRAP_TRY_CATCH, operation, (CtElement) olds.get(0), susps));
+										UNWRAP_TRY_CATCH, operation, (CtElement) olds.get(0), olds, lineP, lineTree));
 							}
 						} else { // try to find a move into the body of the try
 							for (Operation operationAux : this.operations) {
@@ -232,9 +283,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									CtTry ctTryParent = ctElementDst.getParent(new TypeFilter<>(CtTry.class));
 									if (ctTryParent != null && ctTryParent == ctTry) {
 										if (operation instanceof InsertOperation) {
+
+											CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+													operationAux.getSrcNode());
+											ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+													operation.getAction().getNode(), lineP);
+
 											repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
 													new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry,
-															ctElementDst));
+															operationAux.getSrcNode(), lineP, lineTree));
 										}
 									}
 								}
@@ -274,17 +331,28 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						CtElement ctElement = operation2.getSrcNode();
 
 						if (ctElement instanceof CtVariableRead) {
+							CtVariableRead vr = (CtVariableRead) ctElement;
 							CtElement parent = ctInvocation.getParent(new LineFilter());
 							if (invocationArguments.contains(ctElement)) {
+
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), ctElement);
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
-										new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctElement, parent));
+										new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctElement,
+												/* parent */ lineP, lineTree));
 							}
 						}
 						if (ctElement instanceof CtAssignment) {
 							CtElement parent = ctInvocation.getParent(new LineFilter());
+							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), ctElement);
+							ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+									operation.getAction().getNode(), lineP);
+
 							if (invocationArguments.contains(((CtAssignment) ctElement).getAssignment())) {
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
-										new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctElement, parent));
+										new PatternInstance(WRAPS_METHOD, operation, ctInvocation,
+												((CtAssignment) ctElement).getAssigned(), /* parent */lineP, lineTree));
 							}
 						}
 					}
@@ -292,9 +360,14 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 				for (CtExpression ctExpression : invocationArguments) {
 					if (ctExpression.getMetadata("isMoved") != null) {
-						CtElement parent = ctInvocation.getParent(new LineFilter());
-						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
-								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, parent));
+						// CtElement parent = ctInvocation.getParent(new LineFilter());
+						// Operation is an Insert
+						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+								((InsertOperation) operation).getParent());
+						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+								operation.getAction().getNode(), lineP);
+						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD, new PatternInstance(WRAPS_METHOD,
+								operation, ctInvocation, ctExpression, /* parent */ lineP, lineTree));
 					}
 				}
 			} else {
@@ -309,9 +382,16 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
 
-								CtElement parent = ctInvocation.getParent(new LineFilter());
-								repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
-										UNWRAP_METHOD, operation, statementParent, ctInvocation, parent));
+								// CtElement parent = ctInvocation.getParent(new LineFilter());
+
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										operation.getSrcNode());
+								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+										operation.getAction().getNode(), lineP);
+
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD,
+										new PatternInstance(UNWRAP_METHOD, operation, statementParent, ctInvocation,
+												/* parent */lineP, lineTree));
 							}
 						}
 					}
@@ -334,8 +414,13 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						CtBlock bodyBlock = (CtBlock) ctLoop.getBody();
 						List susp = RepairPatternUtils.getIsThereOldStatementInStatementList(bodyBlock.getStatements());
 						if (bodyBlock != null && !susp.isEmpty()) {
+
+							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));
+							ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+									operation.getAction().getNode(), lineP);
+
 							repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
-									new PatternInstance(WRAPS_LOOP, operation, ctLoop, susp));
+									new PatternInstance(WRAPS_LOOP, operation, ctLoop, susp, lineP, lineTree));
 						} else { // try to find an update inside the body of the loop
 							for (Operation operationAux : this.operations) {
 								if (operationAux instanceof UpdateOperation) {
@@ -343,9 +428,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									CtLoop ctLoopParent = ctElementDst.getParent(new TypeFilter<>(CtLoop.class));
 									if (ctLoopParent != null && ctLoopParent == ctLoop) {
 
-										CtStatement sparent = getStmtParent(operationAux.getSrcNode());
+										// CtStatement sparent = getStmtParent(operationAux.getSrcNode());
+										CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+												operationAux.getSrcNode());
+										ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+												operation.getAction().getNode(), lineP);
+
 										repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
-												new PatternInstance(WRAPS_LOOP, operation, ctLoop, sparent));
+												new PatternInstance(WRAPS_LOOP, operation, ctLoop,
+														operationAux.getSrcNode(), lineP, lineTree));
 									}
 								}
 							}

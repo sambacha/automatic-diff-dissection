@@ -71,9 +71,10 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 							? (CtBinaryOperator) operation.getSrcNode()
 							: operation.getSrcNode().getParent(CtBinaryOperator.class);
 
-					if (buggybinaryOperator.getLeftHandOperand().equals(binaryOperator.getLeftHandOperand())
-							&& buggybinaryOperator.getRightHandOperand().equals(binaryOperator.getRightHandOperand())) {
-						System.out.println(buggybinaryOperator.getKind().toString() + binaryOperator.getKind());
+					if (buggybinaryOperator != null && binaryOperator != null &&
+
+							idem(buggybinaryOperator.getLeftHandOperand(), binaryOperator.getLeftHandOperand())
+							&& idem(buggybinaryOperator.getRightHandOperand(), binaryOperator.getRightHandOperand())) {
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, buggybinaryOperator);
 
@@ -195,9 +196,9 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 					}
 					if (isThereOldCondition && isThereNewCondition) {
 
-						ITree parentNode = MappingAnalysis.getParentInSource(diff, operation.getAction());
-						CtElement parentCtElement = (CtElement) parentNode
-								.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+						//ITree parentNode = MappingAnalysis.getParentInSource(diff, operation.getAction());
+						///CtElement parentCtElement = (CtElement) parentNode
+						//		.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 						// Let's get the left element of the modified binary
 						// Left find the old condition part
@@ -215,8 +216,9 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 						suspicious = (CtElement) sourceBinaryTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 						//////
-						CtElement parentLine = MappingAnalysis.getParentLine(filter, parentCtElement);
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff, parentNode, parentLine);
+						CtElement parentLine = MappingAnalysis.getParentLine(filter, suspicious/* parentCtElement */);
+						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+								operation.getAction().getNode(), parentLine);
 						///
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_EXPAND, new PatternInstance(
 								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, suspicious, parentLine, lineTree));
@@ -317,6 +319,14 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 			}
 		}
 
+	}
+
+	private boolean idem(CtExpression rightHandOperand, CtExpression ctExpression) {
+		if (rightHandOperand == null && ctExpression == null)
+			return true;
+		if (rightHandOperand == null || ctExpression == null)
+			return false;
+		return rightHandOperand.equals(ctExpression);
 	}
 
 	private boolean isInCondition(CtElement element) {

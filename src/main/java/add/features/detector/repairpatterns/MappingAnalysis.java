@@ -10,10 +10,11 @@ import com.github.gumtreediff.tree.ITree;
 
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.Diff;
-import spoon.reflect.code.CtIf;
-import spoon.reflect.code.CtLoop;
+import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.path.CtRole;
 import spoon.reflect.visitor.filter.LineFilter;
 
 /**
@@ -71,22 +72,47 @@ public class MappingAnalysis {
 
 	public static ITree getCorrespondingInSourceTree(Diff diff, ITree affectedByOperator, CtElement faulty) {
 		ITree nodeFaulty = null;
+		List<ITree> nodes = new ArrayList<>();
+
+		if (isIn(faulty, affectedByOperator))
+			return affectedByOperator;
+
 		for (ITree ctree : affectedByOperator.getDescendants()) {
 
 			if (isIn(faulty, ctree)) {
-				nodeFaulty = ctree;
-				break;
+				nodes.add(ctree);
+				// nodeFaulty = ctree;
+				// break;
 			}
 		}
-		if (nodeFaulty == null) {
+		if (nodeFaulty == null && nodes.isEmpty()) {
 			for (Mapping ms : diff.getMappingsComp().asSet()) {
 				if (isIn(faulty, ms.getFirst())) {
-					nodeFaulty = ms.getFirst();
-					break;
+					// nodeFaulty = ms.getFirst();
+					// break;
+					nodes.add(ms.getFirst());
 				}
 			}
 		}
-		return nodeFaulty;
+		if (nodes.isEmpty()) {
+			// return null;
+			ITree mappedsource = diff.getMappingsComp().firstMappedSrcParent(affectedByOperator);
+			if (mappedsource != null)
+				return mappedsource;
+			else
+				return diff.getMappingsComp().firstMappedDstParent(affectedByOperator);
+		}
+
+		if (nodes.size() == 1)
+			return nodes.get(0);
+		else {
+			for (ITree iTree : nodes) {
+				if (!iTree.getLabel().isEmpty())
+					return iTree;
+			}
+			return nodes.get(0);
+		}
+		// return nodeFaulty;
 	}
 
 	public static boolean isIn(CtElement faulty, ITree ctree) {
@@ -103,15 +129,37 @@ public class MappingAnalysis {
 		return save;
 	}
 
-	public static CtElement getParentLine(LineFilter filter, CtElement parentCtElement) {
-		CtElement parentLine = null;
-		if (parentCtElement instanceof CtIf || parentCtElement instanceof CtLoop)
-			parentLine = parentCtElement;
-		else {
-			parentLine = parentCtElement.getParent(filter);
-			if (parentLine == null)
-				parentLine = parentCtElement;
+	public static CtElement getParentLine(LineFilter filter, CtElement element) {
+		if (element.getParent() instanceof CtBlock) {
+			return element;
 		}
+
+		CtElement parentCondition = element.getParent(e -> e != null && e.getRoleInParent() != null
+				&& (e.getRoleInParent().equals(CtRole.CONDITION) || e.getRoleInParent().equals(CtRole.EXPRESSION)));
+
+		if (parentCondition != null) {
+
+			CtElement parent = parentCondition.getParent();
+			if (parent instanceof CtReturn)
+				return parent;
+			else
+				return parentCondition;
+
+		}
+		// Not in if/loop condition
+		CtElement parentLine = null;
+
+		parentLine = element.getParent(filter);
+		if (parentLine == null)
+			parentLine = element;
+
+//		if (parentCtElement instanceof CtIf || parentCtElement instanceof CtLoop)
+//			parentLine = parentCtElement;
+//		else {
+//			parentLine = parentCtElement.getParent(filter);
+//			if (parentLine == null)
+//				parentLine = parentCtElement;
+//		}
 		return parentLine;
 	}
 
@@ -128,12 +176,23 @@ public class MappingAnalysis {
 	}
 
 	public static List<CtElement> getFollowStatements(Addition maction) {
+
 		List<CtElement> suspicious = new ArrayList();
 		ITree treeparent = maction.getParent();
 		int possition = maction.getPosition();
-		List<ITree> s = treeparent.getChildren().subList(possition, treeparent.getChildren().size());
-		for (ITree iTree : s) {
-			suspicious.add((CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+
+		if (treeparent.getChildren().isEmpty())
+			return suspicious;
+
+		if (possition >= treeparent.getChildren().size()) {
+			// The last one
+			suspicious.add((CtElement) treeparent.getChildren().get(treeparent.getChildren().size() - 1)
+					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+		} else {
+			List<ITree> s = treeparent.getChildren().subList(possition, treeparent.getChildren().size());
+			for (ITree iTree : s) {
+				suspicious.add((CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+			}
 		}
 		return suspicious;
 	}
