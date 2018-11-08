@@ -128,8 +128,8 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 									InsertOperation operationIns = (InsertOperation) operation;
 									// lineP = MappingAnalysis.getParentLine(new LineFilter(),
 									// operationIns.getParent());
-									List<CtElement> follow = MappingAnalysis
-											.getFollowStatements(operationIns.getAction());
+									List<CtElement> follow = MappingAnalysis.getFollowStatements(diff,
+											operationIns.getAction());
 									if (!follow.isEmpty()) {
 										lineP = follow.get(0);
 

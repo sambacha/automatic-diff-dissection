@@ -74,7 +74,8 @@ public class CodeMovingDetector extends AbstractPatternDetector {
 						&& dstNode.getPosition().getSourceStart() != srcNode.getPosition().getSourceStart()) {
 
 					Move maction = (Move) operation.getAction();
-					List<CtElement> suspicious = MappingAnalysis.getFollowStatements(maction); // MappingAnalysis.getAllStatementsOfParent(maction);
+
+					List<CtElement> suspicious = MappingAnalysis.getFollowStatements(diff, maction); // MappingAnalysis.getAllStatementsOfParent(maction);
 					suspicious.remove(srcNode);
 
 					if (suspicious.size() > 0) {

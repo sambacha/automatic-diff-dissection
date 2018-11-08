@@ -72,13 +72,13 @@ public class AssigmentDetector extends AbstractPatternDetector {
 			CtElement lineP = null;
 			ITree lineTree = null;
 
-			List<CtElement> follow = MappingAnalysis.getFollowStatements(maction);
+			List<CtElement> follow = MappingAnalysis.getFollowStatements(diff, maction);
 			if (!follow.isEmpty()) {
 				lineP = follow.get(0);
 
 			} else {
 				// in case of adding at the end
-				lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) maction);
+				lineP = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
 			}
 			susp.add(lineP);
 
