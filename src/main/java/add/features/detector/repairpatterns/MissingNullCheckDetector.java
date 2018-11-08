@@ -13,6 +13,7 @@ import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import add.features.detector.spoon.SpoonHelper;
 import add.features.detector.spoon.filter.NullCheckFilter;
+import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -99,7 +100,8 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 									if (!soldt.isEmpty())
 										wasPatternFound = true;
 
-								} else if (elseBlock != null) {
+								} // else
+								if (elseBlock != null) {
 									soldelse = RepairPatternUtils
 											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
 									if (!soldelse.isEmpty())
@@ -107,10 +109,9 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 								}
 							}
 
-							// }
 							if (wasPatternFound) {
 
-								List susp = new ArrayList<>();
+								List<CtElement> susp = new ArrayList<>();
 								if (soldt != null)
 									susp.addAll(soldt);
 								if (soldelse != null)
@@ -122,27 +123,32 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 
 									lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));
 
+									lineTree = (ITree) ((lineP.getMetadata("tree") != null) ? lineP.getMetadata("tree")
+											: lineP.getMetadata("gtnode"));
+
 								} else {
 
 									// The next
 									InsertOperation operationIns = (InsertOperation) operation;
-									// lineP = MappingAnalysis.getParentLine(new LineFilter(),
-									// operationIns.getParent());
-									List<CtElement> follow = MappingAnalysis.getFollowStatements(diff,
-											operationIns.getAction());
-									if (!follow.isEmpty()) {
-										lineP = follow.get(0);
 
-									} else {
-										// in case of adding at the end
-										lineP = MappingAnalysis.getParentLine(new LineFilter(),
-												operationIns.getParent());
+									List<ITree> treeInLeft = MappingAnalysis.getFollowStatementsInLeft(diff,
+											operationIns.getAction());
+
+									if (treeInLeft.isEmpty()) {
+										System.out.println(
+												"Problem!!!! Empty parent in " + MISS_NULL_CHECK_N.toLowerCase());
+										continue;
 									}
-									susp.add(lineP);
+
+									for (ITree iTree : treeInLeft) {
+										susp.add((CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+									}
+
+									lineP = susp.get(0);
+									lineTree = treeInLeft.get(0);
+
 								}
 
-								lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-										operation.getAction().getNode(), lineP);
 								if (binaryOperator.getKind().equals(BinaryOperatorKind.EQ)) {
 									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_P,
 											new PatternInstance(MISS_NULL_CHECK_P, operation, parent, susp, lineP,

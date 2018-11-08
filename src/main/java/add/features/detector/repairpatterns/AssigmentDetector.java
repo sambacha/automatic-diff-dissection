@@ -3,12 +3,12 @@ package add.features.detector.repairpatterns;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.gumtreediff.actions.model.Insert;
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
+import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
 import spoon.reflect.code.CtAssignment;
@@ -16,7 +16,6 @@ import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.visitor.filter.LineFilter;
 
 /**
  * 
@@ -63,32 +62,29 @@ public class AssigmentDetector extends AbstractPatternDetector {
 				continue;
 			}
 
-			// if (!RepairPatternUtils.isThereChangesInChildren(srcNode)) {
+			InsertOperation operationIns = (InsertOperation) operation;
 
-			Insert maction = (Insert) operation.getAction();
-
-			List susp = new ArrayList<>();
-
-			CtElement lineP = null;
-			ITree lineTree = null;
-
-			List<CtElement> follow = MappingAnalysis.getFollowStatements(diff, maction);
-			if (!follow.isEmpty()) {
-				lineP = follow.get(0);
-
-			} else {
-				// in case of adding at the end
-				lineP = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
+			List<ITree> treeInLeft = MappingAnalysis.getFollowStatementsInLeft(diff, operationIns.getAction());
+			if (treeInLeft.isEmpty()) {
+				System.out.println("Problems: follow in empty");
+				return;
 			}
-			susp.add(lineP);
 
-			lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff, operation.getAction().getNode(), lineP);
+			List<CtElement> followCtElementsInLeft = new ArrayList<>();
+			for (ITree iTree : treeInLeft) {
+
+				CtElement associatedLeftCtElement = (CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+				followCtElementsInLeft.add(associatedLeftCtElement);
+
+			}
+
+			// lineP = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
 
 			repairPatterns.incrementFeatureCounterInstance(ADD_ASSIGNMENT,
-					new PatternInstance(ADD_ASSIGNMENT, operation, operation.getSrcNode(), follow, lineP, lineTree));
-			// repairPatterns.incrementFeatureCounter("codeMove", operation);
+					new PatternInstance(ADD_ASSIGNMENT, operation, operation.getSrcNode(),
 
-			// }
+							followCtElementsInLeft, followCtElementsInLeft.get(0), treeInLeft.get(0)));
+
 		}
 	}
 

@@ -38,10 +38,9 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 						|| operation.getSrcNode().getParent().getMetadata("isMoved") != null) {
 					continue;
 				}
-				// CtElement parent = srcNode.getParent(new LineFilter());
 				CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
-				ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff, operation.getAction().getNode(),
-						parent);
+				ITree lineTree = (ITree) ((parent.getMetadata("tree") != null) ? parent.getMetadata("tree")
+						: parent.getMetadata("gtnode"));
 
 				if (srcNode instanceof CtLiteral) {
 					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE, new PatternInstance(CONST_CHANGE,
@@ -64,9 +63,9 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 					CtLiteral ctLiteral = (CtLiteral) operation.getSrcNode();
 					// try to search a replacement for the literal
 					for (int j = 0; j < operations.size(); j++) {
-						Operation operation2 = operations.get(j);
-						if (operation2 instanceof InsertOperation) {
-							CtElement ctElement = operation2.getSrcNode();
+						Operation operation2Insert = operations.get(j);
+						if (operation2Insert instanceof InsertOperation) {
+							CtElement ctElement = operation2Insert.getSrcNode();
 							boolean isConstantVariable = false;
 							if ((ctElement instanceof CtVariableAccess
 									&& RepairPatternUtils.isConstantVariableAccess((CtVariableAccess) ctElement))
@@ -74,17 +73,16 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 											&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) ctElement))) {
 								isConstantVariable = true;
 							}
-							if (((InsertOperation) operation2).getParent() == ctLiteral.getParent()
+							if (((InsertOperation) operation2Insert).getParent() == ctLiteral.getParent()
 									&& isConstantVariable) {
-								// CtElement parent = ctLiteral.getParent(new LineFilter());
 								CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), ctLiteral);
-								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-										operation.getAction().getNode(), parent);
+								ITree lineTree = (ITree) ((parent.getMetadata("tree") != null)
+										? parent.getMetadata("tree")
+										: parent.getMetadata("gtnode"));
 
 								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
-										new PatternInstance(CONST_CHANGE, operation2, operation2.getSrcNode(),
-												ctLiteral, parent, lineTree));
-								// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
+										new PatternInstance(CONST_CHANGE, operation2Insert,
+												operation2Insert.getSrcNode(), ctLiteral, parent, lineTree));
 							}
 						}
 					}

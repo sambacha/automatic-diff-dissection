@@ -3,9 +3,7 @@ package add.features.detector.repairpatterns;
 import java.util.List;
 
 import com.github.gumtreediff.actions.model.Move;
-import com.github.gumtreediff.tree.ITree;
 
-import add.entities.PatternInstance;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import gumtree.spoon.diff.operations.MoveOperation;
@@ -15,7 +13,6 @@ import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.visitor.filter.LineFilter;
 
 /**
  * Created by tdurieux
@@ -75,20 +72,21 @@ public class CodeMovingDetector extends AbstractPatternDetector {
 
 					Move maction = (Move) operation.getAction();
 
-					List<CtElement> suspicious = MappingAnalysis.getFollowStatements(diff, maction); // MappingAnalysis.getAllStatementsOfParent(maction);
-					suspicious.remove(srcNode);
+					// List<CtElement> suspicious = MappingAnalysis.getFollowStatements(diff,
+					// maction); // MappingAnalysis.getAllStatementsOfParent(maction);
+					// suspicious.remove(srcNode);
 
-					if (suspicious.size() > 0) {
-						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspicious.get(0));
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operation.getAction().getNode(), lineP);
-
-						repairPatterns.incrementFeatureCounterInstance(CODE_MOVE,
-								new PatternInstance(CODE_MOVE, operation, dstNode, suspicious, lineP, lineTree));
-					} else {
-						repairPatterns.incrementFeatureCounterInstance(CODE_MOVE, new PatternInstance(CODE_MOVE,
-								operation, dstNode, suspicious, srcNode, maction.getParent()));
-					}
+//					if (suspicious.size() > 0) {
+//						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspicious.get(0));
+//						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
+//								operation.getAction().getNode(), lineP);
+//
+//						repairPatterns.incrementFeatureCounterInstance(CODE_MOVE,
+//								new PatternInstance(CODE_MOVE, operation, dstNode, suspicious, lineP, lineTree));
+//					} else {
+//						repairPatterns.incrementFeatureCounterInstance(CODE_MOVE, new PatternInstance(CODE_MOVE,
+//								operation, dstNode, suspicious, srcNode, maction.getParent()));
+//					}
 					// repairPatterns.incrementFeatureCounter("codeMove", operation);
 				}
 			}

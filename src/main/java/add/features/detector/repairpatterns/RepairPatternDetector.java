@@ -37,7 +37,7 @@ public class RepairPatternDetector extends EditScriptBasedDetector {
 		detectors.add(new WrapsWithDetector(operations));
 		// detectors.add(new CopyPasteDetector(operations));
 		detectors.add(new ConstantChangeDetector(operations));
-		detectors.add(new CodeMovingDetector(operations));
+		// detectors.add(new CodeMovingDetector(operations));
 		detectors.add(new ExpressionFixDetector(operations));
 		detectors.add(new WrongReferenceDetector(this.config, operations));
 		detectors.add(new AssigmentDetector(operations));

@@ -1,5 +1,6 @@
 package add.features.detector.repairpatterns;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,8 +79,9 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, buggybinaryOperator);
 
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operation.getAction().getNode(), parentLine);
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
 
 						repairPatterns.incrementFeatureCounterInstance(BIN_OPERATOR_MODIF, new PatternInstance(
 								BIN_OPERATOR_MODIF, operation, dstNode, buggybinaryOperator, parentLine, lineTree));
@@ -196,38 +198,35 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 					}
 					if (isThereOldCondition && isThereNewCondition) {
 
-						//ITree parentNode = MappingAnalysis.getParentInSource(diff, operation.getAction());
-						///CtElement parentCtElement = (CtElement) parentNode
-						//		.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+						// Get the nodes moved in the right
+						List<CtElement> movesInRight = parentBinaryOperator
+								.getElements(e -> e.getMetadata("isMoved") != null && e.getMetadata("root") != null);
 
-						// Let's get the left element of the modified binary
-						// Left find the old condition part
-						CtBinaryOperator binary = (CtBinaryOperator) srcNode;
-						CtElement oldNode = (binary.getRightHandOperand().getMetadata("isMoved") != null)
-								? binary.getRightHandOperand()
-								: binary.getLeftHandOperand();
+						List<CtElement> suspLeft = new ArrayList();
+						for (CtElement ctElement : movesInRight) {
 
-						// Lets find the old node in binary it in the source tree
-						ITree sourceBinaryTree = MappingAnalysis.getTreeInLeft(diff, oldNode);
-						if (sourceBinaryTree == null)
-							sourceBinaryTree = MappingAnalysis.getParentInSource(diff, operation.getAction());
+							ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff,
+									(ITree) ctElement.getMetadata("gtnode"));
+							if (mappedLeft != null) {
+								suspLeft.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
 
-						CtElement suspicious = null;
-						suspicious = (CtElement) sourceBinaryTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+							} else {
+								return;
+							}
 
-						//////
-						CtElement parentLine = MappingAnalysis.getParentLine(filter, suspicious/* parentCtElement */);
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operation.getAction().getNode(), parentLine);
+						}
+
+						CtElement parentLine = MappingAnalysis.getParentLine(filter, suspLeft.get(0));
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
 						///
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_EXPAND, new PatternInstance(
-								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, suspicious, parentLine, lineTree));
+								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, suspLeft, parentLine, lineTree));
 
 						isExpLogicExOrRed = true;
 					}
 					if (isThereOldCondition && isThereDeletedCondition) {
-
-						//
 
 						ITree parentAffectInRight = MappingAnalysis.getParentInRight(diff, operation.getAction());
 						CtElement affected = (CtElement) parentAffectInRight
@@ -235,9 +234,6 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 
 						//
 						CtBinaryOperator binary = (CtBinaryOperator) srcNode;
-						CtElement oldNode = (binary.getRightHandOperand().getMetadata("isMoved") != null)
-								? binary.getRightHandOperand()
-								: binary.getLeftHandOperand();
 
 						CtElement removedNode = (binary.getRightHandOperand().getMetadata("delete") != null)
 								? binary.getRightHandOperand()
@@ -245,12 +241,49 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, binary);
 
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operation.getAction().getNode(), parentLine);
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
 
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_REDUCE, new PatternInstance(
 								EXP_LOGIC_REDUCE, operation, affected, removedNode, parentLine, lineTree));
+
 						// repairPatterns.incrementFeatureCounter(EXP_LOGIC_REDUCE, operation);
+
+						//
+//
+//						ITree solutionInRight = MappingAnalysis.getParentInRight(diff, operation.getAction());
+//						CtElement solution = (CtElement) solutionInRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+//
+//						//
+//						CtBinaryOperator binary = (CtBinaryOperator) srcNode;
+//
+//						// Get the nodes moved in the right
+//						List<CtElement> notNovesInLeft = parentBinaryOperator
+//								.getElements(e -> e.getMetadata("isMoved") == null && e.getMetadata("root") != null);
+//
+//						List<CtElement> suspLeft = new ArrayList();
+//						for (CtElement ctElement : notNovesInLeft) {
+//
+//							ITree mappedLeft = (ITree) ctElement.getMetadata("gtnode");
+//							if (mappedLeft != null) {
+//								suspLeft.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+//
+//							} else {
+//								return;
+//							}
+//
+//						}
+//
+//						CtElement parentLine = MappingAnalysis.getParentLine(filter, binary);
+//
+//						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+//								? parentLine.getMetadata("tree")
+//								: parentLine.getMetadata("gtnode"));
+//
+//						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_REDUCE, new PatternInstance(
+//								EXP_LOGIC_REDUCE, operation, solution, notNovesInLeft, parentLine, lineTree));
+
 						isExpLogicExOrRed = true;
 					}
 				}

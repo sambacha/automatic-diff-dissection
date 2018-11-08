@@ -1,17 +1,17 @@
 package add.features.detector.repairpatterns;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.github.gumtreediff.actions.model.Action;
 import com.github.gumtreediff.actions.model.Addition;
-import com.github.gumtreediff.actions.model.Move;
+import com.github.gumtreediff.actions.model.Insert;
 import com.github.gumtreediff.matchers.Mapping;
 import com.github.gumtreediff.tree.ITree;
 
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.Diff;
-import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.MoveOperation;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtReturn;
@@ -71,51 +71,6 @@ public class MappingAnalysis {
 		// affected = affectedAction.getNode().getParent();
 
 		// return affected;
-	}
-
-	public static ITree getCorrespondingInSourceTree(Diff diff, ITree affectedByOperator, CtElement faulty) {
-		ITree nodeFaulty = null;
-		List<ITree> nodes = new ArrayList<>();
-
-		if (isIn(faulty, affectedByOperator))
-			return affectedByOperator;
-
-		for (ITree ctree : affectedByOperator.getDescendants()) {
-
-			if (isIn(faulty, ctree)) {
-				nodes.add(ctree);
-				// nodeFaulty = ctree;
-				// break;
-			}
-		}
-		if (nodeFaulty == null && nodes.isEmpty()) {
-			for (Mapping ms : diff.getMappingsComp().asSet()) {
-				if (isIn(faulty, ms.getFirst())) {
-					// nodeFaulty = ms.getFirst();
-					// break;
-					nodes.add(ms.getFirst());
-				}
-			}
-		}
-		if (nodes.isEmpty()) {
-			// return null;
-			ITree mappedsource = diff.getMappingsComp().firstMappedSrcParent(affectedByOperator);
-			if (mappedsource != null)
-				return mappedsource;
-			else
-				return diff.getMappingsComp().firstMappedDstParent(affectedByOperator);
-		}
-
-		if (nodes.size() == 1)
-			return nodes.get(0);
-		else {
-			for (ITree iTree : nodes) {
-				if (!iTree.getLabel().isEmpty())
-					return iTree;
-			}
-			return nodes.get(0);
-		}
-		// return nodeFaulty;
 	}
 
 	public static boolean isIn(CtElement faulty, ITree ctree) {
@@ -183,101 +138,81 @@ public class MappingAnalysis {
 		return suspicious;
 	}
 
-	public static List<CtElement> getFollowStatements(Diff diff, Addition maction) {
+	/**
+	 * 
+	 * @param diff
+	 * @param maction
+	 * @return
+	 */
+	public static List<ITree> getFollowStatementsInLeft(Diff diff, Addition maction) {
 
-		List<CtElement> suspicious = new ArrayList();
-		ITree treeparent = maction.getNode().getParent();// maction.getParent();
-		if (!isRightNodeMapped(diff, treeparent)) {
-			treeparent = getRightFromLeftNodeMapped(diff, treeparent);
+		List<ITree> followingInLeft = new ArrayList();
+
+		ITree parentRight = null;
+		if (maction instanceof Insert) {
+
+			// Node at right
+			ITree affectedRight = maction.getNode();
+			// Parent at right
+			parentRight = affectedRight.getParent();
+			int position = getPositionInParent(parentRight, affectedRight);
+			if (position >= 0) {
+
+				int nrSiblings = parentRight.getChildren().size();
+				if (position == nrSiblings - 1) {
+					// The last element, let's suppose suspicious
+					List<ITree> followingSiblingsInRing = new ArrayList((parentRight.getChildren()));
+					Collections.reverse(followingSiblingsInRing);
+					computeLeftFromRight(diff, followingInLeft, followingSiblingsInRing);
+
+				} else {
+					List<ITree> followingSiblingsInRing = parentRight.getChildren().subList(position + 1, nrSiblings);
+					computeLeftFromRight(diff, followingInLeft, followingSiblingsInRing);
+
+					if (followingInLeft.isEmpty()) {
+						// all the following are inserted, let's find the last one
+						// The last element, let's suppose suspicious
+						followingSiblingsInRing = new ArrayList((parentRight.getChildren()));
+						Collections.reverse(followingSiblingsInRing);
+						computeLeftFromRight(diff, followingInLeft, followingSiblingsInRing);
+					}
+				}
+
+			} else {
+				System.out.println("Inserted node Not found in parent");
+			}
 		}
 
-		int position = maction.getPosition();
+		return followingInLeft;
+	}
 
-		if (treeparent.getChildren().isEmpty())
-			return suspicious;
+	public static void computeLeftFromRight(Diff diff, List<ITree> followingInLeft,
+			List<ITree> followingSiblingsInRing) {
+		for (ITree siblingRight : followingSiblingsInRing) {
+			// The mapped at the left
+			ITree mappedSiblingLeft = getLeftFromRightNodeMapped(diff, siblingRight);
 
-		if (position >= treeparent.getChildren().size()) {
-			// The last one
-			suspicious.add((CtElement) treeparent.getChildren().get(treeparent.getChildren().size() - 1)
-					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
-		} else {
-			List<ITree> followingStatemets = treeparent.getChildren().subList(position,
-					treeparent.getChildren().size());
-			for (ITree followingRight : followingStatemets) {
-
-				// Is an insert, we ignore
-				boolean isInsertedNode = diff.getRootOperations().stream()
-						.filter(e -> (e instanceof InsertOperation && followingRight.equals(e.getAction().getNode())))
+			if (mappedSiblingLeft != null) {
+				// lets check if it's null
+				boolean affectedByMoved = diff.getRootOperations().stream()
+						.filter(e -> (e instanceof MoveOperation && mappedSiblingLeft.equals(e.getAction().getNode())))
 						.findFirst().isPresent();
-
-				if (isInsertedNode)
-					continue;
-
-				// is a move:
-				ITree left = getLeftFromRightNodeMapped(diff, followingRight);
-				if (left != null) {
-					boolean isMoveNode = diff.getRootOperations().stream().filter(e -> (e instanceof MoveOperation
-							// we move the left:
-							&& left.equals(e.getAction().getNode()))).findFirst().isPresent();
-
-					if (isMoveNode)
-						continue;
-
-					// If it's update or remove, thet are potentially suspicious
-					suspicious.add((CtElement) followingRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
-
-				}
-
-			}
-		}
-		return suspicious;
-	}
-
-	public static List<CtElement> getFollowStatementsOLD(Diff diff, Addition maction) {
-
-		List<CtElement> suspicious = new ArrayList();
-		ITree treeparent = maction.getNode().getParent();// maction.getParent();
-		if (!isRightNodeMapped(diff, treeparent)) {
-			treeparent = getRightFromLeftNodeMapped(diff, treeparent);
-		}
-
-		int position = maction.getPosition();
-
-		if (treeparent.getChildren().isEmpty())
-			return suspicious;
-
-		if (position >= treeparent.getChildren().size()) {
-			// The last one
-			suspicious.add((CtElement) treeparent.getChildren().get(treeparent.getChildren().size() - 1)
-					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
-		} else {
-			List<ITree> s = treeparent.getChildren().subList(position, treeparent.getChildren().size());
-			for (ITree iTree : s) {
-
-				if (isRightNodeMapped(diff, iTree)) {
-					suspicious.add((CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+				// If mapped left is not moved
+				if (!affectedByMoved) {
+					followingInLeft.add(mappedSiblingLeft);
 				}
 			}
+
 		}
-		return suspicious;
 	}
 
-	@Deprecated
-	private static int getPosition(Diff diff, Addition maction, ITree treeparent) {
-		ITree n = null;
-		if (maction instanceof Move) {
-			n = getRightFromLeftNodeMapped(diff, maction.getNode());
-
-		} else
-			n = maction.getNode();
-
-		for (int i = 0; i < treeparent.getChildren().size(); i++) {
-			ITree iT = treeparent.getChildren().get(i);
-			if (iT.equals(n))
+	public static int getPositionInParent(ITree parent, ITree element) {
+		int i = 0;
+		for (ITree child : parent.getChildren()) {
+			if (child == element)
 				return i;
-
+			i++;
 		}
-
 		return -1;
 	}
 
@@ -329,4 +264,5 @@ public class MappingAnalysis {
 
 		return null;
 	}
+
 }

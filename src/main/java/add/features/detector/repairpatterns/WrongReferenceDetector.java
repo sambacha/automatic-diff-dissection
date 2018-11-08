@@ -95,7 +95,6 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								}
 							}
 							if (!wasVariableWrapped) {
-								// repairPatterns.incrementFeatureCounter("wrongVarRef", operation);
 
 								CtElement susp = operationDelete.getSrcNode();
 								CtElement patch = null;
@@ -106,8 +105,9 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								}
 
 								CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
-								ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-										operationDelete.getAction().getNode(), parentLine);
+								ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+										? parentLine.getMetadata("tree")
+										: parentLine.getMetadata("gtnode"));
 
 								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF, new PatternInstance(
 										WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree));
@@ -122,8 +122,9 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						CtElement patch = null;
 
 						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operationDelete.getAction().getNode(), parentLine);
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
 
 						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
 						if (parentRight != null) {
@@ -160,8 +161,9 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						CtElement patch = null;
 
 						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operationDelete.getAction().getNode(), parentLine);
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
 
 						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
 						if (parentRight != null) {
@@ -247,12 +249,11 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					}
 
 					if (!wasMethodDefUpdated) {
-						// CtElement parent = src.getParent(new LineFilter());// Is the suspicious or
-						// the fixed?
 
 						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), src);
-						ITree lineTree = MappingAnalysis.getCorrespondingInSourceTree(diff,
-								operationDelete.getAction().getNode(), parentLine);
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
 
 						if (!srcCallMethodName.equals(dstCallMethodName)) {
 							// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
