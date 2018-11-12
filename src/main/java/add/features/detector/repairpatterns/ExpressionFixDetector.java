@@ -1,6 +1,5 @@
 package add.features.detector.repairpatterns;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -198,23 +197,10 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 					}
 					if (isThereOldCondition && isThereNewCondition) {
 
-						// Get the nodes moved in the right
-						List<CtElement> movesInRight = parentBinaryOperator
-								.getElements(e -> e.getMetadata("isMoved") != null && e.getMetadata("root") != null);
-
-						List<CtElement> suspLeft = new ArrayList();
-						for (CtElement ctElement : movesInRight) {
-
-							ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff,
-									(ITree) ctElement.getMetadata("gtnode"));
-							if (mappedLeft != null) {
-								suspLeft.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
-
-							} else {
-								return;
-							}
-
-						}
+						List<CtElement> suspLeft = MappingAnalysis.getTreeLeftMovedFromRight(diff,
+								parentBinaryOperator);
+						if (suspLeft == null || suspLeft.isEmpty())
+							return;
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, suspLeft.get(0));
 						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)

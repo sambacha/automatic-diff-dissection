@@ -265,4 +265,24 @@ public class MappingAnalysis {
 		return null;
 	}
 
+	public static List<CtElement> getTreeLeftMovedFromRight(Diff diff, CtElement element) {
+		// Get the nodes moved in the right
+		List<CtElement> movesInRight = element
+				.getElements(e -> e.getMetadata("isMoved") != null && e.getMetadata("root") != null);
+
+		List<CtElement> suspLeft = new ArrayList();
+		for (CtElement ctElement : movesInRight) {
+
+			ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff,
+					(ITree) ctElement.getMetadata("gtnode"));
+			if (mappedLeft != null) {
+				suspLeft.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+
+			} else {
+				return null;
+			}
+
+		}
+		return suspLeft;
+	}
 }
