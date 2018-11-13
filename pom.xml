@@ -46,7 +46,8 @@
 		<dependency>
 			<groupId>fr.inria.gforge.spoon</groupId>
 			<artifactId>spoon-core</artifactId>
-			<version>6.2.0</version>
+			 <version>7.0.0</version> 
+		<!-- <version>6.2.0</version> -->	
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
@@ -70,6 +71,12 @@
 			<groupId>org.nanohttpd</groupId>
 			<artifactId>nanohttpd</artifactId>
 			<version>2.2.0</version>
+		</dependency>
+			<dependency>
+			<groupId>org.inria.sacha.automaticRepair</groupId>
+			<artifactId>astor</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+			<!--use this before commit d09905c02c3bea4e41be52d0af6fe8e485c8f3c7 -->
 		</dependency>
 	</dependencies>
 
