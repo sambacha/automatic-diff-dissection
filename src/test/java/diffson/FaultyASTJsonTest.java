@@ -63,7 +63,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4Jmath105() throws Exception {
 		String diffId = "Math_105";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -88,14 +88,14 @@ public class FaultyASTJsonTest {
 		assertEquals("return (sumYY) - (((sumXY) * (sumXY)) / (sumXX))", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testVerificationD4JChart13() throws Exception {
 		String diffId = "Chart_13";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -121,14 +121,14 @@ public class FaultyASTJsonTest {
 				pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testVerificationD4Jchart10() throws Exception {
 		String diffId = "Chart_10";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -150,14 +150,14 @@ public class FaultyASTJsonTest {
 		assertEquals("return (\" title=\\\"\" + toolTipText) + \"\\\" alt=\\\"\\\"\"", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testVerificationD4Jchart12() throws Exception {
 		String diffId = "Chart_12";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -182,14 +182,14 @@ public class FaultyASTJsonTest {
 		assertEquals("this.dataset = dataset", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testVerificationD4Jtime8() throws Exception {
 		String diffId = "Time_8";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -211,14 +211,14 @@ public class FaultyASTJsonTest {
 		assertEquals("minutesOffset = hoursInMinutes - minutesOffset", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testVerificationD4JMath_26() throws Exception {
 		String diffId = "Math_26";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -241,7 +241,7 @@ public class FaultyASTJsonTest {
 		assertEquals("(p2 > overflow) || (q2 > overflow)", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 
 		// To check duplicates
 		JsonArray affected = (JsonArray) resultjson.get("affected_files");
@@ -263,7 +263,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath35() throws Exception {
 		String diffId = "Math_35";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -286,7 +286,7 @@ public class FaultyASTJsonTest {
 		assertEquals("this.elitismRate = elitismRate", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 		JSonTest.assertMarkedlAST(resultjson, "wrapsMethod", "elitismRate", "FieldWrite");
 	}
 
@@ -294,7 +294,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure25() throws Exception {
 		String diffId = "Closure_25";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -318,7 +318,7 @@ public class FaultyASTJsonTest {
 		assertEquals("scope = traverse(constructor, scope)", pi1.getFaultyLine().toString());
 
 		JsonObject resultjson = JSonTest.getContext(diffId, input);
-		JSonTest.showAST(resultjson);
+		JSonTest.assertSuspiciousASTNode(resultjson);
 		JSonTest.assertMarkedlAST(resultjson, "wrongMethodRef",
 				"com.google.javascript.jscomp.TypeInference#traverse(com.google.javascript.rhino.Node,com.google.javascript.jscomp.type.FlowScope)",
 				"Invocation");
@@ -370,7 +370,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure103() throws Exception {
 		String diffId = "Closure_103";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -394,7 +394,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4Jchart15() throws Exception {
 		String diffId = "Chart_15";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -487,7 +487,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4Jchart26() throws Exception {
 		String diffId = "Chart_26";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -542,7 +542,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4Jchart4() throws Exception {
 		String diffId = "Chart_4";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -576,7 +576,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4Jchart21() throws Exception {
 		String diffId = "Chart_21";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -628,7 +628,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4Jchart22() throws Exception {
 		String diffId = "Chart_22";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -662,7 +662,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure96() throws Exception {
 		String diffId = "Closure_96";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -698,7 +698,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JChart5() throws Exception {
 		String diffId = "Chart_5";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -738,7 +738,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure20() throws Exception {
 		String diffId = "Closure_20";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -769,7 +769,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath_28() throws Exception {
 		String diffId = "Math_28";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -803,7 +803,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath54() throws Exception {
 		String diffId = "Math_54";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -836,7 +836,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath86() throws Exception {
 		String diffId = "Math_86";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -854,7 +854,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure88() throws Exception {
 		String diffId = "Closure_88";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -866,7 +866,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure17() throws Exception {
 		String diffId = "Closure_17";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 		assertTrue(patterns.size() > 0);
@@ -887,7 +887,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure58() throws Exception {
 		String diffId = "Closure_58";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -923,7 +923,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JChart18() {
 		String diffId = "Chart_18";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -966,7 +966,7 @@ public class FaultyASTJsonTest {
 
 		String diffId = "Closure_2";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1011,7 +1011,7 @@ public class FaultyASTJsonTest {
 
 		String diffId = "Lang_33";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1040,7 +1040,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure111() {
 		String diffId = "Closure_111";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1068,7 +1068,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JLang17() {
 		String diffId = "Lang_17";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1126,7 +1126,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath46() {
 		String diffId = "Math_46";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1158,7 +1158,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure11() {
 		String diffId = "Closure_11";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1170,7 +1170,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure30() {
 		String diffId = "Closure_30";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1182,7 +1182,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JTime20() {
 		String diffId = "Time_20";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1198,7 +1198,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure9() {
 		String diffId = "Closure_9";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1221,7 +1221,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure90() {
 		String diffId = "Closure_90";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1244,7 +1244,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JLang32() {
 		String diffId = "Lang_32";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1267,7 +1267,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JChart11() {
 		String diffId = "Chart_11";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1300,7 +1300,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure213() {
 		String diffId = "Closure_123";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1335,7 +1335,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath98() {
 		String diffId = "Math_98";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1363,18 +1363,21 @@ public class FaultyASTJsonTest {
 		JSonTest.assertMarkedlAST(resultjson, "wrongVarRef", "length", "FieldRead");
 	}
 
-	public String getCompletePath(String diffId) {
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		input = file.getAbsolutePath();
-		return input;
+	public String getCompletePathD4J(String diffId) {
+		return getCompletePath("Defects4J/", diffId);
+	}
+
+	public String getCompletePath(String project, String diffId) {
+		String input = project + File.separator + diffId;
+		File file = new File("./datasets/" + input);
+		return file.getAbsolutePath();
 	}
 
 	@Test
 	public void testVerificationD4JChar20() {
 		String diffId = "Chart_20";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1415,7 +1418,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure75() {
 		String diffId = "Closure_75";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1465,7 +1468,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JLang21() {
 		String diffId = "Lang_21";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1514,7 +1517,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath5() {
 		String diffId = "Math_5";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1563,7 +1566,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JMath76() {
 		String diffId = "Math_76";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1611,7 +1614,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure40() {
 		String diffId = "Closure_40";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1645,7 +1648,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JClosure102() {
 		String diffId = "Closure_102";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1681,7 +1684,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JChart1() {
 		String diffId = "Chart_1";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1711,7 +1714,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationD4JChart3() {
 		String diffId = "Chart_3";
 
-		String input = getCompletePath(diffId);
+		String input = getCompletePathD4J(diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1782,7 +1785,9 @@ public class FaultyASTJsonTest {
 	public void testVerificationTest1205753() {
 		String diffId = "1205753";
 
-		String input = "/Users/matias/develop/code/git-gt-spoon-diff/coming/src/main/resources/testInsert2/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
+		// "/Users/matias/develop/code/git-gt-spoon-diff/coming/src/main/resources/testInsert2/"
+		// + diffId;
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1805,7 +1810,9 @@ public class FaultyASTJsonTest {
 	public void testVerificationTest1205753_insert_end() {
 		String diffId = "1205753";
 
-		String input = "/Users/matias/develop/code/git-gt-spoon-diff/coming/src/main/resources/testInsert3/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
+		// "/Users/matias/develop/code/git-gt-spoon-diff/coming/src/main/resources/testInsert3/"
+		// + diffId;
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1828,7 +1835,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationICSE591061() {
 		String diffId = "591061";
 
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/icse2015/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1850,7 +1857,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationICSE888066_METHOD() {
 		String diffId = "888066";
 
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/icse2015/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1872,7 +1879,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationICSE1002329_METHOD() {
 		String diffId = "1002329";
 
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/icse2015/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1894,7 +1901,7 @@ public class FaultyASTJsonTest {
 	public void testVerificationICSE_1064371_METHOD() {
 		String diffId = "1064371";
 
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/icse2015/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -1917,7 +1924,7 @@ public class FaultyASTJsonTest {
 		// False positive
 		String diffId = "1086957";
 
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/icse2015/" + diffId;
+		String input = getCompletePath("icse2015", diffId);
 
 		List<RepairPatterns> patterns = analyze(input);
 

@@ -23,8 +23,12 @@ import com.google.gson.JsonPrimitive;
 
 import fr.inria.astor.core.entities.CNTX_Property;
 
+/**
+ * 
+ * @author Matias Martinez
+ *
+ */
 public class FeatureJSONTest {
-	ClassLoader classLoader = getClass().getClassLoader();
 
 	@Before
 	public void setUp() throws Exception {
@@ -50,11 +54,9 @@ public class FeatureJSONTest {
 
 		String diffId = "Closure_9";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
-		//
+
 		assertMarkedlAST(resultjson, CNTX_Property.M4_PARAMETER_RETURN_COMPABILITY, Boolean.TRUE);
 		assertMarkedlAST(resultjson,
 				CNTX_Property.M4_PARAMETER_RETURN_COMPABILITY + "_normalizeSourceName(java.lang.String)", Boolean.TRUE);
@@ -77,11 +79,10 @@ public class FeatureJSONTest {
 
 		String diffId = "Math_58";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
+
 		System.out.println(resultjson);
-		//
+
 		assertMarkedlAST(resultjson, CNTX_Property.M1_OVERLOADED_METHOD, Boolean.TRUE);
 
 		assertMarkedlAST(resultjson, CNTX_Property.M1_OVERLOADED_METHOD + "_fit(double[])", Boolean.TRUE);
@@ -92,9 +93,7 @@ public class FeatureJSONTest {
 	public void testContefxt_L1_Closure20() {
 
 		String diffId = "Closure_20";
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE1_EXISTS_RELATED_BOOLEAN_EXPRESSION, Boolean.TRUE);
@@ -105,9 +104,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Closure_51";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE2_IS_BOOLEAN_METHOD_PARAM_TYPE_VAR, Boolean.TRUE);
@@ -118,9 +115,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Chart_9";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE3_IS_COMPATIBLE_VAR_NOT_INCLUDED, Boolean.TRUE);
@@ -131,9 +126,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Closure_38";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE4_EXISTS_LOCAL_UNUSED_VARIABLES, Boolean.TRUE);
@@ -144,9 +137,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Closure_38";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE5_BOOLEAN_EXPRESSIONS_IN_FAULTY, Boolean.TRUE);
@@ -157,9 +148,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Closure_31";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE6_HAS_NEGATION, Boolean.TRUE);
@@ -170,9 +159,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Closure_18";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.LE7_SIMPLE_VAR_IN_LOGIC, Boolean.TRUE);
@@ -183,9 +170,7 @@ public class FeatureJSONTest {
 
 		String diffId = "Chart_4";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		// it's used in statement
 		// assertMarkedlAST(resultjson, CNTX_Property.S1_LOCAL_VAR_NOT_USED,
@@ -246,9 +231,7 @@ public class FeatureJSONTest {
 		// TO refactor
 		String diffId = "Math_24";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		assertMarkedlAST(resultjson, CNTX_Property.V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN, Boolean.TRUE);
 	}
@@ -256,12 +239,10 @@ public class FeatureJSONTest {
 	@Test
 	@Ignore
 	public void testContext_v2_2() {
-
+		// TO refactor
 		String diffId = "Math_26";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN, Boolean.FALSE);
@@ -274,12 +255,16 @@ public class FeatureJSONTest {
 	public void testContext_m1_1() {
 		// To refactor
 		String diffId = null;// "Math_58";
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
 		assertMarkedlAST(resultjson, CNTX_Property.M2_SIMILAR_METHOD_WITH_SAME_RETURN, Boolean.FALSE);
 	}
 
+	public JsonObject getJsonOfBugId(String diffId) {
+		String input = "Defects4J/" + diffId;
+		File file = new File("./datasets/" + input);
+		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		return resultjson;
+	}
 }

@@ -21,7 +21,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -36,10 +36,10 @@ public class DiffICSE2015Test {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 
-		String out = "/Users/matias/develop/CodeRep-data/processed_ICSE2015" + "_unidiff";
+		String out = new File("./out/tests/case" + "_unidiff").getAbsolutePath();
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
 
-		File fileDiff = new File("/Users/matias/develop/sketch-repair/outputdiff4/" + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -48,11 +48,13 @@ public class DiffICSE2015Test {
 
 	}
 
-	ClassLoader classLoader = getClass().getClassLoader();
+	public String getCompletePathICSE2015(String diffId) {
+		return getCompletePath("icse2015", diffId);
+	}
 
 	public String getCompletePath(String dataset, String diffId) {
 		String input = dataset + File.separator + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
+		File file = new File("./datasets/" + input);
 		input = file.getAbsolutePath();
 		return input;
 	}
@@ -63,7 +65,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -78,7 +80,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -93,7 +95,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -108,7 +110,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -123,7 +125,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -138,7 +140,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -153,7 +155,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -168,7 +170,7 @@ public class DiffICSE2015Test {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
@@ -258,31 +260,14 @@ public class DiffICSE2015Test {
 		runAndAssertSingleDiff(diffId);
 	}
 
-	public void runAndAssertSingleDiff(String case1421510) {
+	public void runAndAssertSingleDiff(String caseId) {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + case1421510);
+		File fileDiff = new File("./datasets/icse2015/" + caseId);
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
 		assertTrue(arrayout.size() > 0);
 		System.out.println(arrayout);
 	}
 
-	@Test
-	public void testFailingTChart_21() throws Exception {
-		String diffId = "Chart_21";
-
-		String out = "/Users/matias/develop/CodeRep-data/processed_d4J/";
-		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/Defects4J/";
-		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
-
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
-
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
-
-	}
 }

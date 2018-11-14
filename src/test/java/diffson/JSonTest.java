@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Ignore;
@@ -30,8 +32,6 @@ import gumtree.spoon.diff.Diff;
  */
 public class JSonTest {
 
-	ClassLoader classLoader = getClass().getClassLoader();
-
 	@Test
 	@Ignore
 	public void testFailingTimeoutCase_986499() throws Exception {
@@ -52,9 +52,7 @@ public class JSonTest {
 	public void testFailingTimeoutCase_2875_NPE() throws Exception {
 		String diffId = "2875";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		assertTrue(allch.size() == 2);
@@ -70,25 +68,24 @@ public class JSonTest {
 	public void testFailingTimeoutCase_65_replace() throws Exception {
 		String diffId = "65";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		System.out.println(resultjson);
 	}
 
 	@Test
+//	@Ignore // TO UPDATE
 	public void testFailingTimeoutCase_4117_MOVE() throws Exception {
 		String diffId = "4117";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
+		System.out.println(resultjson);
 
-		JsonArray allch = (JsonArray) resultjson.get("info");
-		assertTrue(allch.size() == 2);
+		List<JsonElement> elements = getPatternInstance(resultjson);
 
-		JsonObject jsonMove = (JsonObject) allch.get(1);
+		assertTrue(elements.size() == 1);
+
+		JsonObject jsonMove = (JsonObject) elements.get(0);
 		System.out.println(jsonMove);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) jsonMove.get("bug").getAsJsonObject()
@@ -131,17 +128,19 @@ public class JSonTest {
 	}
 
 	@Test
+	@Ignore // NOT pattern instance
 	public void testFailingTimeoutCase_1264_NPE() throws Exception {
 		String diffId = "1264";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
-		JsonArray allch = (JsonArray) resultjson.get("info");
-		assertTrue(allch.size() == 1);
+		System.out.println(resultjson);
 
-		JsonObject json0 = (JsonObject) allch.get(0);
+		List<JsonElement> elements = getPatternInstance(resultjson);
+
+		assertTrue(elements.size() > 0);
+
+		JsonObject json0 = (JsonObject) elements.get(0);
 
 		JsonPrimitive ops = (JsonPrimitive) json0.get("bug")// .getAsJsonObject().get(CNTX_Property.AFFECTED.toString())
 				.getAsJsonObject().get(CNTX_Property.OPERATION.toString());
@@ -160,18 +159,41 @@ public class JSonTest {
 
 	}
 
+	public List<JsonElement> getPatternInstance(JsonObject resultjson) {
+		List<JsonElement> contexts = new ArrayList<>();
+		JsonArray affected = (JsonArray) resultjson.get("affected_files");
+		for (JsonElement jsonElement : affected) {
+
+			JsonObject jo = (JsonObject) jsonElement;
+			// JsonElement elAST = jo.get("faulty_stmts_ast");
+			JsonElement elAST = jo.get("pattern_instances");
+
+			assertNotNull(elAST);
+			assertTrue(elAST instanceof JsonArray);
+			JsonArray ar = (JsonArray) elAST;
+
+			for (JsonElement suspiciousTree : ar) {
+
+				JsonObject jso = suspiciousTree.getAsJsonObject();
+				contexts.add(jso.get("context"));
+
+			}
+		}
+		System.out.println("Number of pattern instances " + contexts.size());
+		return contexts;
+	}
+
 	@Test
 	public void testFailingTimeoutCase_2_update() throws Exception {
 		String diffId = "2";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
-		JsonArray allch = (JsonArray) resultjson.get("info");
-		assertTrue(allch.size() == 1);
+		List<JsonElement> elements = getPatternInstance(resultjson);
 
-		JsonObject json0 = (JsonObject) allch.get(0);
+		assertTrue(elements.size() > 0);
+
+		JsonObject json0 = (JsonObject) elements.get(0);
 		System.out.println(json0);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) json0.get("bug").getAsJsonObject()
@@ -237,9 +259,7 @@ public class JSonTest {
 	public void testFailingTimeoutCase_1290_update() throws Exception {
 		String diffId = "1290";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		assertTrue(allch.size() == 1);
@@ -253,9 +273,7 @@ public class JSonTest {
 	public void testFailingTimeoutCase_61_update() throws Exception {
 		String diffId = "61";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		assertTrue(allch.size() == 1);
@@ -300,10 +318,8 @@ public class JSonTest {
 	public void testFailingTimeoutCase_694_Delete() throws Exception {
 		String diffId = "694";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
-
+		JsonObject resultjson = getJSonCodeRep(diffId);
+		System.out.println(resultjson);
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		System.out.println(allch);
 		assertTrue(allch.size() == 1);
@@ -342,9 +358,7 @@ public class JSonTest {
 	public void testFailingTimeoutCase_5_insert() throws Exception {
 		String diffId = "5";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		System.out.println(allch);
@@ -390,9 +404,7 @@ public class JSonTest {
 	public void testFailingTimeoutCase_70_delete() throws Exception {
 		String diffId = "70";
 
-		String input = "codeRepDS1/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		System.out.println(allch);
@@ -422,12 +434,16 @@ public class JSonTest {
 		assertTrue(hasColored((JsonObject) json2.get(CNTX_Property.AST_PARENT.toString()), "MOV"));
 	}
 
+	public JsonObject getJSonCodeRep(String diffId) {
+		return getJsonData("codeRepDS1/", diffId);
+	}
+
 	@Test
 	public void test_EMPTY_ICSE15_966027() throws Exception {
 		String diffId = "966027";
+		File file = new File("./datasets/icse2015" + File.separator + diffId);
 
-		String input = "/Users/matias/develop/sketch-repair/outputdiff4/" + diffId;
-		JsonObject resultjson = getContext(diffId, input);
+		JsonObject resultjson = getContext(diffId, file.getAbsolutePath());
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		System.out.println("Print " + allch);
@@ -441,9 +457,7 @@ public class JSonTest {
 	public void testD4JMath4() throws Exception {
 		String diffId = "Math_4";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 		System.out.println(resultjson);
 	}
 
@@ -451,9 +465,7 @@ public class JSonTest {
 	public void testD4JChar14() throws Exception {
 		String diffId = "Chart_14";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
 
@@ -463,9 +475,7 @@ public class JSonTest {
 	public void testD4JLang7_CBR() throws Exception {
 		String diffId = "Lang_7";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -476,9 +486,7 @@ public class JSonTest {
 	public void testD4JLang3_WrapId() throws Exception {
 		String diffId = "Lang_3";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -489,9 +497,7 @@ public class JSonTest {
 	public void testD4JMath75() throws Exception {
 		String diffId = "Math_75";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -513,9 +519,7 @@ public class JSonTest {
 	public void testD4JChart3() throws Exception {
 		String diffId = "Chart_3";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -535,9 +539,7 @@ public class JSonTest {
 	public void testD4JLang1() throws Exception {
 		String diffId = "Lang_1";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -557,9 +559,7 @@ public class JSonTest {
 	public void testD4JMath_55() throws Exception {
 		String diffId = "Math_55";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -579,9 +579,7 @@ public class JSonTest {
 	public void testD4JTime_11() throws Exception {
 		String diffId = "Time_11";
 		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -601,9 +599,7 @@ public class JSonTest {
 	public void testD4JMath_88() throws Exception {
 		String diffId = "Math_88";
 		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
@@ -625,11 +621,9 @@ public class JSonTest {
 	public void testD4JChart4() throws Exception {
 		String diffId = "Chart_4";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -637,11 +631,9 @@ public class JSonTest {
 	public void testD4Jchart18() throws Exception {
 		String diffId = "Chart_18";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -649,11 +641,9 @@ public class JSonTest {
 	public void testD4Jlang31() throws Exception {
 		String diffId = "Lang_31";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -661,11 +651,9 @@ public class JSonTest {
 	public void testD4Jclosure2() throws Exception {
 		String diffId = "Closure_2";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -673,11 +661,9 @@ public class JSonTest {
 	public void testD4Jlang33() throws Exception {
 		String diffId = "Lang_33";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -685,11 +671,9 @@ public class JSonTest {
 	public void testD4Jclosure111() throws Exception {
 		String diffId = "Closure_111";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -697,11 +681,9 @@ public class JSonTest {
 	public void testD4Jchart21() throws Exception {
 		String diffId = "Chart_21";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -709,11 +691,9 @@ public class JSonTest {
 	public void testD4JTime5() throws Exception {
 		String diffId = "Time_5";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 
 	}
 
@@ -721,11 +701,9 @@ public class JSonTest {
 	public void testD4Jlang17() throws Exception {
 		String diffId = "Lang_17";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 		// See multiple susp
 	}
 
@@ -733,99 +711,94 @@ public class JSonTest {
 	public void testD4Jmath46() throws Exception {
 		String diffId = "Math_46";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jtime18() throws Exception {
 		String diffId = "time_18";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jclosure83() throws Exception {
 		String diffId = "Closure_83";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jmath60() throws Exception {
 		String diffId = "Math_60";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jlang13() throws Exception {
 		String diffId = "Lang_13";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jchart10() throws Exception {
 		String diffId = "Chart_10";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jchart12() throws Exception {
 		String diffId = "Chart_12";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
+	}
+
+	public JsonObject getJsonDataD4j(String diffId) {
+		return getJsonData("Defects4J/", diffId);
+	}
+
+	public JsonObject getJsonData(String ds, String diffId) {
+
+		// File file = new File(classLoader.getResource(input).getFile());
+		File file = new File("./datasets/" + ds + File.separator + diffId);
+
+		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		return resultjson;
 	}
 
 	@Test
 	public void testD4Jmath105() throws Exception {
 		String diffId = "Math_105";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Jtime8() throws Exception {
 		String diffId = "time_8";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
@@ -833,11 +806,9 @@ public class JSonTest {
 	public void testD4Jmockito14() throws Exception {
 		String diffId = "time_8";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
@@ -845,42 +816,40 @@ public class JSonTest {
 	public void testD4Jmath27() throws Exception {
 		String diffId = "Math_27";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4closure124() throws Exception {
 		String diffId = "Closure_124";
 
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
 	@Test
 	public void testD4Math_7() throws Exception {
 		String diffId = "Math_7";
-		String input = "Defects4J/" + diffId;
-		File file = new File(classLoader.getResource(input).getFile());
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = getJsonDataD4j(diffId);
 
-		showAST(resultjson);
+		assertSuspiciousASTNode(resultjson);
 	}
 
-//	time17()
-//	closure124()
-//	math7()
-
-	public static void showAST(JsonObject resultjson) {
+	public static void assertSuspiciousASTNode(JsonObject resultjson) {
 		assertMarkedlAST(resultjson, null, null, null);
 	}
 
+	/**
+	 * Assert if there is at least one node marked as suspicious.
+	 * 
+	 * @param resultjson
+	 * @param patternName
+	 * @param label
+	 * @param type
+	 */
 	public static void assertMarkedlAST(JsonObject resultjson, String patternName, String label, String type) {
 
 		System.out.println("****************");
@@ -1014,8 +983,7 @@ public class JSonTest {
 	public void testFailingTimeoutCase_1555_Move_new() throws Exception {
 		String diffId = "1555";
 
-		String input = "/Users/matias/develop/CodeRep-data/result_Dataset1_unidiff/" + diffId;
-		JsonObject resultjson = getContext(diffId, input);
+		JsonObject resultjson = getJSonCodeRep(diffId);
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		assertTrue(allch.size() == 2);

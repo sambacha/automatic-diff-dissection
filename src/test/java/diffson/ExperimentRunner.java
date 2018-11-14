@@ -1,12 +1,15 @@
 package diffson;
 
+import java.io.File;
+
 import org.junit.Test;
 
 import fr.inria.astor.core.setup.ConfigurationProperties;
 
 /**
+ * Experiment runners
  */
-public class Runner {
+public class ExperimentRunner {
 
 	@Test
 	public void testICSE2015() throws Exception {
@@ -19,9 +22,11 @@ public class Runner {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "20");
-		String out = "/Users/matias/develop/CodeRep-data/processed_ICSE2015_unidiff";
+		File outFile = new File("./out/icse2015");
+		String out = outFile.getAbsolutePath();
+		outFile.mkdirs();
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
-		String input = "/Users/matias/develop/sketch-repair/outputdiff4/";
+		String input = new File("./datasets/icse2015").getAbsolutePath();
 		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
 		analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
 
@@ -32,10 +37,11 @@ public class Runner {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
-		String out = "/Users/matias/develop/sketch-repair/git-sketch4repair/diff_analysis/Defects4J";
-		// +"//"/Users/matias/develop/CodeRep-data/processed_d4J/";
+		File outFile = new File("./out/Defects4J");
+		String out = outFile.getAbsolutePath();
+		outFile.mkdirs();
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
-		String input = "/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/Defects4J/";
+		String input = new File("./datasets/Defects4J").getAbsolutePath();
 		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
 		analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
 	}
@@ -45,9 +51,11 @@ public class Runner {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 		for (int i = 1; i <= 1; i++) {
-			String out = "/Users/matias/develop/CodeRep-data/process_Dataset" + i + "_unidiff";
+			File outFile = new File("./out/codeRepDS" + i);
+			String out = outFile.getAbsolutePath();
+			outFile.mkdirs();
 			DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
-			String input = "/Users/matias/develop/CodeRep-data/result_Dataset" + i + "_unidiff/";
+			String input = new File("./datasets/codeRepDS" + i).getAbsolutePath();
 			ConfigurationProperties.properties.setProperty("icse15difffolder", input);
 			analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
 		}
