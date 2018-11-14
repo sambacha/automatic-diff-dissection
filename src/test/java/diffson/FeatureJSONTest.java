@@ -264,7 +264,7 @@ public class FeatureJSONTest {
 	public JsonObject getJsonOfBugId(String diffId) {
 		String input = "Defects4J/" + diffId;
 		File file = new File("./datasets/" + input);
-		JsonObject resultjson = JSonTest.getContext(diffId, file.getAbsolutePath());
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, file.getAbsolutePath());
 		return resultjson;
 	}
 }

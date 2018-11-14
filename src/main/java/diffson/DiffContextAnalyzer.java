@@ -159,13 +159,6 @@ public class DiffContextAnalyzer {
 		System.out.println("Zero " + zero);
 		System.out.println("Error " + error);
 
-		// System.out.println("JSON: \n" + root);
-		// FileWriter fw = new FileWriter("./outputanalysis" + (new Date()).toString() +
-		// ".json");
-		// fw.write(root.toJSONString());
-		// fw.flush();
-		// fw.close();
-
 		beforeEnd();
 	}
 
