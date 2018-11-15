@@ -1385,7 +1385,8 @@ public class SuspiciousASTFaultyTest {
 
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 		System.out.println("END 1\n" + resultjson.toString());
-		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsIf", "org.jfree.chart.plot.PiePlotState#setTotal()", "Invocation");
+		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsIf", "org.jfree.chart.plot.PiePlotState#setTotal()",
+				"Invocation");
 
 		// The second pattern:
 		insts = repairPatterns.getPatternInstances().get("missNullCheckP");
@@ -1535,7 +1536,8 @@ public class SuspiciousASTFaultyTest {
 
 		System.out.println("END 1\n" + resultjson.toString());
 		// TODO:
-		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "addassignment", "\u003d"/* "maximumRangeValue" */, "Assignment");
+		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "addassignment", "\u003d"/* "maximumRangeValue" */,
+				"Assignment");
 
 	}
 
@@ -2423,7 +2425,8 @@ public class SuspiciousASTFaultyTest {
 
 		System.out.println("END 1\n" + resultjson.toString());
 
-		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsIfElse", "java.lang.Object#getClass()", "Invocation");
+		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsIfElse", "java.lang.Object#getClass()",
+				"Invocation");
 	}
 
 	@Test
@@ -2983,4 +2986,276 @@ public class SuspiciousASTFaultyTest {
 		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "addassignment", "if", "If");
 
 	}
+
+	/**
+	 * For 1079460, the repair action is identified as "susp_wrongMethodRef" and
+	 * "susp_wrapsMethod", but in fact it probably should be identified as "variable
+	 * replacement by method call" repair action. I think, the patch like 1079460 is
+	 * common in practice, so it may represent a common and probably (important)
+	 * drawback in the tool.
+	 */
+	@Test
+	public void testICSE15_1079460() {
+		String diffId = "1079460";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongMethodRef");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		// newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
+
+		PatternInstance pi1 = insts.get(0);
+		assertTrue(pi1.getNodeAffectedOp().toString()
+				.equals("newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement())"));
+		// assertEquals(2, pi1.getFaulty().size());
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("newCC.setCurrentDependent(td)"))
+				.findFirst().isPresent());
+
+		assertNotNull(pi1.getFaultyTree());
+		assertTrue(pi1.getFaultyLine().toString().equals("newCC.setCurrentDependent(td)"));
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+//		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrongVarRef", "NaN", "FieldRead");
+//
+//		JsonArray affected = (JsonArray) resultjson.get("affected_files");
+//		for (JsonElement jsonElement : affected) {
+//
+//			JsonObject jo = (JsonObject) jsonElement;
+//			// JsonElement elAST = jo.get("faulty_stmts_ast");
+//			JsonElement elAST = jo.get("pattern_instances");
+//
+//			assertNotNull(elAST);
+//			assertTrue(elAST instanceof JsonArray);
+//			JsonArray ar = (JsonArray) elAST;
+//			assertTrue(ar.size() == 1);
+//
+//		}
+
+	}
+
+	// 494136
+
+	@Test
+	public void testICSE15_494136() {
+		String diffId = "494136";
+
+//		
+//		Diff Update Literal at org.apache.lucene.index.SegmentMerger:353
+//		" < " to " <= "
+//	Delete BinaryOperator at org.apache.lucene.index.SegmentMerger:351
+//		 < 
+//	Insert BinaryOperator at org.apache.lucene.index.SegmentMerger:351
+//		(lastDoc != 0) && ( <= )
+//	Move VariableRead from org.apache.lucene.index.SegmentMerger:351 to org.apache.lucene.index.SegmentMerger:351
+//		doc
+//	Move VariableRead from org.apache.lucene.index.SegmentMerger:351 to org.apache.lucene.index.SegmentMerger:351
+//		lastDoc
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongMethodRef");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		// newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
+
+		PatternInstance pi1 = insts.get(0);
+		assertTrue(pi1.getNodeAffectedOp().toString()
+				.equals("newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement())"));
+		// assertEquals(2, pi1.getFaulty().size());
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("newCC.setCurrentDependent(td)"))
+				.findFirst().isPresent());
+
+		assertNotNull(pi1.getFaultyTree());
+		assertTrue(pi1.getFaultyLine().toString().equals("newCC.setCurrentDependent(td)"));
+
+//		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrongVarRef", "NaN", "FieldRead");
+//
+//		JsonArray affected = (JsonArray) resultjson.get("affected_files");
+//		for (JsonElement jsonElement : affected) {
+//
+//			JsonObject jo = (JsonObject) jsonElement;
+//			// JsonElement elAST = jo.get("faulty_stmts_ast");
+//			JsonElement elAST = jo.get("pattern_instances");
+//
+//			assertNotNull(elAST);
+//			assertTrue(elAST instanceof JsonArray);
+//			JsonArray ar = (JsonArray) elAST;
+//			assertTrue(ar.size() == 1);
+//
+//		}
+
+	}
+
+	// 1078693
+	@Test
+	public void testICSE15_1078693() {
+		String diffId = "1078693";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongMethodRef");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		// newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
+
+		PatternInstance pi1 = insts.get(0);
+		assertTrue(pi1.getNodeAffectedOp().toString()
+				.equals("newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement())"));
+		// assertEquals(2, pi1.getFaulty().size());
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("newCC.setCurrentDependent(td)"))
+				.findFirst().isPresent());
+
+		assertNotNull(pi1.getFaultyTree());
+		assertTrue(pi1.getFaultyLine().toString().equals("newCC.setCurrentDependent(td)"));
+
+	}
+
+	@Test
+	public void testICSE15_1051440() {
+		String diffId = "1051440";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+	}
+
+	@Test
+	public void testICSE15_1089542() {
+		String diffId = "1089542";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+	}
+
+	// 1102345
+	// Wrong method ref points to childer:
+
+	@Test
+	public void testICSE15_1102345() {
+		String diffId = "1102345";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+	}
+
+	// 381553
+
+	@Test
+	public void testICSE15_381553() {
+		String diffId = "381553";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+	}
+
+	// 381553
+	// FPositive
+	@Test
+	public void testICSE15_1476326() {
+		String diffId = "1476326";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+	}
+
+	@Test
+	public void testICSE15_289672() {
+		String diffId = "289672";
+
+		String input = getCompletePath("icse2015", diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+	}
+	// 289672
 }
