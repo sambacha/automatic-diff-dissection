@@ -171,6 +171,9 @@ public class DiffContextAnalyzer {
 			if (".DS_Store".equals(fileModif.getName()))
 				continue;
 
+			if (fileModif.getName().startsWith("Test") || fileModif.getName().endsWith("Test"))
+				continue;
+
 			String pathname = fileModif.getAbsolutePath() + File.separator + difffile.getName() + "_"
 					+ fileModif.getName(); // + "_" + i_hunk;
 			File previousVersion = new File(pathname + "_s.java");

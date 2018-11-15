@@ -114,7 +114,7 @@ public abstract class EditScriptBasedDetector extends FeatureAnalyzer {
 					setTreesLeftRight(editScript, operation, srcNode, dstNode);
 				}
 
-				if (operation instanceof InsertOperation) {
+				if (srcNode != null && operation instanceof InsertOperation && operation.getAction() != null) {
 					srcNode.putMetadata("tree", operation.getAction().getNode());
 				}
 			}
