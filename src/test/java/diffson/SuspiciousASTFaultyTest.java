@@ -89,6 +89,45 @@ public class SuspiciousASTFaultyTest {
 		assertTrue("Node suspicious not found", found);
 	}
 
+	public static List<JsonElement> getMarkedlAST(JsonObject resultjson, String fileName, String patternName) {
+
+		System.out.println("****************");
+		List<JsonElement> elements = new ArrayList<>();
+
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String prettyJsonString = gson.toJson(resultjson);
+
+		JsonArray affected = (JsonArray) resultjson.get("affected_files");
+		for (JsonElement jsonElement : affected) {
+
+			JsonObject jo = (JsonObject) jsonElement;
+			JsonElement elAST = jo.get("pattern_instances");
+
+			assertNotNull(elAST);
+			assertTrue(elAST instanceof JsonArray);
+			JsonArray ar = (JsonArray) elAST;
+
+			for (JsonElement suspiciousTree : ar) {
+
+				JsonObject jso = suspiciousTree.getAsJsonObject();
+				System.out.println("--> AST element: \n" + jso.get("pattern_name"));
+
+				JsonElement faultyElement = jso.get("faulty_ast");
+				prettyJsonString = gson.toJson(faultyElement);
+				System.out.println("suspicious element:\n" + prettyJsonString);
+
+				assertTrue("Equals to []", !faultyElement.toString().equals("[]"));
+				// assertTrue(printSusp(jso.get("faulty_ast"), label, type));
+				if (calculateSusp(elements, faultyElement, patternName, null, null)) {
+					// elements.add(faultyElement);
+				}
+
+			}
+
+		}
+		return elements;
+	}
+
 	public static void assertSuspiciousASTNode(JsonObject resultjson) {
 		assertMarkedlAST(resultjson, null, null, null);
 	}
@@ -197,6 +236,52 @@ public class SuspiciousASTFaultyTest {
 				JsonArray arr = ob.getAsJsonArray();
 				for (JsonElement jsonElement : arr) {
 					if (printSusp(jsonElement, patternName, label, type)) {
+						t = true;
+					}
+				}
+			}
+		}
+		return t;
+	}
+
+	public static boolean calculateSusp(List<JsonElement> elements, JsonElement ob, String patternName, String label,
+			String type) {
+		boolean t = false;
+		if (ob instanceof JsonObject) {
+			JsonObject jon = ob.getAsJsonObject();
+			for (String s : jon.keySet()) {
+				if (s.equals("susp")) {
+					// System.out.println("susp--> " + ob);
+					if (label == null && type == null && hasPattern(jon, ("susp_" + patternName))) {
+
+						t = true;
+						elements.add(jon);
+						// break;
+
+					} else {
+
+						if (label != null && type != null && jon.get("label").getAsString().toString().equals(label)
+								&& jon.get("type").getAsString().toString().equals(type)
+								&& (patternName == null || hasPattern(jon, ("susp_" + patternName)))) {
+							t = true;
+							elements.add(jon);
+						}
+					}
+				} else {
+
+					JsonElement e = jon.get(s);
+					boolean t1 = calculateSusp(elements, e, patternName, label, type);
+					if (t1) {
+						return true;
+					}
+				}
+
+			}
+		} else {
+			if (ob instanceof JsonArray) {
+				JsonArray arr = ob.getAsJsonArray();
+				for (JsonElement jsonElement : arr) {
+					if (calculateSusp(elements, jsonElement, patternName, label, type)) {
 						t = true;
 					}
 				}
@@ -3024,7 +3109,7 @@ public class SuspiciousASTFaultyTest {
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 
 		System.out.println("END 1\n" + resultjson.toString());
-//		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrongVarRef", "NaN", "FieldRead");
+		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrongVarRef", "NaN", "FieldRead");
 //
 //		JsonArray affected = (JsonArray) resultjson.get("affected_files");
 //		for (JsonElement jsonElement : affected) {
@@ -3045,20 +3130,8 @@ public class SuspiciousASTFaultyTest {
 	// 494136
 
 	@Test
-	public void testICSE15_494136() {
+	public void testICSE15_494136_Labeling() {
 		String diffId = "494136";
-
-//		
-//		Diff Update Literal at org.apache.lucene.index.SegmentMerger:353
-//		" < " to " <= "
-//	Delete BinaryOperator at org.apache.lucene.index.SegmentMerger:351
-//		 < 
-//	Insert BinaryOperator at org.apache.lucene.index.SegmentMerger:351
-//		(lastDoc != 0) && ( <= )
-//	Move VariableRead from org.apache.lucene.index.SegmentMerger:351 to org.apache.lucene.index.SegmentMerger:351
-//		doc
-//	Move VariableRead from org.apache.lucene.index.SegmentMerger:351 to org.apache.lucene.index.SegmentMerger:351
-//		lastDoc
 
 		String input = getCompletePath("icse2015", diffId);
 
@@ -3071,43 +3144,40 @@ public class SuspiciousASTFaultyTest {
 
 		System.out.println("END 1\n" + resultjson.toString());
 
-		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrongMethodRef");
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("expLogicExpand");
 		System.out.println(insts);
 		assertTrue(insts.size() > 0);
 
 		// newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
 
 		PatternInstance pi1 = insts.get(0);
-		assertTrue(pi1.getNodeAffectedOp().toString()
-				.equals("newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement())"));
+		assertTrue(pi1.getNodeAffectedOp().toString().equals("(lastDoc != 0) && (doc <= lastDoc)"));
 		// assertEquals(2, pi1.getFaulty().size());
-		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("newCC.setCurrentDependent(td)"))
-				.findFirst().isPresent());
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("doc")).findFirst().isPresent());
 
 		assertNotNull(pi1.getFaultyTree());
-		assertTrue(pi1.getFaultyLine().toString().equals("newCC.setCurrentDependent(td)"));
+		assertTrue(pi1.getFaultyLine().toString().equals("doc < lastDoc"));
 
-//		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrongVarRef", "NaN", "FieldRead");
-//
-//		JsonArray affected = (JsonArray) resultjson.get("affected_files");
-//		for (JsonElement jsonElement : affected) {
-//
-//			JsonObject jo = (JsonObject) jsonElement;
-//			// JsonElement elAST = jo.get("faulty_stmts_ast");
-//			JsonElement elAST = jo.get("pattern_instances");
-//
-//			assertNotNull(elAST);
-//			assertTrue(elAST instanceof JsonArray);
-//			JsonArray ar = (JsonArray) elAST;
-//			assertTrue(ar.size() == 1);
-//
-//		}
+		List<JsonElement> elements = getMarkedlAST(resultjson, null, "expLogicExpand");
+		assertEquals(2, elements.size());
+
+		List<PatternInstance> instsCOnst = repairPatterns.getPatternInstances().get("constChange");
+		System.out.println(instsCOnst);
+		assertTrue(instsCOnst.size() > 0);
+
+		pi1 = instsCOnst.get(0);
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("<")).findFirst().isPresent());
+		assertTrue(pi1.getFaultyLine().toString().equals(
+				"new java.lang.IllegalStateException(((((\"docs out of order (\" + doc) + \" < \") + lastDoc) + \" )\"))"));
+		assertNotNull(pi1.getFaultyTree());
+
+		elements = getMarkedlAST(resultjson, null, "constChange");
+		assertEquals(1, elements.size());
 
 	}
 
-	// 1078693
 	@Test
-	public void testICSE15_1078693() {
+	public void testICSE15_1078693_labeling() {
 		String diffId = "1078693";
 
 		String input = getCompletePath("icse2015", diffId);
@@ -3125,22 +3195,23 @@ public class SuspiciousASTFaultyTest {
 		System.out.println(insts);
 		assertTrue(insts.size() > 0);
 
-		// newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
-
 		PatternInstance pi1 = insts.get(0);
 		assertTrue(pi1.getNodeAffectedOp().toString()
 				.equals("newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement())"));
-		// assertEquals(2, pi1.getFaulty().size());
+
 		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("newCC.setCurrentDependent(td)"))
 				.findFirst().isPresent());
 
 		assertNotNull(pi1.getFaultyTree());
 		assertTrue(pi1.getFaultyLine().toString().equals("newCC.setCurrentDependent(td)"));
 
+		List elements = getMarkedlAST(resultjson, null, "wrongMethodRef");
+		assertEquals(1, elements.size());
+
 	}
 
 	@Test
-	public void testICSE15_1051440() {
+	public void testICSE15_1051440_WrongDiff() {
 		String diffId = "1051440";
 
 		String input = getCompletePath("icse2015", diffId);

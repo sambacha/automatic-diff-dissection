@@ -1,6 +1,5 @@
 package diffson;
 
-
 import java.util.List;
 
 import com.github.gumtreediff.tree.ITree;
@@ -46,7 +45,9 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 	private boolean paint(JsonObject jsontree, CtElement ctelement) {
 		boolean found = false;
-		if (nodesAffectedByPattern.containsKey(ctelement)) {
+		if (nodesAffectedByPattern.containsKey(ctelement)
+				// workaround: siee if the same object is present
+				&& nodesAffectedByPattern.keySet().stream().filter(e -> e == ctelement).findFirst().isPresent()) {
 
 			JsonArray arr = new JsonArray();
 			List<String> ps = nodesAffectedByPattern.get(ctelement);
