@@ -102,4 +102,12 @@ public class PatternInstance {
 	public void setFaultyTree(ITree faultyTree) {
 		this.faultyTree = faultyTree;
 	}
+
+	public List<PropertyPair> getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(List<PropertyPair> metadata) {
+		this.metadata = metadata;
+	}
 }

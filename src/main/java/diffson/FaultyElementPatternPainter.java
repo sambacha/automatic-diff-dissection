@@ -1,6 +1,7 @@
 package diffson;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.gumtreediff.tree.ITree;
 import com.google.gson.JsonArray;
@@ -8,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import add.entities.PatternInstance;
+import add.entities.PropertyPair;
 import fr.inria.astor.util.MapList;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.builder.jsonsupport.NodePainter;
@@ -20,10 +22,15 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 	public FaultyElementPatternPainter(List<PatternInstance> instances) {
 		// Collect all nodes and get the operator
+		Boolean includeMetadata = ConfigurationProperties.getPropertyBoolean("include_pattern_metadata");
 
 		for (PatternInstance patternInstance : instances) {
 			for (CtElement susp : patternInstance.getFaulty()) {
-				nodesAffectedByPattern.add(susp, "susp_" + patternInstance.getPatternName());
+				nodesAffectedByPattern.add(susp, ("susp_" + patternInstance.getPatternName()
+				//
+						+ ((includeMetadata) ? ("_" + patternInstance.getMetadata().stream().map(PropertyPair::getValue)
+								.collect(Collectors.joining("_"))) : "")));
+
 			}
 		}
 

@@ -195,7 +195,7 @@ public class SuspiciousASTFaultyTest {
 			return false;
 
 		for (JsonElement el : jon.get("susp").getAsJsonArray()) {
-			if (el.getAsString().toString().equals(p))
+			if (el.getAsString().toString().startsWith(p))
 				return true;
 		}
 		return false;
@@ -3228,10 +3228,11 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testICSE15_979518() {
+	public void testICSE15_979518_Wrong_labeledNode_wrongMethodRef() {
 		String diffId = "979518";
 
 		String input = getCompletePath("icse2015", diffId);
+		// We force to analyze the test, there we have the pattern instance
 		diffson.ConfigurationProperties.properties.setProperty("excludetests", "false");
 		List<RepairPatterns> patterns = analyze(input);
 
@@ -3244,6 +3245,11 @@ public class SuspiciousASTFaultyTest {
 
 		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
 
+		List<JsonElement> suspiciousElements = getMarkedlAST(resultjson, null, "wrongMethodRef");
+		assertEquals(1, suspiciousElements.size());
+		System.out.println("-->" + suspiciousElements.get(0));
+		JsonObject obj = (JsonObject) suspiciousElements.get(0);
+		assertEquals("ConstructorCall", obj.get("type").getAsString());
 	}
 
 	@Test

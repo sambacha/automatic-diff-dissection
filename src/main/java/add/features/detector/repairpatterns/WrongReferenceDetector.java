@@ -96,6 +96,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									}
 								}
 							}
+							// EN Dskype
 							if (!wasVariableWrapped) {
 
 								CtElement susp = operationDelete.getSrcNode();
@@ -123,11 +124,15 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						}
 					}
 				} else {
-					// Not access var
-					/// WHY??
+					// Inside delete but node is Not access var
+
 					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
 
-						CtElement susp = operationDelete.getSrcNode();
+						CtElement susp = null;// operationDelete.getSrcNode();
+						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
+						if (susp == null)
+							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
+
 						CtElement patch = null;
 
 						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
@@ -151,7 +156,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					}
 				}
 			}
-
+			/// UPDATE NODE
 			if (operation instanceof UpdateOperation) {
 				CtElement srcNode = operation.getSrcNode();
 				CtElement dstNode = operation.getDstNode();
@@ -196,7 +201,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 					// CtTypeReference srcTypeReference;
 					String srcCallMethodName;
-					CtElement src = srcNode;
+					CtElement srcInvocation = srcNode;
 					List<CtTypeReference> srcCallArguments;
 					if (srcNode instanceof CtInvocation) {
 						// srcTypeReference = ((CtInvocation) srcNode).getTarget().getType();
@@ -264,7 +269,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 					if (!wasMethodDefUpdated) {
 
-						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), src);
+						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), srcInvocation);
 						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
 								? parentLine.getMetadata("tree")
 								: parentLine.getMetadata("gtnode"));
@@ -272,7 +277,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						if (!srcCallMethodName.equals(dstCallMethodName)) {
 							// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-									new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parentLine, lineTree,
+									new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
+											lineTree,
 											//
 											new PropertyPair("Change", "differentMethodName")));
 
@@ -280,7 +286,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							if (srcCallArguments.size() != dstCallArguments.size()) {
 								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-										new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parentLine, lineTree,
+										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
+												lineTree,
 												//
 												new PropertyPair("Change", "SameNamedifferentArgument")));
 							}

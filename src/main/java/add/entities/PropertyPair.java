@@ -1,29 +1,29 @@
 package add.entities;
 
 public class PropertyPair {
-	String a;
-	String b;
+	String key;
+	String value;
 
 	public PropertyPair(String a, String b) {
 		super();
-		this.a = a;
-		this.b = b;
+		this.key = a;
+		this.value = b;
 	}
 
-	public String getA() {
-		return a;
+	public String getKey() {
+		return key;
 	}
 
-	public void setA(String a) {
-		this.a = a;
+	public void setKey(String a) {
+		this.key = a;
 	}
 
-	public String getB() {
-		return b;
+	public String getValue() {
+		return value;
 	}
 
-	public void setB(String b) {
-		this.b = b;
+	public void setValue(String b) {
+		this.value = b;
 	}
 
 }
