@@ -171,7 +171,8 @@ public class DiffContextAnalyzer {
 			if (".DS_Store".equals(fileModif.getName()))
 				continue;
 
-			if (fileModif.getName().startsWith("Test") || fileModif.getName().endsWith("Test"))
+			if (ConfigurationProperties.getPropertyBoolean("excludetests")
+					&& (fileModif.getName().startsWith("Test") || fileModif.getName().endsWith("Test")))
 				continue;
 
 			String pathname = fileModif.getAbsolutePath() + File.separator + difffile.getName() + "_"

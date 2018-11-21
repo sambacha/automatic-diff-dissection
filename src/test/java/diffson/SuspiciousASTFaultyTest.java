@@ -3228,6 +3228,25 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
+	public void testICSE15_979518() {
+		String diffId = "979518";
+
+		String input = getCompletePath("icse2015", diffId);
+		diffson.ConfigurationProperties.properties.setProperty("excludetests", "false");
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+	}
+
+	@Test
 	public void testICSE15_1089542() {
 		String diffId = "1089542";
 
