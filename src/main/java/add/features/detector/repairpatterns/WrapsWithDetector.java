@@ -6,6 +6,7 @@ import java.util.List;
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
+import add.entities.PropertyPair;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import add.features.detector.spoon.SpoonHelper;
@@ -29,7 +30,6 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTry;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtWhile;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.visitor.filter.LineFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -92,14 +92,6 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 									}
 								}
 
-								// CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
-								// (CtElement) stmtsMoved.get(0));
-								// ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null)
-								// ? lineP.getMetadata("tree")
-								// : lineP.getMetadata("gtnode"));
-//
-//								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF,
-//										new PatternInstance(WRAPS_IF, operation, ctIf, stmtsMoved, lineP, lineTree));
 								if (leftElements.size() > 0)
 									repairPatterns.incrementFeatureCounterInstance(WRAPS_IF,
 											new PatternInstance(WRAPS_IF, operation, ctIf, leftElements,
@@ -330,23 +322,6 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 		}
 	}
 
-	/**
-	 * Return a list with the statemetns inside the first parameter, but removing
-	 * those from the second
-	 * 
-	 * @param ctElements
-	 * @param olds
-	 * @return
-	 */
-	private List listSuspicions(CtElement ctElements, List olds) {
-		List susp = ctElements.getElements(new TypeFilter<>(CtStatement.class));
-		for (Object object : olds) {
-			CtElement e = (CtElement) object;
-			susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
-		}
-		return susp;
-	}
-
 	private void detectWrapsMethod(Operation operation, RepairPatterns repairPatterns) {
 		if (operation.getSrcNode() instanceof CtInvocation) {
 			if (operation instanceof InsertOperation) {
@@ -367,7 +342,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 										: lineP.getMetadata("gtnode"));
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 										new PatternInstance(WRAPS_METHOD, operation, ctInvocation, elementRemoved,
-												/* parent */ lineP, lineTree));
+												lineP, lineTree, new PropertyPair("Old", "VarRead"),
+												new PropertyPair("New", "Invocation")));
 							}
 						}
 						if (elementRemoved instanceof CtAssignment) {
@@ -378,8 +354,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 							if (invocationArguments.contains(((CtAssignment) elementRemoved).getAssignment())) {
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 										new PatternInstance(WRAPS_METHOD, operation, ctInvocation,
-												((CtAssignment) elementRemoved).getAssigned(), /* parent */lineP,
-												lineTree));
+												((CtAssignment) elementRemoved).getAssigned(), lineP, lineTree,
+												new PropertyPair("Old", "Assignment"),
+												new PropertyPair("New", "Invocation")));
 							}
 						}
 					}
@@ -396,8 +373,10 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null) ? lineP.getMetadata("tree")
 								: lineP.getMetadata("gtnode"));
-						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD, new PatternInstance(WRAPS_METHOD,
-								operation, ctInvocation, ctExpression, /* parent */ lineP, lineTree));
+						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
+										lineTree, new PropertyPair("Old", "MovedExpression"),
+										new PropertyPair("New", "Invocation")));
 					}
 				}
 			} else {
@@ -418,9 +397,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 										? lineP.getMetadata("tree")
 										: lineP.getMetadata("gtnode"));
 
-								repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD,
-										new PatternInstance(UNWRAP_METHOD, operation, statementParent, ctInvocation,
-												/* parent */lineP, lineTree));
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
+										UNWRAP_METHOD, operation, statementParent, ctInvocation, lineP, lineTree));
 							}
 						}
 					}
@@ -475,17 +453,6 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 				}
 			}
 		}
-	}
-
-	private CtStatement getStmtParent(CtElement srcNode) {
-
-		CtStatement st = srcNode.getParent(CtStatement.class);
-		while (st != null && st.getParent() != null
-				&& !(st.getParent() instanceof CtBlock || st.getParent() instanceof CtClass)) {
-			st = st.getParent(CtStatement.class);
-
-		}
-		return st;
 	}
 
 }
