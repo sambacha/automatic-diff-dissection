@@ -6,6 +6,7 @@ import java.util.List;
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
+import add.entities.PropertyPair;
 import add.entities.RepairPatterns;
 import add.main.Config;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
@@ -43,9 +44,10 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 	@Override
 	public void detect(RepairPatterns repairPatterns) {
 		for (int i = 0; i < operations.size(); i++) {
-			Operation operationDelete = operations.get(i);
-			Operation operationInsert = null;
-			if (operationDelete instanceof DeleteOperation) {
+			Operation operation = operations.get(i);
+			// Operation operationInsert = null;
+			if (operation instanceof DeleteOperation) {
+				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
 					if (srcNode.getMetadata("delete") != null) {
@@ -57,7 +59,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								Operation operation2 = operations.get(j);
 								if (operation2 instanceof InsertOperation) {
 									CtElement node2 = operation2.getSrcNode();
-									operationInsert = operation2;
+									// operationInsert = operation2;
 									if (node2 instanceof CtInvocation || node2 instanceof CtConstructorCall) {
 										if (((InsertOperation) operation2).getParent() != null) {
 											if (srcNode.getParent() == ((InsertOperation) operation2).getParent()) {
@@ -109,13 +111,20 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 										? parentLine.getMetadata("tree")
 										: parentLine.getMetadata("gtnode"));
 
-								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF, new PatternInstance(
-										WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree));
+								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
+										new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine,
+												lineTree,
+
+												// Is a variable access or a type access
+												new PropertyPair("Old", "Removed_" + srcNode.getClass().getSimpleName()
+														.replace("Ct", "").replace("Impl", ""))));
 
 							}
 						}
 					}
-				} else {/// WHY??
+				} else {
+					// Not access var
+					/// WHY??
 					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
 
 						CtElement susp = operationDelete.getSrcNode();
@@ -131,18 +140,21 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 						}
 
-						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF, new PatternInstance(
-								WRONG_METHOD_REF, operationDelete, patch, susp, parentLine, lineTree));
+						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
+										lineTree,
+										//
+										new PropertyPair("Change", "ArgumentRemovement")
 
-						// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operationDelete);
-						// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operationDelete);
+								));
+
 					}
 				}
 			}
 
-			if (operationDelete instanceof UpdateOperation) {
-				CtElement srcNode = operationDelete.getSrcNode();
-				CtElement dstNode = operationDelete.getDstNode();
+			if (operation instanceof UpdateOperation) {
+				CtElement srcNode = operation.getSrcNode();
+				CtElement dstNode = operation.getDstNode();
 				if (dstNode.getParent().getMetadata("new") != null
 						|| dstNode.getParent().getMetadata("isMoved") != null) {
 					continue;
@@ -152,12 +164,12 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					continue;
 				}
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
-					if (operationDelete.getDstNode() instanceof CtVariableAccess
-							|| operationDelete.getDstNode() instanceof CtTypeAccess
-							|| operationDelete.getDstNode() instanceof CtInvocation) {
+					if (operation.getDstNode() instanceof CtVariableAccess
+							|| operation.getDstNode() instanceof CtTypeAccess
+							|| operation.getDstNode() instanceof CtInvocation) {
 						// repairPatterns.incrementFeatureCounter(WRONG_VAR_REF, operationUpdate);
 
-						CtElement susp = operationDelete.getSrcNode();
+						CtElement susp = operation.getSrcNode();
 						CtElement patch = null;
 
 						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
@@ -165,19 +177,20 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								? parentLine.getMetadata("tree")
 								: parentLine.getMetadata("gtnode"));
 
-						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+						ITree parentRight = MappingAnalysis.getParentInRight(diff, operation.getAction());
 						if (parentRight != null) {
 							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 						}
 
-						repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
-								new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree));
+						repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF, new PatternInstance(WRONG_VAR_REF,
+								operation, patch, susp, parentLine, lineTree, new PropertyPair("Change", "Update_"
+										+ srcNode.getClass().getSimpleName().replace("Ct", "").replace("Impl", ""))));
 					}
 				}
 				if (!(srcNode instanceof CtInvocation) && !(srcNode instanceof CtConstructorCall)) {
 					continue;
 				}
-
+				// Update a method invocation
 				if (dstNode instanceof CtInvocation || dstNode instanceof CtConstructorCall) {
 					boolean wasMethodDefUpdated = false;
 
@@ -207,6 +220,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					for (Operation operation2 : operations) {
 						if (operation2 instanceof InsertOperation) {
 							CtElement insertedNode = operation2.getSrcNode();
+							// See whether a method signature was modified
 							if (insertedNode instanceof CtParameter) {
 								CtElement ctElement = ((InsertOperation) operation2).getParent();
 								if (ctElement instanceof CtMethod) {
@@ -237,7 +251,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 													newParEquals = false;
 													break;
 												}
-											}
+											} // not sure
 											if (newParEquals) {
 												wasMethodDefUpdated = true;
 											}
@@ -257,14 +271,18 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 						if (!srcCallMethodName.equals(dstCallMethodName)) {
 							// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
-							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF, new PatternInstance(
-									WRONG_METHOD_REF, operationDelete, dst, src, parentLine, lineTree));
+							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+									new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parentLine, lineTree,
+											//
+											new PropertyPair("Change", "differentMethodName")));
 
 						} else {
 							if (srcCallArguments.size() != dstCallArguments.size()) {
 								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
-								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF, new PatternInstance(
-										WRONG_METHOD_REF, operationDelete, dst, src, parentLine, lineTree));
+								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+										new PatternInstance(WRONG_METHOD_REF, operation, dst, src, parentLine, lineTree,
+												//
+												new PropertyPair("Change", "SameNamedifferentArgument")));
 							}
 						}
 					}
