@@ -28,8 +28,9 @@ public class FaultyElementPatternPainter implements NodePainter {
 			for (CtElement susp : patternInstance.getFaulty()) {
 				nodesAffectedByPattern.add(susp, ("susp_" + patternInstance.getPatternName()
 				//
-						+ ((includeMetadata) ? ("_" + patternInstance.getMetadata().stream().map(PropertyPair::getValue)
-								.collect(Collectors.joining("_"))) : "")));
+						+ ((includeMetadata && !patternInstance.getMetadata().isEmpty()) ? ("_" + patternInstance
+								.getMetadata().stream().map(PropertyPair::getValue).collect(Collectors.joining("_")))
+								: "")));
 
 			}
 		}

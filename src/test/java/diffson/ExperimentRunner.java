@@ -1,6 +1,7 @@
 package diffson;
 
 import java.io.File;
+import java.util.Date;
 
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ public class ExperimentRunner {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "20");
-		File outFile = new File("./out/icse2015");
+		File outFile = new File("./out/ICSE2015_" + (new Date()));
 		String out = outFile.getAbsolutePath();
 		outFile.mkdirs();
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);

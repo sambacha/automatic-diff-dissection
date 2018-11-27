@@ -39,15 +39,15 @@ import spoon.reflect.visitor.filter.TypeFilter;
  */
 public class WrapsWithDetector extends AbstractPatternDetector {
 
-	private static final String WRAPS_LOOP = "wrapsLoop";
-	private static final String UNWRAP_METHOD = "unwrapMethod";
-	private static final String UNWRAP_TRY_CATCH = "unwrapTryCatch";
-	private static final String WRAPS_METHOD = "wrapsMethod";
-	private static final String WRAPS_TRY_CATCH = "wrapsTryCatch";
-	private static final String WRAPS_ELSE = "wrapsElse";
-	private static final String WRAPS_IF_ELSE = "wrapsIfElse";
-	private static final String UNWRAP_IF_ELSE = "unwrapIfElse";
-	private static final String WRAPS_IF = "wrapsIf";
+	public static final String WRAPS_LOOP = "wrapsLoop";
+	public static final String UNWRAP_METHOD = "unwrapMethod";
+	public static final String UNWRAP_TRY_CATCH = "unwrapTryCatch";
+	public static final String WRAPS_METHOD = "wrapsMethod";
+	public static final String WRAPS_TRY_CATCH = "wrapsTryCatch";
+	public static final String WRAPS_ELSE = "wrapsElse";
+	public static final String WRAPS_IF_ELSE = "wrapsIfElse";
+	public static final String UNWRAP_IF_ELSE = "unwrapIfElse";
+	public static final String WRAPS_IF = "wrapsIf";
 
 	public WrapsWithDetector(List<Operation> operations) {
 		super(operations);
@@ -76,6 +76,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					if (elseBlock == null) {
 						List stmtsMoved = RepairPatternUtils
 								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
+
 						if (thenBlock != null && !stmtsMoved.isEmpty()) {
 							if (operation instanceof InsertOperation) {
 								List<ITree> leftTreees = new ArrayList();
@@ -84,6 +85,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								for (Object object : stmtsMoved) {
 									CtElement moved = (CtElement) object;
 									ITree rightTree = (ITree) moved.getMetadata("tree");
+									// We start in the right because the moved are taken from the added if, not from
+									// the Mov operator ()
 									ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff, rightTree);
 									if (mappedLeft != null) {
 										leftTreees.add(mappedLeft);
@@ -95,11 +98,20 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								if (leftElements.size() > 0)
 									repairPatterns.incrementFeatureCounterInstance(WRAPS_IF,
 											new PatternInstance(WRAPS_IF, operation, ctIf, leftElements,
-													leftElements.get(0), leftTreees.get(0)));
+													leftElements.get(0), leftTreees.get(0),
+													new PropertyPair("case", "elsenull")));
 
 							} else {
 
-								List susp = ctElement.getElements(new TypeFilter<>(CtStatement.class));
+								// Remove if THEN (Not else present)
+
+								List susp = new ArrayList<>();
+								// Suspicious is the removed if
+								susp.add(ctIf);
+								// Let's take all elements that are inside the removed if
+								//
+								List subelements = ctElement.getElements(new TypeFilter<>(CtStatement.class));
+								susp.addAll(subelements);
 								for (Object object : stmtsMoved) {
 									CtElement e = (CtElement) object;
 									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
@@ -114,10 +126,10 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
 										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) stmtsMoved.get(0),
-												susp, lineP, lineTree));
+												susp, lineP, lineTree, new PropertyPair("case", "elsenull")));
 							}
 						}
-					} else {
+					} else {// ELSE has content
 						List sthen = RepairPatternUtils
 								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
 						List selse = RepairPatternUtils
@@ -136,15 +148,24 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 										: lineP.getMetadata("gtnode"));
 
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
-										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, all, lineP, lineTree));
+										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, all, lineP, lineTree,
+												new PropertyPair("case", "elsenotnull")));
 							} else {
-
-								List susp = ctElement.getElements(new TypeFilter<>(CtStatement.class));
-								sthen.addAll(selse);
-								for (Object object : sthen) {
-									CtElement e = (CtElement) object;
-									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
-								}
+								// ELSE with content
+								List susp = new ArrayList<>();
+								// Suspicious is the removed if
+								susp.add(ctIf);
+								// Let's take all elements that are inside the removed if
+								//
+								// COMMENTED related to Issue #4
+//								List subelements = ctElement.getElements(new TypeFilter<>(CtStatement.class));
+//								susp.addAll(subelements);
+//
+//								sthen.addAll(selse);
+//								for (Object object : sthen) {
+//									CtElement e = (CtElement) object;
+//									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
+//								}
 
 								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
 										(CtElement) susp.get(0));
@@ -154,7 +175,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
 										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) sthen.get(0), susp,
-												lineP, lineTree));
+												lineP, lineTree, new PropertyPair("case", "elsenotnull")));
 							}
 						}
 					}
@@ -202,8 +223,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						if (operation instanceof InsertOperation) {
 
 							if (statementParent.getMetadata("new") == null) {
-								CtElement susp = (thenExpression.getMetadata("new") != null) ? elseExpression
+								// We get the not new (the moved).
+								// As the then/else is inserted with the Condition, it's always in the right
+								CtElement suspRigh = (thenExpression.getMetadata("new") != null) ? elseExpression
 										: thenExpression;
+
+								ITree leftMoved = MappingAnalysis.getLeftFromRightNodeMapped(diff,
+										(ITree) suspRigh.getMetadata("gtnode"));
+
+								CtElement susp = (CtElement) leftMoved.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), susp);
 								ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null)
@@ -291,8 +319,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 										new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry, olds, lineP, lineTree));
 							} else {
 
-								repairPatterns.incrementFeatureCounterInstance(UNWRAP_TRY_CATCH, new PatternInstance(
-										UNWRAP_TRY_CATCH, operation, (CtElement) olds.get(0), olds, lineP, lineTree));
+								ITree tryTree = (ITree) ctTry.getMetadata("gtnode");
+								repairPatterns.incrementFeatureCounterInstance(UNWRAP_TRY_CATCH,
+										new PatternInstance(UNWRAP_TRY_CATCH, operation, ctTry, ctTry, ctTry, tryTree));
 							}
 						} else { // try to find a move into the body of the try
 							for (Operation operationAux : this.operations) {
