@@ -393,8 +393,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 										new PatternInstance(WRAPS_METHOD, operation, ctInvocation,
-												((CtAssignment) elementRemoved).getAssigned(), lineP, lineTree,
-												new PropertyPair("Old", "Assignment"),
+												// ((CtAssignment) elementRemoved).getAssigned()
+												elementRemoved, lineP, lineTree, new PropertyPair("Old", "Assignment"),
 												new PropertyPair("New", "Invocation")));
 							}
 						}

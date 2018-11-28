@@ -29,6 +29,7 @@ import add.features.detector.EditScriptBasedDetector;
 import add.features.detector.repairpatterns.RepairPatternDetector;
 import add.features.detector.repairpatterns.WrapsWithDetector;
 import add.main.Config;
+import add.utils.TestUtils;
 import fr.inria.astor.core.entities.CNTX_Property;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import gumtree.spoon.diff.Diff;
@@ -1317,7 +1318,7 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testD4JVchart10() throws Exception {
+	public void testD4JVchart10_wrap_method_case1() throws Exception {
 		String diffId = "Chart_10";
 
 		String input = getCompletePathD4J(diffId);
@@ -1343,6 +1344,9 @@ public class SuspiciousASTFaultyTest {
 
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+		showJSONFaultyAST(resultjson);
+
 	}
 
 	@Test
@@ -1379,7 +1383,7 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testD4JVchart12() throws Exception {
+	public void testD4JVchart12_wrap_case2() throws Exception {
 		String diffId = "Chart_12";
 
 		String input = getCompletePathD4J(diffId);
@@ -1408,6 +1412,38 @@ public class SuspiciousASTFaultyTest {
 
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+
+		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "", "wrapsMethod");
+		assertTrue(market.size() > 0);
+		System.out.println("First marked:\n" + market.get(0));
+		assertEquals("Assignment", ((JsonObject) market.get(0)).get("type").getAsString());
+
+		showJSONFaultyAST(resultjson);
+	}
+
+	@Test
+	public void testD4JVtime17_unwrap() {
+		Config config = TestUtils.setupConfig("Time 17");
+
+		RepairPatternDetector detector = new RepairPatternDetector(config);
+		RepairPatterns repairPatterns = detector.analyze();
+
+		Assert.assertTrue(repairPatterns.getFeatureCounter("unwrapMethod") > 0);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("unwrapMethod");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		PatternInstance pi1 = insts.get(0);
+		assertTrue(pi1.getNodeAffectedOp().toString().contains("convertUTCToLocal("));
+		assertEquals(1, pi1.getFaulty().size());
+		assertTrue(pi1.getFaulty().stream()
+				.filter(e -> e.toString().contains("instant - (3 * (DateTimeConstants.MILLIS_PER_HOUR)))")).findFirst()
+				.isPresent());
+
+		assertTrue(pi1.getFaultyLine().toString().equals(
+				"long instantBefore = convertUTCToLocal((instant - (3 * (DateTimeConstants.MILLIS_PER_HOUR))))"));
+
 	}
 
 	@Test
@@ -1589,7 +1625,72 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testD4JVchart21() throws Exception {
+	public void testD4closure124_wrapLoop_case1() throws Exception {
+		String diffId = "Closure_124";
+		String input = getCompletePathD4J(diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		JsonObject resultjson = getJsonDataD4j(diffId);
+
+		assertSuspiciousASTNode(resultjson);
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		List<PatternInstance> listWrap = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_LOOP);
+		System.out.println(listWrap);
+		assertTrue(listWrap.size() > 0);
+
+		PatternInstance pi1 = listWrap.get(0);
+		// assertTrue(pi1.getNodeAffectedOp().toString().contains("index >= 0"));
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("node = node.getFirstChild()"))
+				.findFirst().isPresent());
+		assertEquals("node = node.getFirstChild()", pi1.getFaultyLine().toString());
+
+		////
+		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "", WrapsWithDetector.WRAPS_LOOP);
+		assertTrue(market.size() > 0);
+		System.out.println("First marked:\n" + market.get(0));
+		assertEquals("Assignment", ((JsonObject) market.get(0)).get("type").getAsString());
+		showJSONFaultyAST(resultjson);
+
+	}
+
+	@Test
+	public void testD4closure124_wrapLoop_case_2() throws Exception {
+		String diffId = "math_7";
+		String input = getCompletePathD4J(diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		JsonObject resultjson = getJsonDataD4j(diffId);
+
+		assertSuspiciousASTNode(resultjson);
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		List<PatternInstance> listWrap = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_LOOP);
+		System.out.println(listWrap);
+		assertTrue(listWrap.size() > 0);
+
+		PatternInstance pi1 = listWrap.stream()
+				.filter(e -> e.getFaultyLine().toString().equals("currentEvent.stepAccepted(eventT, eventY)"))
+				.findFirst().get();
+		// assertTrue(pi1.getNodeAffectedOp().toString().contains("index >= 0"));
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("currentEvent")).findFirst().isPresent());
+		assertEquals("currentEvent.stepAccepted(eventT, eventY)", pi1.getFaultyLine().toString());
+
+		////
+		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "", WrapsWithDetector.WRAPS_LOOP);
+		showJSONFaultyAST(resultjson);
+		assertTrue(market.size() > 0);
+		System.out.println("First marked:\n" + market.get(0));
+		assertEquals("VariableRead", ((JsonObject) market.get(0)).get("type").getAsString());
+
+	}
+
+	@Test
+	public void testD4JVchart21_wrapElse() throws Exception {
 		String diffId = "Chart_21";
 
 		String input = getCompletePathD4J(diffId);
@@ -2722,7 +2823,7 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testD4JVmath105() throws Exception {
+	public void testD4JVmath105_wrapMethod_case3() throws Exception {
 		String diffId = "Math_105";
 
 		String input = getCompletePathD4J(diffId);
@@ -2751,6 +2852,7 @@ public class SuspiciousASTFaultyTest {
 
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
+		showJSONFaultyAST(resultjson);
 	}
 
 	@Test
@@ -2822,7 +2924,7 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testD4Jmath103_wrap_try() throws Exception {
+	public void testD4Jmath103_wrap_try_case1() throws Exception {
 		String diffId = "Math_103";
 
 		String input = getCompletePathD4J(diffId);
@@ -2854,6 +2956,43 @@ public class SuspiciousASTFaultyTest {
 		System.out.println("First marked:\n" + market.get(0));
 		assertTrue(market.stream().filter(e -> ((JsonObject) e).get("type").getAsString().equals("Return")).findFirst()
 				.isPresent());
+		// assertTrue(market.size() == 1);
+
+	}
+
+	@Test
+	public void testD4JClosure83_wrap_try_Case2() throws Exception {
+		String diffId = "Closure_83";
+
+		String input = getCompletePathD4J(diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+		Assert.assertTrue(repairPatterns.getFeatureCounter(WrapsWithDetector.WRAPS_TRY_CATCH) > 0);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_TRY_CATCH);
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		PatternInstance pi1 = insts.get(0);
+		assertNotNull(pi1.getFaultyTree());
+		assertTrue(pi1.getFaultyLine().toString().startsWith("java.lang.String param = params.getParameter(0)"));
+
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+		// SuspiciousASTFaultyTest.assertMarkedlAST(resultjson,
+		// WrapsWithDetector.UNWRAP_TRY_CATCH, "", "");
+
+		showJSONFaultyAST(resultjson);
+
+		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "",
+				WrapsWithDetector.WRAPS_TRY_CATCH);
+		assertTrue(market.size() > 0);
+		System.out.println("First marked:\n" + market.get(0));
+		assertTrue(market.stream().filter(e -> ((JsonObject) e).get("type").getAsString().equals("LocalVariable"))
+				.findFirst().isPresent());
 		// assertTrue(market.size() == 1);
 
 	}

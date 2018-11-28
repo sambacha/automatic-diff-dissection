@@ -6,6 +6,7 @@ import java.util.List;
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
+import add.entities.PropertyPair;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
@@ -82,8 +83,9 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 								? parentLine.getMetadata("tree")
 								: parentLine.getMetadata("gtnode"));
 
-						repairPatterns.incrementFeatureCounterInstance(BIN_OPERATOR_MODIF, new PatternInstance(
-								BIN_OPERATOR_MODIF, operation, dstNode, buggybinaryOperator, parentLine, lineTree));
+						repairPatterns.incrementFeatureCounterInstance(BIN_OPERATOR_MODIF,
+								new PatternInstance(BIN_OPERATOR_MODIF, operation, dstNode, buggybinaryOperator,
+										parentLine, lineTree, new PropertyPair("type", "sameLeftRighTerms")));
 
 					}
 

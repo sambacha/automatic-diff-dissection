@@ -5,6 +5,7 @@ import java.util.List;
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
+import add.entities.PropertyPair;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import gumtree.spoon.diff.operations.DeleteOperation;
@@ -43,20 +44,23 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 						: parent.getMetadata("gtnode"));
 
 				if (srcNode instanceof CtLiteral) {
-					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE, new PatternInstance(CONST_CHANGE,
-							operation, operation.getDstNode(), srcNode, parent, lineTree));
+					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
+									lineTree, new PropertyPair("type", "literal")));
 				}
 				if (srcNode instanceof CtVariableAccess
 						&& RepairPatternUtils.isConstantVariableAccess((CtVariableAccess) srcNode)) {
 					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
-					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE, new PatternInstance(CONST_CHANGE,
-							operation, operation.getDstNode(), srcNode, parent, lineTree));
+					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
+									lineTree, new PropertyPair("type", "varaccess")));
 				}
 				if (srcNode instanceof CtTypeAccess
 						&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
 					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
-					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE, new PatternInstance(CONST_CHANGE,
-							operation, operation.getDstNode(), srcNode, parent, lineTree));
+					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
+									lineTree, new PropertyPair("type", "typeaccess")));
 				}
 			} else {
 				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtLiteral) {
@@ -82,7 +86,8 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 
 								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
 										new PatternInstance(CONST_CHANGE, operation2Insert,
-												operation2Insert.getSrcNode(), ctLiteral, parent, lineTree));
+												operation2Insert.getSrcNode(), ctLiteral, parent, lineTree,
+												new PropertyPair("type", "literal_by_varaccess")));
 							}
 						}
 					}
