@@ -197,14 +197,21 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
 									if (!selse.isEmpty()) {
 
-										CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
-												(CtElement) selse.get(0));
-										ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null)
-												? lineP.getMetadata("tree")
-												: lineP.getMetadata("gtnode"));
+										if (operation instanceof InsertOperation) {
+											CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+													(CtElement) selse.get(0));
+											ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null)
+													? lineP.getMetadata("tree")
+													: lineP.getMetadata("gtnode"));
 
-										repairPatterns.incrementFeatureCounterInstance(WRAPS_ELSE, new PatternInstance(
-												WRAPS_ELSE, operation, ctIfParent, selse, lineP, lineTree));
+											repairPatterns.incrementFeatureCounterInstance(WRAPS_ELSE,
+													new PatternInstance(WRAPS_ELSE, operation, ctIfParent, selse, lineP,
+															lineTree));
+										} else {
+											// Here is unwrap else.
+											// TODO:
+
+										}
 									}
 								}
 							}
@@ -376,11 +383,14 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 							}
 						}
 						if (elementRemoved instanceof CtAssignment) {
-							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), elementRemoved);
-							ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null) ? lineP.getMetadata("tree")
-									: lineP.getMetadata("gtnode"));
 
 							if (invocationArguments.contains(((CtAssignment) elementRemoved).getAssignment())) {
+
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), elementRemoved);
+								ITree lineTree = (ITree) ((lineP.getMetadata("tree") != null)
+										? lineP.getMetadata("tree")
+										: lineP.getMetadata("gtnode"));
+
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 										new PatternInstance(WRAPS_METHOD, operation, ctInvocation,
 												((CtAssignment) elementRemoved).getAssigned(), lineP, lineTree,
@@ -394,7 +404,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 				for (CtExpression ctExpression : invocationArguments) {
 					if (ctExpression.getMetadata("isMoved") != null) {
 						// Operation is an Insert
-
+						// TODO:
 						List<CtElement> suspLeft = MappingAnalysis.getTreeLeftMovedFromRight(diff, ctInvocation);
 						if (suspLeft == null || suspLeft.isEmpty())
 							return;
