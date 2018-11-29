@@ -15,7 +15,6 @@ import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.MoveOperation;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtFor;
-import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
@@ -164,7 +163,7 @@ public class MappingAnalysis {
 
 				ITree elseTree = copiedIfTree.getChildren().get(2);
 				copiedIfTree.getChildren().remove(2);
-			} else
+			}
 			// we remove the then
 			if (copiedIfTree.getChildren().size() == 2) {
 
@@ -177,7 +176,7 @@ public class MappingAnalysis {
 			return copiedIfTree;
 
 		} else// todo DOUntil
-		if (parentLine instanceof CtWhile || parentLine instanceof CtFor || parentLine instanceof CtForEach) {
+		if (parentLine instanceof CtWhile) {
 			ITree copiedIfTree = lineTree.deepCopy();
 
 			// we remove the then
@@ -188,9 +187,20 @@ public class MappingAnalysis {
 			}
 
 			return copiedIfTree;
+		} else // || parentLine instanceof CtForEach
+		if (parentLine instanceof CtFor) {
+
+			ITree copiedIfTree = lineTree.deepCopy();
+
+			for (int i = lineTree.getChildren().size() - 1; i >= 3; i--) {
+
+				copiedIfTree.getChildren().remove(i);
+			}
+			return copiedIfTree;
 		}
 
 		return lineTree;
+
 	}
 
 	/**

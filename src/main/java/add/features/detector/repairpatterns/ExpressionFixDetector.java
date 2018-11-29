@@ -232,40 +232,6 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 
 						// repairPatterns.incrementFeatureCounter(EXP_LOGIC_REDUCE, operation);
 
-						//
-//
-//						ITree solutionInRight = MappingAnalysis.getParentInRight(diff, operation.getAction());
-//						CtElement solution = (CtElement) solutionInRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-//
-//						//
-//						CtBinaryOperator binary = (CtBinaryOperator) srcNode;
-//
-//						// Get the nodes moved in the right
-//						List<CtElement> notNovesInLeft = parentBinaryOperator
-//								.getElements(e -> e.getMetadata("isMoved") == null && e.getMetadata("root") != null);
-//
-//						List<CtElement> suspLeft = new ArrayList();
-//						for (CtElement ctElement : notNovesInLeft) {
-//
-//							ITree mappedLeft = (ITree) ctElement.getMetadata("gtnode");
-//							if (mappedLeft != null) {
-//								suspLeft.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
-//
-//							} else {
-//								return;
-//							}
-//
-//						}
-//
-//						CtElement parentLine = MappingAnalysis.getParentLine(filter, binary);
-//
-//						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-//								? parentLine.getMetadata("tree")
-//								: parentLine.getMetadata("gtnode"));
-//
-//						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_REDUCE, new PatternInstance(
-//								EXP_LOGIC_REDUCE, operation, solution, notNovesInLeft, parentLine, lineTree));
-
 						isExpLogicExOrRed = true;
 					}
 				}

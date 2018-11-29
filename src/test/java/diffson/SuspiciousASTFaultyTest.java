@@ -1337,8 +1337,8 @@ public class SuspiciousASTFaultyTest {
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 
 		System.out.println("END 1\n" + resultjson.toString());
-		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "binOperatorModif", "NE",
-				ExpressionFixDetector.BIN_OPERATOR_MODIF);
+
+		showJSONFaultyAST(resultjson);
 
 		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "",
 				ExpressionFixDetector.BIN_OPERATOR_MODIF);
@@ -1346,8 +1346,6 @@ public class SuspiciousASTFaultyTest {
 		System.out.println("First marked:\n" + market.get(0));
 		assertEquals("BinaryOperator", ((JsonObject) market.get(0)).get("type").getAsString());
 		showJSONFaultyAST(resultjson);
-
-		// showJSONFaultyAST(resultjson);
 
 	}
 
@@ -1765,6 +1763,45 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
+	public void testD4Closure30_Expr_reduction() throws Exception {
+		String diffId = "Closure_30";
+		String input = getCompletePathD4J(diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+
+		JsonObject resultjson = getJsonDataD4j(diffId);
+
+		assertSuspiciousASTNode(resultjson);
+		RepairPatterns repairPatterns = patterns.get(0);
+		System.out.println(repairPatterns);
+
+		List<PatternInstance> listWrap = repairPatterns.getPatternInstances()
+				.get(ExpressionFixDetector.EXP_LOGIC_REDUCE);
+		System.out.println(listWrap);
+		assertTrue(listWrap.size() > 0);
+
+		PatternInstance pi1 = listWrap.get(0);
+
+		assertTrue(pi1.getNodeAffectedOp().toString().contains("if (n.isName()) {"));
+
+		assertTrue(pi1.getFaulty().stream()
+				.filter(e -> e.toString().contains("jsScope.isDeclared(n.getString(), true)")).findFirst().isPresent());
+
+		assertTrue(pi1.getFaultyLine().toString()
+				.contains("if ((n.isName()) && (jsScope.isDeclared(n.getString(), true))) {"));
+
+		////
+		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "",
+				ExpressionFixDetector.EXP_LOGIC_REDUCE);
+		assertTrue(market.size() > 0);
+		System.out.println("First marked:\n" + market.get(0));
+		// assertEquals("Invocation", ((JsonObject)
+		// market.get(0)).get("type").getAsString());
+		showJSONFaultyAST(resultjson);
+
+	}
+
+	@Test
 	public void testD4Lang26_WrongMethod_case3() throws Exception {
 		String diffId = "Lang_26";
 		String input = getCompletePathD4J(diffId);
@@ -2087,7 +2124,7 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
-	public void testD4JVChart5() throws Exception {
+	public void testD4JVChart5_expansion() throws Exception {
 		String diffId = "Chart_5";
 
 		String input = getCompletePathD4J(diffId);
@@ -2111,19 +2148,46 @@ public class SuspiciousASTFaultyTest {
 
 		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().equals("(!(this.allowDuplicateXValues))"))
 				.findFirst().isPresent());
-		// assertTrue(pi1.getFaulty().stream().filter(e ->
-		// e.toString().equals("this.allowDuplicateXValues")).findFirst()
-		// .isPresent());
+
 		assertNotNull(pi1.getFaultyTree());
 		// assertNotNull(pi1.getFaultyTree());
-		assertEquals("(index >= 0) && (!(this.allowDuplicateXValues))", pi1.getFaultyLine().toString());
+		assertTrue(pi1.getFaultyLine().toString().startsWith("if ((index >= 0) && (!(this.allowDuplicateXValues))) {"));
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 
 		System.out.println("END 1\n" + resultjson.toString());
-		// TODO:
-		// JSonTest.showAST(resultjson, "expLogicExpand", "AND"/* "maximumRangeValue"
-		// */, "BinaryOperator");
 
+	}
+
+	@Test
+	public void testD4JVClosure23_expansion() throws Exception {
+		String diffId = "Closure_23";
+
+		String input = getCompletePathD4J(diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+		assertTrue(patterns.size() > 0);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+
+		System.out.println(repairPatterns);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("expLogicReduce");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		PatternInstance pi1 = insts.get(0);
+		System.out.println(pi1);
+
+		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().equals("(i < intIndex)")).findFirst().isPresent());
+
+		assertNotNull(pi1.getFaultyTree());
+		assertTrue(pi1.getFaultyLine().toString()
+				.startsWith("for (int i = 0; (current != null) && (i < intIndex); i++) {"));
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		System.out.println("END 1\n" + resultjson.toString());
+
+		showJSONFaultyAST(resultjson);
 	}
 
 	@Test
@@ -2375,12 +2439,52 @@ public class SuspiciousASTFaultyTest {
 				"((value != null) && ((value.getNext()) == null)) && (com.google.javascript.jscomp.NodeUtil.isImmutableValue(value))"));
 		assertNotNull(pi1.getFaultyTree());
 		assertTrue(
-				pi1.getFaulty().stream().filter(e -> e.toString().contains("value != null")).findFirst().isPresent());
+				pi1.getFaulty().stream().filter(e -> e.toString().startsWith("value != null")).findFirst().isPresent());
+
+		assertTrue(pi1.getFaultyLine().toString().startsWith("if (value != null"));
 
 		// assertTrue(pi1.getFaultyLine().toString().equals("value != null"));
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 
-		System.out.println("END 1\n" + resultjson.toString());
+		// System.out.println("END 1\n" + resultjson.toString());
+		showJSONFaultyAST(resultjson);
+	}
+
+	@Test
+	public void testD4JVClosure55_expand() throws Exception {
+		String diffId = "Closure_55";
+
+		String input = getCompletePathD4J(diffId);
+
+		List<RepairPatterns> patterns = analyze(input);
+		assertTrue(patterns.size() > 0);
+
+		RepairPatterns repairPatterns = patterns.get(0);
+
+		System.out.println(repairPatterns);
+
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("expLogicExpand");
+		System.out.println(insts);
+		assertTrue(insts.size() > 0);
+
+		PatternInstance pi1 = insts.get(0);
+		System.out.println(pi1);
+		// assertTrue(pi1.getNodeAffectedOp().toString().contains(
+		// "((value != null) && ((value.getNext()) == null)) &&
+		// (com.google.javascript.jscomp.NodeUtil.isImmutableValue(value))"));
+		assertNotNull(pi1.getFaultyTree());
+		// assertTrue(
+		// pi1.getFaulty().stream().filter(e -> e.toString().startsWith("value !=
+		// null")).findFirst().isPresent());
+
+		assertTrue(pi1.getFaultyLine().toString()
+				.startsWith("return com.google.javascript.jscomp.NodeUtil.isFunctionExpression(n)"));
+
+		// assertTrue(pi1.getFaultyLine().toString().equals("value != null"));
+		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+
+		// System.out.println("END 1\n" + resultjson.toString());
+		showJSONFaultyAST(resultjson);
 	}
 
 	@Test
