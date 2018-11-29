@@ -29,8 +29,8 @@ import spoon.reflect.visitor.filter.LineFilter;
  * Created by fermadeiral
  */
 public class MissingNullCheckDetector extends AbstractPatternDetector {
-	private static final String MISS_NULL_CHECK_N = "missNullCheckN";
-	private static final String MISS_NULL_CHECK_P = "missNullCheckP";
+	public static final String MISS_NULL_CHECK_N = "missNullCheckN";
+	public static final String MISS_NULL_CHECK_P = "missNullCheckP";
 	private static Logger LOGGER = LoggerFactory.getLogger(MissingNullCheckDetector.class);
 
 	public MissingNullCheckDetector(List<Operation> operations) {
@@ -123,8 +123,7 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 
 									lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));
 
-									lineTree = (ITree) ((lineP.getMetadata("tree") != null) ? lineP.getMetadata("tree")
-											: lineP.getMetadata("gtnode"));
+									lineTree = MappingAnalysis.getTree(lineP);
 
 								} else {
 

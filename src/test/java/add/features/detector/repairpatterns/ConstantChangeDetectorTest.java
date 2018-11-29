@@ -49,7 +49,7 @@ public class ConstantChangeDetectorTest {
 
 		RepairPatternDetector detector = new RepairPatternDetector(config);
 		RepairPatterns repairPatterns = detector.analyze();
-
+		// PROBLEMS WITH THE GT
 		Assert.assertTrue(repairPatterns.getFeatureCounter("constChange") > 0);
 
 		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("constChange");

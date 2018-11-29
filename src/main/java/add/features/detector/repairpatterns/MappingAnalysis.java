@@ -14,8 +14,12 @@ import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.MoveOperation;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtFor;
+import spoon.reflect.code.CtForEach;
+import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.path.CtRole;
 import spoon.reflect.visitor.filter.LineFilter;
@@ -87,13 +91,15 @@ public class MappingAnalysis {
 		return save;
 	}
 
-	public static CtElement getParentLine(LineFilter filter, CtElement element) {
+	public static CtElement getParentLineOld(LineFilter filter, CtElement element) {
+
 		if (element.getParent() instanceof CtBlock) {
 			return element;
 		}
 
-		if (element.getRoleInParent().equals(CtRole.CONDITION) || (element.getRoleInParent().equals(CtRole.EXPRESSION)
-				&& !(element.getParent() instanceof CtReturn))) {
+		if (element.getRoleInParent().equals(CtRole.CONDITION) ||
+		//
+				(element.getRoleInParent().equals(CtRole.EXPRESSION) && !(element.getParent() instanceof CtReturn))) {
 			return element;
 		}
 
@@ -116,13 +122,17 @@ public class MappingAnalysis {
 		if (parentLine == null)
 			parentLine = element;
 
-//		if (parentCtElement instanceof CtIf || parentCtElement instanceof CtLoop)
-//			parentLine = parentCtElement;
-//		else {
-//			parentLine = parentCtElement.getParent(filter);
-//			if (parentLine == null)
-//				parentLine = parentCtElement;
-//		}
+		return parentLine;
+	}
+
+	public static CtElement getParentLine(LineFilter filter, CtElement element) {
+
+		CtElement parentLine = null;
+
+		parentLine = element.getParent(filter);
+		if (parentLine == null)
+			parentLine = element;
+
 		return parentLine;
 	}
 
@@ -136,6 +146,51 @@ public class MappingAnalysis {
 				suspicious.add(e);
 		}
 		return suspicious;
+	}
+
+	@SuppressWarnings("unused")
+	public static ITree getTree(CtElement parentLine) {
+
+		ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null) ? parentLine.getMetadata("tree")
+				: parentLine.getMetadata("gtnode"));
+
+		if (parentLine instanceof CtIf) {
+
+			ITree copiedIfTree = lineTree.deepCopy();
+			// We keep only the first child (the condition)
+
+			// We remove the else
+			if (copiedIfTree.getChildren().size() == 3) {
+
+				ITree elseTree = copiedIfTree.getChildren().get(2);
+				copiedIfTree.getChildren().remove(2);
+			} else
+			// we remove the then
+			if (copiedIfTree.getChildren().size() == 2) {
+
+				ITree thenTree = copiedIfTree.getChildren().get(1);
+				copiedIfTree.getChildren().remove(1);
+			} else {
+				System.err.println("ERRORIf with  More than 3 children");
+			}
+
+			return copiedIfTree;
+
+		} else// todo DOUntil
+		if (parentLine instanceof CtWhile || parentLine instanceof CtFor || parentLine instanceof CtForEach) {
+			ITree copiedIfTree = lineTree.deepCopy();
+
+			// we remove the then
+			if (copiedIfTree.getChildren().size() <= 2) {
+
+				ITree thenTree = copiedIfTree.getChildren().get(1);
+				copiedIfTree.getChildren().remove(1);
+			}
+
+			return copiedIfTree;
+		}
+
+		return lineTree;
 	}
 
 	/**

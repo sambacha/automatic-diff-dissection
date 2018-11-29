@@ -23,7 +23,7 @@ import spoon.reflect.visitor.filter.LineFilter;
  */
 public class ConstantChangeDetector extends AbstractPatternDetector {
 
-	private static final String CONST_CHANGE = "constChange";
+	public static final String CONST_CHANGE = "constChange";
 
 	public ConstantChangeDetector(List<Operation> operations) {
 		super(operations);
@@ -40,8 +40,7 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 					continue;
 				}
 				CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
-				ITree lineTree = (ITree) ((parent.getMetadata("tree") != null) ? parent.getMetadata("tree")
-						: parent.getMetadata("gtnode"));
+				ITree lineTree = MappingAnalysis.getTree(parent);
 
 				if (srcNode instanceof CtLiteral) {
 					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
@@ -80,9 +79,7 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 							if (((InsertOperation) operation2Insert).getParent() == ctLiteral.getParent()
 									&& isConstantVariable) {
 								CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), ctLiteral);
-								ITree lineTree = (ITree) ((parent.getMetadata("tree") != null)
-										? parent.getMetadata("tree")
-										: parent.getMetadata("gtnode"));
+								ITree lineTree = MappingAnalysis.getTree(parent);
 
 								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
 										new PatternInstance(CONST_CHANGE, operation2Insert,

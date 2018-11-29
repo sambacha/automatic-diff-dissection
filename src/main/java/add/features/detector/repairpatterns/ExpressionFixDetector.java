@@ -35,10 +35,10 @@ import spoon.reflect.visitor.filter.TypeFilter;
  */
 public class ExpressionFixDetector extends AbstractPatternDetector {
 
-	private static final String BIN_OPERATOR_MODIF = "binOperatorModif";
-	private static final String EXP_LOGIC_MOD = "expLogicMod";
-	private static final String EXP_LOGIC_REDUCE = "expLogicReduce";
-	private static final String EXP_LOGIC_EXPAND = "expLogicExpand";
+	public static final String BIN_OPERATOR_MODIF = "binOperatorModif";
+	public static final String EXP_LOGIC_MOD = "expLogicMod";
+	public static final String EXP_LOGIC_REDUCE = "expLogicReduce";
+	public static final String EXP_LOGIC_EXPAND = "expLogicExpand";
 
 	public ExpressionFixDetector(List<Operation> operations) {
 		super(operations);
@@ -79,9 +79,7 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, buggybinaryOperator);
 
-						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-								? parentLine.getMetadata("tree")
-								: parentLine.getMetadata("gtnode"));
+						ITree lineTree = MappingAnalysis.getTree(parentLine);
 
 						repairPatterns.incrementFeatureCounterInstance(BIN_OPERATOR_MODIF,
 								new PatternInstance(BIN_OPERATOR_MODIF, operation, dstNode, buggybinaryOperator,
@@ -205,9 +203,7 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 							return;
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, suspLeft.get(0));
-						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-								? parentLine.getMetadata("tree")
-								: parentLine.getMetadata("gtnode"));
+						ITree lineTree = MappingAnalysis.getTree(parentLine);
 						///
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_EXPAND, new PatternInstance(
 								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, suspLeft, parentLine, lineTree));
@@ -229,9 +225,7 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, binary);
 
-						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-								? parentLine.getMetadata("tree")
-								: parentLine.getMetadata("gtnode"));
+						ITree lineTree = MappingAnalysis.getTree(parentLine);
 
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_REDUCE, new PatternInstance(
 								EXP_LOGIC_REDUCE, operation, affected, removedNode, parentLine, lineTree));

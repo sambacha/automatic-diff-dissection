@@ -31,9 +31,10 @@ public class MissingNullCheckDetectorTest {
 		RepairPatternDetector detector = new RepairPatternDetector(config);
 		RepairPatterns repairPatterns = detector.analyze();
 
-		Assert.assertTrue(repairPatterns.getFeatureCounter("missNullCheckN") > 0);
+		Assert.assertTrue(repairPatterns.getFeatureCounter(MissingNullCheckDetector.MISS_NULL_CHECK_N) > 0);
 
-		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("missNullCheckN");
+		List<PatternInstance> insts = repairPatterns.getPatternInstances()
+				.get(MissingNullCheckDetector.MISS_NULL_CHECK_N);
 		System.out.println(insts);
 		assertTrue(insts.size() > 0);
 

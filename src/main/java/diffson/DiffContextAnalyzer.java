@@ -854,8 +854,7 @@ public class DiffContextAnalyzer {
 				}
 
 				for (CtElement faulty : faulties) {
-					ITree nodeFaulty = (ITree) faulty.getMetadata("gtnode");// MappingAnalysis.getCorrespondingInSourceTree(diff,
-																			// affectedByOperator, faulty);
+					ITree nodeFaulty = (ITree) faulty.getMetadata("gtnode");
 
 					if (nodeFaulty != null) {
 						allTreeparents.add(nodeFaulty);
