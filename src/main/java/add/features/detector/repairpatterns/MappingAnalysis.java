@@ -126,6 +126,10 @@ public class MappingAnalysis {
 
 	public static CtElement getParentLine(LineFilter filter, CtElement element) {
 
+		if (element instanceof CtStatement && element.getParent() instanceof CtBlock) {
+			return element;
+		}
+
 		CtElement parentLine = null;
 
 		parentLine = element.getParent(filter);
@@ -308,11 +312,23 @@ public class MappingAnalysis {
 		return false;
 	}
 
+	public static ITree getLeftFromRightNodeMapped(Diff diff, CtElement element) {
+
+		ITree leftMoved = MappingAnalysis.getLeftFromRightNodeMapped(diff, (ITree) element.getMetadata("gtnode"));
+
+		return getLeftFromRightNodeMapped(diff, leftMoved);
+	}
+
 	public static ITree getLeftFromRightNodeMapped(Diff diff, ITree iTree) {
 
 		for (Mapping map : diff.getMappingsComp().asSet()) {
 			if (map.getSecond().equals(iTree)) {
 				return map.getFirst();
+			}
+
+			// if it's in left, we return it
+			if (map.getFirst().equals(iTree)) {
+				return iTree;
 			}
 		}
 
@@ -325,6 +341,11 @@ public class MappingAnalysis {
 			if (map.getFirst().equals(iTree)) {
 				return map.getSecond();
 			}
+			// if its in right, we return it
+			if (map.getSecond().equals(iTree)) {
+				return iTree;
+			}
+
 		}
 
 		return null;
