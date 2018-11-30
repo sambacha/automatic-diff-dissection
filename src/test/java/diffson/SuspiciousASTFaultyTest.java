@@ -3325,7 +3325,7 @@ public class SuspiciousASTFaultyTest {
 				WrapsWithDetector.WRAPS_TRY_CATCH);
 		assertTrue(market.size() > 0);
 		System.out.println("First marked:\n" + market.get(0));
-		assertTrue(market.stream().filter(e -> ((JsonObject) e).get("type").getAsString().equals("LocalVariable"))
+		assertTrue(market.stream().filter(e -> ((JsonObject) e).get("type").getAsString().equals("Invocation"))
 				.findFirst().isPresent());
 		// assertTrue(market.size() == 1);
 

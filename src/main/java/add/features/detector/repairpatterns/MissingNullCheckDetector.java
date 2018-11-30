@@ -41,7 +41,12 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 	public void detect(RepairPatterns repairPatterns) {
 		for (Operation operation : this.operations) {
 			if (operation instanceof InsertOperation) {
+
 				CtElement srcNode = operation.getSrcNode();
+
+				if (srcNode instanceof spoon.reflect.declaration.CtMethod)
+					continue;
+
 				SpoonHelper.printInsertOrDeleteOperation(srcNode.getFactory().getEnvironment(), srcNode, operation);
 
 				List<CtBinaryOperator> binaryOperatorList = srcNode.getElements(new NullCheckFilter());
