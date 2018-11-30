@@ -74,26 +74,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					CtBlock thenBlock = ctIf.getThenStatement();
 					CtBlock elseBlock = ctIf.getElseStatement();
 					if (elseBlock == null) {
-						List stmtsMoved = RepairPatternUtils
-								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
+						List stmtsMoved = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								thenBlock.getStatements());
 
 						if (thenBlock != null && !stmtsMoved.isEmpty()) {
 							if (operation instanceof InsertOperation) {
 								List<ITree> leftTreees = new ArrayList();
 								List<CtElement> leftElements = new ArrayList();
 
-								for (Object object : stmtsMoved) {
-									CtElement moved = (CtElement) object;
-									ITree rightTree = (ITree) moved.getMetadata("tree");
-									// We start in the right because the moved are taken from the added if, not from
-									// the Mov operator ()
-									ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff, rightTree);
-									if (mappedLeft != null) {
-										leftTreees.add(mappedLeft);
-										leftElements.add(
-												(CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
-									}
-								}
+								calculatorLeftInformation(stmtsMoved, leftTreees, leftElements);
 
 								if (leftElements.size() > 0)
 									repairPatterns.incrementFeatureCounterInstance(WRAPS_IF,
@@ -128,23 +117,24 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 							}
 						}
 					} else {// ELSE has content
-						List sthen = RepairPatternUtils
-								.getIsThereOldStatementInStatementList(thenBlock.getStatements());
-						List selse = RepairPatternUtils
-								.getIsThereOldStatementInStatementList(elseBlock.getStatements());
+						List sthen = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								thenBlock.getStatements());
+						List selse = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								elseBlock.getStatements());
 						// selse.addAll(sthen);
 						if (!sthen.isEmpty() || !selse.isEmpty()) {
+							List moved = new ArrayList<>();
+							moved.addAll(sthen);
+							moved.addAll(selse);
+
 							if (operation instanceof InsertOperation) {
 
-								List all = new ArrayList<>();
-								all.addAll(sthen);
-								all.addAll(selse);
 								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
-										(CtElement) all.get(0));
+										(CtElement) moved.get(0));
 								ITree lineTree = MappingAnalysis.getTree(lineP);
 
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_IF_ELSE,
-										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, all, lineP, lineTree,
+										new PatternInstance(WRAPS_IF_ELSE, operation, ctIf, moved, lineP, lineTree,
 												new PropertyPair("case", "elsenotnull")));
 							} else {
 								// ELSE with content
@@ -168,7 +158,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								ITree lineTree = MappingAnalysis.getTree(lineP);
 
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
-										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) sthen.get(0), susp,
+										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) moved.get(0), susp,
 												lineP, lineTree, new PropertyPair("case", "elsenotnull")));
 							}
 						}
@@ -187,8 +177,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								CtBlock thenBlock = ctIfParent.getThenStatement();
 								if (thenBlock != null && RepairPatternUtils
 										.isThereOldStatementInStatementList(thenBlock.getStatements())) {
-									List selse = RepairPatternUtils
-											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
+									List selse = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+											elseBlock.getStatements());
 									if (!selse.isEmpty()) {
 
 										if (operation instanceof InsertOperation) {
@@ -286,6 +276,19 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 		}
 	}
 
+	public void calculatorLeftInformation(List stmtsMoved, List<ITree> leftTreees, List<CtElement> leftElements) {
+		for (Object object : stmtsMoved) {
+			CtElement moved = (CtElement) object;
+			// We start in the right because the moved are taken from the added if, not from
+			// the Mov operator ()
+			ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff, moved);
+			if (mappedLeft != null) {
+				leftTreees.add(mappedLeft);
+				leftElements.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+			}
+		}
+	}
+
 	private void detectWrapsTryCatch(Operation operation, RepairPatterns repairPatterns) {
 		if (operation instanceof InsertOperation || operation instanceof DeleteOperation) {
 			CtElement ctElement = operation.getSrcNode();
@@ -298,8 +301,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					if (RepairPatternUtils.isThereOnlyNewCatch(catchList)) {
 						CtBlock tryBodyBlock = ctTry.getBody();
 
-						List olds = RepairPatternUtils
-								.getIsThereOldStatementInStatementList(tryBodyBlock.getStatements());
+						List olds = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								tryBodyBlock.getStatements());
 						if (tryBodyBlock != null && !olds.isEmpty()) {
 
 							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) olds.get(0));
@@ -434,7 +437,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						|| (ctLoop instanceof CtWhile && RepairPatternUtils.isNewWhile((CtWhile) ctLoop))) {
 					if (ctLoop.getBody() instanceof CtBlock) {
 						CtBlock bodyBlock = (CtBlock) ctLoop.getBody();
-						List susp = RepairPatternUtils.getIsThereOldStatementInStatementList(bodyBlock.getStatements());
+						List susp = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								bodyBlock.getStatements());
 						if (bodyBlock != null && !susp.isEmpty()) {
 
 							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));

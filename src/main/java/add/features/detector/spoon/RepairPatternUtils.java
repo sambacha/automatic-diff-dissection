@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.github.gumtreediff.tree.ITree;
+
+import add.features.detector.repairpatterns.MappingAnalysis;
 import add.features.detector.spoon.filter.ReturnInsideConditionalFilter;
 import add.features.detector.spoon.filter.ThrowInsideConditionalFilter;
+import gumtree.spoon.builder.SpoonGumTreeBuilder;
+import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.MoveOperation;
 import gumtree.spoon.diff.operations.Operation;
 import spoon.reflect.code.CtArrayAccess;
@@ -288,10 +293,31 @@ public class RepairPatternUtils {
 		return false;
 	}
 
-	public static List<CtStatement> getIsThereOldStatementInStatementList(List<CtStatement> statements) {
+	public static List<CtStatement> getIsThereOldStatementInStatementList(Diff diff, List<CtStatement> statements) {
 		List<CtStatement> statementsNotNew = new ArrayList<>();
 		for (CtStatement statement : statements) {
 			if (!RepairPatternUtils.isNewStatement(statement)) {
+
+				ITree leftMoved = MappingAnalysis.getLeftFromRightNodeMapped(diff, statement);
+				if (leftMoved != null) {
+					CtElement susp = (CtElement) leftMoved.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+					if (susp instanceof CtStatement) {
+						statementsNotNew.add((CtStatement) susp);
+					}
+				}
+
+				// statementsNotNew.add(statement);
+
+			}
+		}
+		return statementsNotNew;
+	}
+
+	public static List<CtStatement> getIsThereOldStatementInStatementList_old(List<CtStatement> statements) {
+		List<CtStatement> statementsNotNew = new ArrayList<>();
+		for (CtStatement statement : statements) {
+			if (!RepairPatternUtils.isNewStatement(statement)) {
+
 				statementsNotNew.add(statement);
 				// return true;
 			}

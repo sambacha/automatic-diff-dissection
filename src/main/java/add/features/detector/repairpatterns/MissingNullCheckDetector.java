@@ -95,15 +95,15 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 								CtBlock elseBlock = ((CtIf) parent).getElseStatement();
 
 								if (thenBlock != null) {
-									soldt = RepairPatternUtils
-											.getIsThereOldStatementInStatementList(thenBlock.getStatements());
+									soldt = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+											thenBlock.getStatements());
 									if (!soldt.isEmpty())
 										wasPatternFound = true;
 
 								} // else
 								if (elseBlock != null) {
-									soldelse = RepairPatternUtils
-											.getIsThereOldStatementInStatementList(elseBlock.getStatements());
+									soldelse = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+											elseBlock.getStatements());
 									if (!soldelse.isEmpty())
 										wasPatternFound = true;
 								}

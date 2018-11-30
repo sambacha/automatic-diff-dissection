@@ -717,16 +717,7 @@ public class SuspiciousASTFaultyTest {
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
 
-		JsonArray affected = (JsonArray) resultjson.get("affected");
-		for (JsonElement jsonElement : affected) {
-			JsonArray affAr = (JsonArray) jsonElement;
-			for (JsonElement aff : affAr) {
-
-				JsonObject jo = (JsonObject) aff;
-				JsonElement elAST = jo.get("ast");
-				System.out.println("--> AST element: \n" + elAST);
-			}
-		}
+		showJSONFaultyAST(resultjson);
 
 	}
 
@@ -783,17 +774,6 @@ public class SuspiciousASTFaultyTest {
 
 		System.out.println(resultjson);
 		// assertTrue(resultjson.get("patterns"))
-
-		JsonArray affected = (JsonArray) resultjson.get("affected");
-		for (JsonElement jsonElement : affected) {
-			JsonArray affAr = (JsonArray) jsonElement;
-			for (JsonElement aff : affAr) {
-
-				JsonObject jo = (JsonObject) aff;
-				JsonElement elAST = jo.get("ast");
-				// System.out.println("--> AST element: \n" + elAST);
-			}
-		}
 
 	}
 
@@ -1763,6 +1743,7 @@ public class SuspiciousASTFaultyTest {
 	}
 
 	@Test
+	@Ignore
 	public void testD4Closure30_Expr_reduction() throws Exception {
 		String diffId = "Closure_30";
 		String input = getCompletePathD4J(diffId);
@@ -1781,7 +1762,7 @@ public class SuspiciousASTFaultyTest {
 		assertTrue(listWrap.size() > 0);
 
 		PatternInstance pi1 = listWrap.get(0);
-
+		// The if is inserted an removed.
 		assertTrue(pi1.getNodeAffectedOp().toString().contains("if (n.isName()) {"));
 
 		assertTrue(pi1.getFaulty().stream()
@@ -1951,7 +1932,7 @@ public class SuspiciousASTFaultyTest {
 		// assertEquals(2, pi1.getFaulty().size());
 		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("row")).findFirst().isPresent());
 		assertNotNull(pi1.getFaultyTree());
-		assertEquals("row >= 0", pi1.getFaultyLine().toString());
+		assertTrue(pi1.getFaultyLine().toString().startsWith("if (row >= 0) {"));
 
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 		System.out.println("END 1\n" + resultjson.toString());
@@ -2655,7 +2636,7 @@ public class SuspiciousASTFaultyTest {
 		RepairPatterns repairPatterns = patterns.get(0);
 		System.out.println(repairPatterns);
 
-		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrapsIfElse");
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_IF_ELSE);
 		System.out.println(insts);
 		assertTrue(insts.size() > 0);
 
@@ -2811,7 +2792,8 @@ public class SuspiciousASTFaultyTest {
 				.isPresent());
 		assertNotNull(pi1.getFaultyTree());
 		// assertNotNull(pi1.getFaultyTree());
-		assertEquals("(arguments.hasNext()) && (parameters.hasNext())", pi1.getFaultyLine().toString());
+		assertTrue(
+				pi1.getFaultyLine().toString().startsWith("while ((arguments.hasNext()) && (parameters.hasNext())) {"));
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 
 		System.out.println("END 1\n" + resultjson.toString());
@@ -3093,7 +3075,7 @@ public class SuspiciousASTFaultyTest {
 		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("p2")).findFirst().isPresent());
 
 		assertNotNull(pi1.getFaultyTree());
-		assertEquals("(p2 > overflow) || (q2 > overflow)", pi1.getFaultyLine().toString());
+		assertTrue(pi1.getFaultyLine().toString().startsWith("if ((p2 > overflow) || (q2 > overflow)) {"));
 
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
 		SuspiciousASTFaultyTest.assertSuspiciousASTNode(resultjson);
@@ -3456,7 +3438,7 @@ public class SuspiciousASTFaultyTest {
 
 		System.out.println(repairPatterns);
 
-		List<PatternInstance> insts = repairPatterns.getPatternInstances().get("wrapsIf");
+		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_IF);
 		System.out.println(insts);
 		assertTrue(insts.size() > 0);
 
