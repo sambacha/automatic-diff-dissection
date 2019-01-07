@@ -557,21 +557,26 @@ public class DiffContextAnalyzer {
 
 			/// Repair actions
 			JsonObject repairactions = new JsonObject();
-			RepairActionDetector pa = new RepairActionDetector(config, diff);
-			RepairActions as = pa.analyze();
+			try {
+				RepairActionDetector pa = new RepairActionDetector(config, diff);
+				RepairActions as = pa.analyze();
 
-			for (String featureName : as.getFeatureNames()) {
-				int counter = as.getFeatureCounter(featureName);
-				repairactions.addProperty(featureName, counter);
+				for (String featureName : as.getFeatureNames()) {
+					int counter = as.getFeatureCounter(featureName);
+					repairactions.addProperty(featureName, counter);
 
-				List<CtElement> el = as.getElementPerFeature().get(featureName);
-				if (el != null && el.size() > 0) {
-					for (Operation opi : diff.getAllOperations()) {
-						if (el.contains(opi.getNode())) {
-							repairactionPerOp.add(opi, featureName);
+					List<CtElement> el = as.getElementPerFeature().get(featureName);
+					if (el != null && el.size() > 0) {
+						for (Operation opi : diff.getAllOperations()) {
+							if (el.contains(opi.getNode())) {
+								repairactionPerOp.add(opi, featureName);
+							}
 						}
 					}
 				}
+			} catch (Exception e) {
+				System.err.println("Error computing ");
+				e.printStackTrace();
 			}
 
 			fileModified.add("repairactions", repairactions);
@@ -583,6 +588,22 @@ public class DiffContextAnalyzer {
 			// fileModified.add("faulty_stmts_ast", ast_arrays);
 			fileModified.add("pattern_instances", ast_arrays);
 
+			JsonArray ast_changes_arrays = new JsonArray();
+			// Here include optionality
+			if (true) {
+
+				for (Operation op : operationsFromFile) {
+
+					JsonObject astNode = new JsonObject();
+					astNode.addProperty("change", op.getClass().getSimpleName());
+					JsonObject opContext = getContextInformation(diff, cresolver, op, op.getSrcNode());
+					astNode.add("info", opContext);
+
+					ast_changes_arrays.add(astNode);
+				}
+
+			}
+			fileModified.add("ast_changes", ast_changes_arrays);
 		}
 
 		return statsjsonRoot;
@@ -811,6 +832,8 @@ public class DiffContextAnalyzer {
 
 	}
 
+	CntxResolver cresolver = new CntxResolver();
+
 	/**
 	 * Only AST for pattern
 	 * 
@@ -828,23 +851,23 @@ public class DiffContextAnalyzer {
 		Json4SpoonGenerator jsongen = new Json4SpoonGenerator();
 
 		JsonArray ast_affected = new JsonArray();
-		CntxResolver cresolver = new CntxResolver();
 
 		List<PatternInstance> patternInstancesMerged = merge(patternInstancesOriginal);
 
 		for (PatternInstance patternInstance : patternInstancesMerged) {
 			Set<ITree> allTreeparents = new HashSet<>();
-			Operation operation = patternInstance.getOp();
+			Operation opi = patternInstance.getOp();
 
 			List<CtElement> faulties = null;
 
+			CtElement getAffectedCtElement = patternInstance.getFaultyLine();
 			if (patternInstance.getFaultyTree() != null)
 				allTreeparents.add(patternInstance.getFaultyTree());
 			else {
 
-				if (patternInstance.getFaultyLine() != null) {
+				if (getAffectedCtElement != null) {
 					faulties = new ArrayList<>();
-					faulties.add(patternInstance.getFaultyLine());
+					faulties.add(getAffectedCtElement);
 				} else {
 					if (patternInstance.getFaulty() != null)
 						faulties = patternInstance.getFaulty();
@@ -881,19 +904,8 @@ public class DiffContextAnalyzer {
 			ast_affected.add(jsonInstance);
 
 			//
-			JsonObject opContext = new JsonObject();
 
-			// opContext.addProperty("bug", modifiedFile);
-
-			// opContext.addProperty("key", modifiedFile);
-			Cntx iContext = cresolver
-					.retrieveCntx(patternInstance.getFaultyLine()/* patternInstance.getOp().getSrcNode() */);
-			// iContext.setIdentifier(modifiedFile);
-			opContext.add("cntx", iContext.toJSON());
-
-			setBuggyInformation(patternInstance.getOp(), cresolver, opContext, diff);
-
-			setPatchInformation(patternInstance.getOp(), cresolver, opContext, diff);
+			JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
 
 			jsonInstance.add("context", opContext);
 
@@ -901,6 +913,20 @@ public class DiffContextAnalyzer {
 
 		return ast_affected;
 
+	}
+
+	public JsonObject getContextInformation(Diff diff, CntxResolver cresolver, Operation opi,
+			CtElement getAffectedCtElement) {
+		Cntx iContext = cresolver.retrieveCntx(getAffectedCtElement);
+
+		JsonObject opContext = new JsonObject();
+
+		opContext.add("cntx", iContext.toJSON());
+
+		setBuggyInformation(opi, cresolver, opContext, diff);
+
+		setPatchInformation(opi, cresolver, opContext, diff);
+		return opContext;
 	}
 
 	private List<PatternInstance> merge(List<PatternInstance> patternInstancesOriginal) {
