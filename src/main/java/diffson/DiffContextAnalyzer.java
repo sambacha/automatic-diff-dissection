@@ -28,6 +28,7 @@ import com.github.gumtreediff.tree.ITree;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import add.entities.PatternInstance;
@@ -74,7 +75,7 @@ public class DiffContextAnalyzer {
 		super();
 		ConfigurationProperties.properties.setProperty("maxdifftoanalyze", "5");
 
-		out = new File("/Users/matias/develop/CodeRep-data/process_Dataset1_unidiff");
+		out = new File("/tmp/");
 		out.mkdirs();
 	}
 
@@ -174,15 +175,21 @@ public class DiffContextAnalyzer {
 			if (ConfigurationProperties.getPropertyBoolean("excludetests")
 					&& (fileModif.getName().startsWith("Test") || fileModif.getName().endsWith("Test")))
 				continue;
+			// Commented for the ye's dataset 3Fix
+			// String pathname = fileModif.getAbsolutePath() + File.separator +
+			//// difffile.getName() + "_" +
+			// fileModif.getName();
 
 			String pathname = fileModif.getAbsolutePath() + File.separator + difffile.getName() + "_"
-					+ fileModif.getName(); // + "_" + i_hunk;
+					+ fileModif.getName();
+
 			File previousVersion = new File(pathname + "_s.java");
 			if (!previousVersion.exists()) {
 				pathname = pathname + "_" + i_hunk;
 				previousVersion = new File(pathname + "_s.java");
 				if (!previousVersion.exists())
-					break;
+					// break;
+					continue;
 			}
 
 			JsonObject file = new JsonObject();
@@ -194,7 +201,6 @@ public class DiffContextAnalyzer {
 			File postVersion = new File(pathname + "_t.java");
 			i_hunk++;
 			try {
-
 				Diff diff = getdiffFuture(previousVersion, postVersion);
 				if (diff == null) {
 					file.addProperty("status", "differror");
@@ -210,6 +216,8 @@ public class DiffContextAnalyzer {
 					file.addProperty("status", "no_change");
 					continue;
 				}
+
+				System.out.println("--diff: " + diff);
 
 				JsonObject singlediff = new JsonObject();
 				changesArray.add(singlediff);
@@ -376,16 +384,36 @@ public class DiffContextAnalyzer {
 		try {
 
 			JsonObject statsjsonRoot = getContextFuture(difffile.getName(), diffOfcommit);// calculateCntxJSON(difffile.getName(),
-																							// diffOfcommit);
+			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // diffOfcommit);
 
-			FileWriter fw = new FileWriter(out.getAbsolutePath() + File.separator + difffile.getName() + ".json");
+			boolean savePerFile = false;// testing
+			if (savePerFile) {
 
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			String prettyJsonString = gson.toJson(statsjsonRoot);
-			fw.write(prettyJsonString);
+				JsonArray filesa = statsjsonRoot.getAsJsonArray("affected_files");
+				for (JsonElement jsonElement : filesa) {
 
-			fw.flush();
-			fw.close();
+					String name = jsonElement.getAsJsonObject().getAsJsonPrimitive("file").getAsString();
+
+					FileWriter fw = new FileWriter(out.getAbsolutePath() + File.separator + name + ".json");
+
+					String prettyJsonString = gson.toJson(jsonElement);
+					fw.write(prettyJsonString);
+
+					fw.flush();
+					fw.close();
+
+				}
+
+			} else {
+				FileWriter fw = new FileWriter(out.getAbsolutePath() + File.separator + difffile.getName() + ".json");
+
+				// Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				String prettyJsonString = gson.toJson(statsjsonRoot);
+				fw.write(prettyJsonString);
+
+				fw.flush();
+				fw.close();
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
