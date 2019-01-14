@@ -916,8 +916,9 @@ public class DiffContextAnalyzer {
 			}
 
 			List<NodePainter> painters = new ArrayList();
-			painters.add(new PatternPainter(patternsPerOp, "patterns"));
-			painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
+			// Removed in this version
+			// painters.add(new PatternPainter(patternsPerOp, "patterns"));
+			// painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
 			painters.add(new OperationNodePainter(diff.getAllOperations()));
 			painters.add(new FaultyElementPatternPainter(patternInstancesOriginal));
 
@@ -928,7 +929,8 @@ public class DiffContextAnalyzer {
 				affected.add(jsonT);
 			}
 			jsonInstance.add("faulty_ast", affected);
-			jsonInstance.addProperty("pattern_name", patternInstance.getPatternName());
+			// Removed in this version
+			// jsonInstance.addProperty("pattern_name", patternInstance.getPatternName());
 			ast_affected.add(jsonInstance);
 
 			//
