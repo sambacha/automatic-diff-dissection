@@ -142,6 +142,7 @@ public class SuspiciousASTFaultyTest {
 		assertMarkedlAST(resultjson, null, null, null);
 	}
 
+	@SuppressWarnings("unused")
 	public static JsonObject getContext(String diffId, String input) {
 		File fileInput = new File(input);
 		System.out.println(input);
@@ -150,19 +151,14 @@ public class SuspiciousASTFaultyTest {
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		@SuppressWarnings("unused")
+		// Compute the diff of the revision
 		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileInput);
-
+		// Get the diff obtained
 		Map<String, Diff> diffOfcommit = analyzer.getDiffOfcommit();
 		for (Diff diff : diffOfcommit.values()) {
-			System.out.println("Diff " + diff);
+			System.out.println("Diff: " + diff);
 		}
-
-		MapCounter<String> counter = new MapCounter<>();
-		MapCounter<String> counterParent = new MapCounter<>();
-
-		analyzer.processDiff(counter, counterParent, fileInput);
-
+		// Calculate context
 		JsonObject resultjson = analyzer.calculateCntxJSON(diffId, diffOfcommit);
 		return resultjson;
 	}

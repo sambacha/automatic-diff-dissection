@@ -132,6 +132,7 @@ public class DiffContextAnalyzer {
 			JsonArray filesArray = processDiff(counter, counterParent, difffile);
 
 			jsondiff.add("files", filesArray);
+			// here, at the end, we compute the Context
 			atEndCommit(difffile);
 
 			if (diffanalyzed == ConfigurationProperties.getPropertyInteger("maxdifftoanalyze")) {
@@ -565,77 +566,82 @@ public class DiffContextAnalyzer {
 				patternInstances.addAll(pi);
 			}
 
-			JsonObject patterns = new JsonObject();
-			for (String featureName : rp.getFeatureNames()) {
-				int counter = rp.getFeatureCounter(featureName);
-				patterns.addProperty(featureName, counter);
-
-				List<Operation> opsfeature = rp.getOperationsPerFeature().get(featureName);
-				if (opsfeature == null || opsfeature.isEmpty())
-					continue;
-
-				for (Operation operation : opsfeature) {
-
-					patternsPerOp.add(operation, featureName);
-
-				}
-			}
-
-			fileModified.add("repairpatterns", patterns);
-
-			/// Repair actions
-			JsonObject repairactions = new JsonObject();
-			try {
-				RepairActionDetector pa = new RepairActionDetector(config, diff);
-				RepairActions as = pa.analyze();
-
-				for (String featureName : as.getFeatureNames()) {
-					int counter = as.getFeatureCounter(featureName);
-					repairactions.addProperty(featureName, counter);
-
-					List<CtElement> el = as.getElementPerFeature().get(featureName);
-					if (el != null && el.size() > 0) {
-						for (Operation opi : diff.getAllOperations()) {
-							if (el.contains(opi.getNode())) {
-								repairactionPerOp.add(opi, featureName);
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-				System.err.println("Error computing ");
-				e.printStackTrace();
-			}
-
-			fileModified.add("repairactions", repairactions);
-			// repairActionslistJSon.add(repairActionFile);
-			// End repair actions
-
 			JsonArray ast_arrays = calculateJSONAffectedStatementList(diff, operationsFromFile, patternsPerOp,
 					repairactionPerOp, patternInstances);
 			// fileModified.add("faulty_stmts_ast", ast_arrays);
 			fileModified.add("pattern_instances", ast_arrays);
 
-			JsonArray ast_changes_arrays = new JsonArray();
-			// Here include optionality
-			if (true) {
+			// includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
 
-				for (Operation op : operationsFromFile) {
-
-					JsonObject astNode = new JsonObject();
-					astNode.addProperty("change", op.getClass().getSimpleName());
-					JsonObject opContext = getContextInformation(diff, cresolver, op, op.getSrcNode());
-					astNode.add("info", opContext);
-
-					ast_changes_arrays.add(astNode);
-				}
-
-			}
-			fileModified.add("ast_changes", ast_changes_arrays);
 		}
 
 		return statsjsonRoot;
 
+	}
+
+	public void includeAstChangeInfoInJSon(Diff diff, List<Operation> operationsFromFile, JsonObject fileModified) {
+		JsonArray ast_changes_arrays = new JsonArray();
+		// Here include optionality
+
+		for (Operation op : operationsFromFile) {
+
+			JsonObject astNode = new JsonObject();
+			astNode.addProperty("change", op.getClass().getSimpleName());
+			JsonObject opContext = getContextInformation(diff, cresolver, op, op.getSrcNode());
+			astNode.add("info", opContext);
+
+			ast_changes_arrays.add(astNode);
+		}
+		fileModified.add("ast_changes", ast_changes_arrays);
+	}
+
+	public void repairactions(MapList<Operation, String> patternsPerOp, MapList<Operation, String> repairactionPerOp,
+			Diff diff, JsonObject fileModified, Config config, RepairPatterns rp) {
+		JsonObject patterns = new JsonObject();
+		for (String featureName : rp.getFeatureNames()) {
+			int counter = rp.getFeatureCounter(featureName);
+			patterns.addProperty(featureName, counter);
+
+			List<Operation> opsfeature = rp.getOperationsPerFeature().get(featureName);
+			if (opsfeature == null || opsfeature.isEmpty())
+				continue;
+
+			for (Operation operation : opsfeature) {
+
+				patternsPerOp.add(operation, featureName);
+
+			}
+		}
+
+		fileModified.add("repairpatterns", patterns);
+
+		/// Repair actions
+		JsonObject repairactions = new JsonObject();
+		try {
+			RepairActionDetector pa = new RepairActionDetector(config, diff);
+			RepairActions as = pa.analyze();
+
+			for (String featureName : as.getFeatureNames()) {
+				int counter = as.getFeatureCounter(featureName);
+				repairactions.addProperty(featureName, counter);
+
+				List<CtElement> el = as.getElementPerFeature().get(featureName);
+				if (el != null && el.size() > 0) {
+					for (Operation opi : diff.getAllOperations()) {
+						if (el.contains(opi.getNode())) {
+							repairactionPerOp.add(opi, featureName);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("Error computing ");
+			e.printStackTrace();
+		}
+
+		fileModified.add("repairactions", repairactions);
+		// repairActionslistJSon.add(repairActionFile);
+		// End repair actions
 	}
 
 	/**
@@ -916,9 +922,8 @@ public class DiffContextAnalyzer {
 			}
 
 			List<NodePainter> painters = new ArrayList();
-			// Removed in this version
-			// painters.add(new PatternPainter(patternsPerOp, "patterns"));
-			// painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
+			painters.add(new PatternPainter(patternsPerOp, "patterns"));
+			painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
 			painters.add(new OperationNodePainter(diff.getAllOperations()));
 			painters.add(new FaultyElementPatternPainter(patternInstancesOriginal));
 
@@ -932,8 +937,6 @@ public class DiffContextAnalyzer {
 			// Removed in this version
 			// jsonInstance.addProperty("pattern_name", patternInstance.getPatternName());
 			ast_affected.add(jsonInstance);
-
-			//
 
 			JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
 

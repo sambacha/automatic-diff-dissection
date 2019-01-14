@@ -90,14 +90,12 @@ public class FeatureJSONTest {
 	}
 
 	@Test
-	@Ignore
 	public void testContefxt_L1_Closure20() {
 
 		String diffId = "Closure_20";
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
-		// The test fail due to the feature definition: the buggy is not in a binary
-		// logical expression (but the patch)
+
 		assertMarkedlAST(resultjson, CNTX_Property.LE1_EXISTS_RELATED_BOOLEAN_EXPRESSION, Boolean.TRUE);
 	}
 
@@ -177,6 +175,16 @@ public class FeatureJSONTest {
 		// it's used in statement
 		// assertMarkedlAST(resultjson, CNTX_Property.S1_LOCAL_VAR_NOT_USED,
 		// Boolean.TRUE);
+	}
+
+	@Test
+	public void testContext_S6_Closure_83() {
+
+		String diffId = "Closure_83";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+		assertMarkedlAST(resultjson, CNTX_Property.S6_METHOD_THROWS_EXCEPTION, Boolean.TRUE);
 	}
 
 	public static void assertMarkedlAST(JsonObject resultjson, CNTX_Property name, Boolean b) {
@@ -266,4 +274,25 @@ public class FeatureJSONTest {
 		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, file.getAbsolutePath());
 		return resultjson;
 	}
+
+	@Test
+	public void testContext_Chart_7() {
+
+		String diffId = "Chart_7";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+
+	}
+
+	@Test
+	public void testContext_Closure_20() {
+
+		String diffId = "Closure_20";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+
+	}
+
 }
