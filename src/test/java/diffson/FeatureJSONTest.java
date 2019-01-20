@@ -21,7 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import fr.inria.astor.core.entities.CNTX_Property;
+import fr.inria.coming.codefeatures.CodeFeatures;
 
 /**
  * 
@@ -57,21 +57,19 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 
-		assertMarkedlAST(resultjson, CNTX_Property.M4_PARAMETER_RETURN_COMPABILITY, Boolean.TRUE);
-		assertMarkedlAST(resultjson,
-				CNTX_Property.M4_PARAMETER_RETURN_COMPABILITY + "_normalizeSourceName(java.lang.String)", Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.M4_PARAMETER_RETURN_COMPABILITY, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.M4_PARAMETER_RETURN_COMPABILITY, Boolean.TRUE);
 
-		assertMarkedlAST(resultjson, CNTX_Property.M3_SIMILAR_METHOD_WITH_PARAMETER_COMP, Boolean.TRUE);
+		assertMapAST(resultjson, "FEATURES_METHODS", CodeFeatures.M4_PARAMETER_RETURN_COMPABILITY,
+				"normalizeSourceName(java.lang.String)", true);
 
-		assertMarkedlAST(resultjson,
-				CNTX_Property.M3_SIMILAR_METHOD_WITH_PARAMETER_COMP + "_normalizeSourceName(java.lang.String)",
-				Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.M4_PARAMETER_RETURN_COMPABILITY, Boolean.TRUE);
 
-		assertMarkedlAST(resultjson, CNTX_Property.M2_SIMILAR_METHOD_WITH_SAME_RETURN, Boolean.FALSE);
+		assertMapAST(resultjson, "FEATURES_METHODS", CodeFeatures.M2_SIMILAR_METHOD_WITH_SAME_RETURN,
+				"normalizeSourceName(java.lang.String)", false);
 
-		// assertMarkedlAST(resultjson,
-		// "M2_SIMILAR_METHOD_WITH_SAME_RETURN_guessCJSModuleName(java.lang.String)",
-		// s Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.M2_SIMILAR_METHOD_WITH_SAME_RETURN, Boolean.FALSE);
+
 	}
 
 	@Test
@@ -83,9 +81,10 @@ public class FeatureJSONTest {
 
 		System.out.println(resultjson);
 
-		assertMarkedlAST(resultjson, CNTX_Property.M1_OVERLOADED_METHOD, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.M1_OVERLOADED_METHOD, Boolean.TRUE);
 
-		assertMarkedlAST(resultjson, CNTX_Property.M1_OVERLOADED_METHOD + "_fit(double[])", Boolean.TRUE);
+		assertMapAST(resultjson, "FEATURES_METHODS"/* "FEATURES_VARS" */, CodeFeatures.M1_OVERLOADED_METHOD,
+				"fit(double[])", Boolean.TRUE);
 
 	}
 
@@ -96,7 +95,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 
-		assertMarkedlAST(resultjson, CNTX_Property.LE1_EXISTS_RELATED_BOOLEAN_EXPRESSION, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE1_EXISTS_RELATED_BOOLEAN_EXPRESSION, Boolean.TRUE);
 	}
 
 	@Test
@@ -107,7 +106,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.LE2_IS_BOOLEAN_METHOD_PARAM_TYPE_VAR, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE2_IS_BOOLEAN_METHOD_PARAM_TYPE_VAR, Boolean.TRUE);
 	}
 
 	@Test
@@ -118,7 +117,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.LE3_IS_COMPATIBLE_VAR_NOT_INCLUDED, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE3_IS_COMPATIBLE_VAR_NOT_INCLUDED, Boolean.TRUE);
 	}
 
 	@Test
@@ -129,7 +128,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.LE4_EXISTS_LOCAL_UNUSED_VARIABLES, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE4_EXISTS_LOCAL_UNUSED_VARIABLES, Boolean.TRUE);
 	}
 
 	@Test
@@ -140,7 +139,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.LE5_BOOLEAN_EXPRESSIONS_IN_FAULTY, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE5_BOOLEAN_EXPRESSIONS_IN_FAULTY, Boolean.TRUE);
 	}
 
 	@Test
@@ -151,7 +150,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.LE6_HAS_NEGATION, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE6_HAS_NEGATION, Boolean.TRUE);
 	}
 
 	@Test
@@ -162,7 +161,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.LE7_SIMPLE_VAR_IN_LOGIC, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE7_SIMPLE_VAR_IN_LOGIC, Boolean.TRUE);
 	}
 
 	@Test
@@ -173,8 +172,32 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		// it's used in statement
-		// assertMarkedlAST(resultjson, CNTX_Property.S1_LOCAL_VAR_NOT_USED,
+		// assertMarkedlAST(resultjson, CodeFeatures.S1_LOCAL_VAR_NOT_USED,
 		// Boolean.TRUE);
+	}
+
+	@Test
+	public void testContext_S2_Closure_60() {
+
+		String diffId = "Closure_60";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+		// it's used in statement
+		// assertMarkedlAST(resultjson,
+		// CodeFeatures.S5_SIMILAR_PRIMITIVE_TYPE_WITH_GUARD, Boolean.FALSE);
+	}
+
+	@Test
+	public void testContext_S2_Closure_111() {
+
+		String diffId = "Closure_111";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+		// The condition has an invocation which return type is not known
+		assertMarkedlAST(resultjson, CodeFeatures.S2_SIMILAR_OBJECT_TYPE_WITH_GUARD, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.S5_SIMILAR_PRIMITIVE_TYPE_WITH_GUARD, Boolean.FALSE);
 	}
 
 	@Test
@@ -184,10 +207,10 @@ public class FeatureJSONTest {
 
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
-		assertMarkedlAST(resultjson, CNTX_Property.S6_METHOD_THROWS_EXCEPTION, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.S6_METHOD_THROWS_EXCEPTION, Boolean.TRUE);
 	}
 
-	public static void assertMarkedlAST(JsonObject resultjson, CNTX_Property name, Boolean b) {
+	public static void assertMarkedlAST(JsonObject resultjson, CodeFeatures name, Boolean b) {
 		assertMarkedlAST(resultjson, name.name(), b);
 	}
 
@@ -235,13 +258,63 @@ public class FeatureJSONTest {
 		// assertTrue("Node suspicious not found", found);
 	}
 
+	public static void assertMapAST(JsonObject resultjson, String typeProperty, CodeFeatures nameProperty,
+			String elementname, Boolean b) {
+
+		System.out.println("**************** finding " + nameProperty);
+
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String prettyJsonString = gson.toJson(resultjson);
+
+		System.out.println(prettyJsonString);
+		boolean found = false;
+		JsonArray affected = (JsonArray) resultjson.get("affected_files");
+		for (JsonElement jsonElement : affected) {
+
+			JsonObject jo = (JsonObject) jsonElement;
+			// JsonElement elAST = jo.get("faulty_stmts_ast");
+			JsonElement elAST = jo.get("pattern_instances");
+
+			assertNotNull(elAST);
+			assertTrue(elAST instanceof JsonArray);
+			JsonArray ar = (JsonArray) elAST;
+			assertTrue(ar.size() > 0);
+
+			for (JsonElement suspiciousTree : ar) {
+
+				JsonObject jso = suspiciousTree.getAsJsonObject();
+				JsonObject asJsonObject = jso.get("context").getAsJsonObject().get("cntx").getAsJsonObject();
+
+				JsonObject typePropertyJSon = (JsonObject) asJsonObject.get(typeProperty);
+				if (typePropertyJSon == null)
+					continue;
+				JsonObject elementPropertyJSon = (JsonObject) typePropertyJSon.get(elementname);
+				if (elementPropertyJSon != null) {
+					JsonElement property = elementPropertyJSon.get(nameProperty.toString());
+					if (property != null) {
+						JsonPrimitive value = property.getAsJsonPrimitive();
+
+						System.out.println(nameProperty + " " + value.getAsString());
+						found = found || Boolean.parseBoolean(value.getAsString());
+					}
+				}
+			}
+
+		}
+
+		assertEquals(b, found);
+
+		// assertTrue("Node suspicious not found", found);
+	}
+
 	@Test
 	public void testContext_v1() {
 		String diffId = "Math_24";
 
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
-		assertMarkedlAST(resultjson, CNTX_Property.V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN, Boolean.TRUE);
+
 	}
 
 	@Test
@@ -252,8 +325,10 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN, Boolean.FALSE);
-		assertMarkedlAST(resultjson, CNTX_Property.S3_TYPE_OF_FAULTY_STATEMENT + "_BinaryOperator", Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN, Boolean.FALSE);
+		// the property is not boolean any more:
+		// assertMarkedlAST(resultjson, CodeFeatures.S3_TYPE_OF_FAULTY_STATEMENT);
+		// + "_BinaryOperator"
 
 	}
 
@@ -265,7 +340,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CNTX_Property.M2_SIMILAR_METHOD_WITH_SAME_RETURN, Boolean.FALSE);
+		assertMarkedlAST(resultjson, CodeFeatures.M2_SIMILAR_METHOD_WITH_SAME_RETURN, Boolean.FALSE);
 	}
 
 	public JsonObject getJsonOfBugId(String diffId) {
@@ -289,6 +364,15 @@ public class FeatureJSONTest {
 	public void testContext_Closure_20() {
 
 		String diffId = "Closure_20";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+
+	}
+
+	@Test
+	public void testContext_Time_15() {
+		String diffId = "Time_15";
 
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);

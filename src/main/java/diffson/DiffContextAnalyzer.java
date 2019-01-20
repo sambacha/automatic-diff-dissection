@@ -39,10 +39,10 @@ import add.features.detector.repairactions.RepairActionDetector;
 import add.features.detector.repairpatterns.MappingAnalysis;
 import add.features.detector.repairpatterns.RepairPatternDetector;
 import add.main.Config;
-import fr.inria.astor.core.entities.CNTX_Property;
-import fr.inria.astor.core.entities.Cntx;
-import fr.inria.astor.core.entities.CntxResolver;
 import fr.inria.astor.util.MapList;
+import fr.inria.coming.codefeatures.Cntx;
+import fr.inria.coming.codefeatures.CodeFeatureDetector;
+import fr.inria.coming.codefeatures.CodeFeatures;
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.builder.Json4SpoonGenerator;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
@@ -476,7 +476,7 @@ public class DiffContextAnalyzer {
 
 			System.out.println("Diff file " + modifiedFile + " " + ops.size());
 			for (Operation operation : ops) {
-				CntxResolver cresolver = new CntxResolver();
+				CodeFeatureDetector cresolver = new CodeFeatureDetector();
 
 				JsonObject opContext = new JsonObject();
 
@@ -571,7 +571,7 @@ public class DiffContextAnalyzer {
 			// fileModified.add("faulty_stmts_ast", ast_arrays);
 			fileModified.add("pattern_instances", ast_arrays);
 
-			// includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
+			includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
 
 		}
 
@@ -645,7 +645,7 @@ public class DiffContextAnalyzer {
 	}
 
 	/**
-	 * CntxResolver cresolver = new CntxResolver();
+	 * CodeFeatureDetector cresolver = new CodeFeatureDetector();
 	 * 
 	 * JsonObject opContext = new JsonObject();
 	 * 
@@ -679,9 +679,13 @@ public class DiffContextAnalyzer {
 	 */
 
 	@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
-	private void setBuggyInformation(Operation operation, CntxResolver cresolver, JsonObject opContext, Diff diff) {
+	private void setBuggyInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext,
+			Diff diff) {
 
 		Cntx bugContext = new Cntx<>();
+
+		CtElement affectedCtElement = null;
+
 		if (operation instanceof MoveOperation) {
 
 			MoveOperation movop = (MoveOperation) operation;
@@ -689,9 +693,11 @@ public class DiffContextAnalyzer {
 			CtElement affectedMoved = operation.getSrcNode();
 			MappingStore mappings = diff.getMappingsComp();
 
-			bugContext.put(CNTX_Property.OPERATION, "MV");
+			affectedCtElement = affectedMoved;
 
-			bugContext.put(CNTX_Property.AFFECTED, cresolver.retrieveBuggyInfo(affectedMoved));
+			bugContext.put(CodeFeatures.OPERATION, "MV");
+
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(affectedMoved));
 
 			ITree affected = MappingAnalysis.getParentInSource(diff, movop.getAction());
 
@@ -700,7 +706,7 @@ public class DiffContextAnalyzer {
 			if (targetTreeParentNode != null) {
 				CtElement oldParentLocationInsertStmt = (CtElement) targetTreeParentNode.getMetadata("spoon_object");
 
-				bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
 			}
 
 		} else if (operation instanceof InsertOperation)
@@ -710,29 +716,41 @@ public class DiffContextAnalyzer {
 			CtElement oldLocation = ((InsertOperation) operation).getParent();
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
 
-			bugContext.put(CNTX_Property.AFFECTED, null);
-			bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
-			bugContext.put(CNTX_Property.OPERATION, "INS");
+			affectedCtElement = oldLocation;
+			bugContext.put(CodeFeatures.AFFECTED, null);
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.OPERATION, "INS");
 
 		} else if (operation instanceof DeleteOperation) {
 
 			DeleteOperation up = (DeleteOperation) operation;
 			CtElement oldLocation = operation.getSrcNode();
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
-			bugContext.put(CNTX_Property.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
-			bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
-			bugContext.put(CNTX_Property.OPERATION, "DEL");
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.OPERATION, "DEL");
+
+			affectedCtElement = oldLocation;
 
 		} else if (operation instanceof UpdateOperation) {
 
 			UpdateOperation up = (UpdateOperation) operation;
 			CtElement oldLocation = operation.getSrcNode();
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
-			bugContext.put(CNTX_Property.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
-			bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
-			bugContext.put(CNTX_Property.OPERATION, "UPD");
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.OPERATION, "UPD");
+
+			affectedCtElement = oldLocation;
 		}
 
+		//
+		if (affectedCtElement != null) {
+			Cntx iContext = cresolver.retrieveCntx(affectedCtElement);
+			opContext.add("cntx", iContext.toJSON());
+		}
+
+		//
 		if (bugContext != null)
 			opContext.add("bug", bugContext.toJSON());
 		else
@@ -745,15 +763,19 @@ public class DiffContextAnalyzer {
 	////////
 
 	@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
-	private void setPatchInformation(Operation operation, CntxResolver cresolver, JsonObject opContext, Diff diff) {
+	private void setPatchInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext,
+			Diff diff) {
 
 		Cntx bugContext = new Cntx<>();
 		MappingStore mappings = diff.getMappingsComp();
+
+		CtElement nodeToCalculateContext = null;
+
 		if (operation instanceof MoveOperation) {
 
 			// Element to move in source
 			CtElement affectedMoved = operation.getSrcNode();
-			bugContext.put(CNTX_Property.OPERATION, "MV");
+			bugContext.put(CodeFeatures.OPERATION, "MV");
 			// Find the parent
 
 			// let's find the destination in the Source Tree
@@ -761,13 +783,13 @@ public class DiffContextAnalyzer {
 			// This parent is from the dst
 			ITree newParentSRC = ma.getParent();
 
-			bugContext.put(CNTX_Property.AFFECTED, cresolver.retrieveBuggyInfo(affectedMoved));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(affectedMoved));
 
 			ITree parentInRight = MappingAnalysis.getParentInRight(diff, ma);
 
-			CtElement parentMovedElementInDst = getStmtParent((CtElement) parentInRight.getMetadata("spoon_object"));// searchMapped(mappings,
-																														// parentInRight);
-			bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(parentMovedElementInDst));
+			CtElement parentMovedElementInDst = getStmtParent((CtElement) parentInRight.getMetadata("spoon_object"));
+			nodeToCalculateContext = parentMovedElementInDst;
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(parentMovedElementInDst));
 
 		} else if (operation instanceof InsertOperation)
 
@@ -776,9 +798,10 @@ public class DiffContextAnalyzer {
 			CtElement affectedElement = op.getSrcNode();
 			CtElement newParentLocationInsertStmt = getStmtParent(affectedElement);
 
-			bugContext.put(CNTX_Property.AFFECTED, cresolver.retrieveBuggyInfo(affectedElement));
-			bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(newParentLocationInsertStmt));
-			bugContext.put(CNTX_Property.OPERATION, "INS");
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(affectedElement));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(newParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.OPERATION, "INS");
+			nodeToCalculateContext = affectedElement;
 		} else if (operation instanceof DeleteOperation) {
 
 			DeleteOperation up = (DeleteOperation) operation;
@@ -795,9 +818,10 @@ public class DiffContextAnalyzer {
 				CtElement parentDstInDst = (CtElement) mappedParentDst.getMetadata("spoon_object");
 
 				CtElement oldParentLocationInsertStmt = getStmtParent(parentDstInDst);
-				bugContext.put(CNTX_Property.AFFECTED, null);
-				bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
-				bugContext.put(CNTX_Property.OPERATION, "DEL");
+				nodeToCalculateContext = oldParentLocationInsertStmt;
+				bugContext.put(CodeFeatures.AFFECTED, null);
+				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+				bugContext.put(CodeFeatures.OPERATION, "DEL");
 			}
 
 		} else if (operation instanceof UpdateOperation) {
@@ -806,9 +830,15 @@ public class DiffContextAnalyzer {
 			CtElement oldLocation = operation.getDstNode();
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
 
-			bugContext.put(CNTX_Property.OPERATION, "UPD");
-			bugContext.put(CNTX_Property.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
-			bugContext.put(CNTX_Property.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.OPERATION, "UPD");
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			// Is it located in parent?
+			nodeToCalculateContext = oldLocation;
+		}
+
+		if (nodeToCalculateContext != null) {
+
 		}
 
 		if (bugContext != null)
@@ -860,13 +890,13 @@ public class DiffContextAnalyzer {
 			JsonObject jsonT = jsongen.getJSONwithOperations(((DiffImpl) diff).getContext(), methodTreeNode,
 					diff.getAllOperations());
 
-			opContext.add(CNTX_Property.AST_PARENT.toString(), jsonT);
+			opContext.add(CodeFeatures.AST_PARENT.toString(), jsonT);
 
 		}
 
 	}
 
-	CntxResolver cresolver = new CntxResolver();
+	CodeFeatureDetector cresolver = new CodeFeatureDetector();
 
 	/**
 	 * Only AST for pattern
@@ -948,13 +978,13 @@ public class DiffContextAnalyzer {
 
 	}
 
-	public JsonObject getContextInformation(Diff diff, CntxResolver cresolver, Operation opi,
+	public JsonObject getContextInformation(Diff diff, CodeFeatureDetector cresolver, Operation opi,
 			CtElement getAffectedCtElement) {
-		Cntx iContext = cresolver.retrieveCntx(getAffectedCtElement);
 
 		JsonObject opContext = new JsonObject();
 
-		opContext.add("cntx", iContext.toJSON());
+		// Cntx iContext = cresolver.retrieveCntx(getAffectedCtElement);
+		// opContext.add("cntx", iContext.toJSON());
 
 		setBuggyInformation(opi, cresolver, opContext, diff);
 
@@ -1077,7 +1107,7 @@ public class DiffContextAnalyzer {
 
 		JsonObject jsonT = jsongen.getJSONwithOperations(((DiffImpl) diff).getContext(),
 				operation.getAction().getNode(), emptyList);
-		opContext.add(CNTX_Property.AST.toString(), jsonT);
+		opContext.add(CodeFeatures.AST.toString(), jsonT);
 
 	}
 

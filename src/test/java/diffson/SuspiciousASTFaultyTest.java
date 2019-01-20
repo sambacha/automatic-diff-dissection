@@ -33,8 +33,8 @@ import add.features.detector.repairpatterns.WrapsWithDetector;
 import add.features.detector.repairpatterns.WrongReferenceDetector;
 import add.main.Config;
 import add.utils.TestUtils;
-import fr.inria.astor.core.entities.CNTX_Property;
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.coming.codefeatures.CodeFeatures;
 import gumtree.spoon.diff.Diff;
 
 /**
@@ -152,7 +152,7 @@ public class SuspiciousASTFaultyTest {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		// Compute the diff of the revision
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileInput);
+		analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileInput);
 		// Get the diff obtained
 		Map<String, Diff> diffOfcommit = analyzer.getDiffOfcommit();
 		for (Diff diff : diffOfcommit.values()) {
@@ -854,18 +854,18 @@ public class SuspiciousASTFaultyTest {
 
 		JsonObject json0 = (JsonObject) elements.get(0);
 
-		JsonPrimitive ops = (JsonPrimitive) json0.get("bug")// .getAsJsonObject().get(CNTX_Property.AFFECTED.toString())
-				.getAsJsonObject().get(CNTX_Property.OPERATION.toString());
+		JsonPrimitive ops = (JsonPrimitive) json0.get("bug")// .getAsJsonObject().get(CodeFeatures.AFFECTED.toString())
+				.getAsJsonObject().get(CodeFeatures.OPERATION.toString());
 
 		assertEquals("UPD", ops.getAsString());
 
 		JsonPrimitive buggyCode = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("java.lang.String REPLICATION_UNABLE_TO_STOP_MASTER = \\\"XRE07\\\";", buggyCode.getAsString());
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("java.lang.String REPLICATION_NOT_IN_MASTER_MODE = \\\"XRE07\\\";", buggyCode1.getAsString());
 
@@ -898,11 +898,11 @@ public class SuspiciousASTFaultyTest {
 
 		// INSERT
 
-		Object buggyCode = json0.get("bug").getAsJsonObject().get(CNTX_Property.AFFECTED.toString());
+		Object buggyCode = json0.get("bug").getAsJsonObject().get(CodeFeatures.AFFECTED.toString());
 		assertEquals("null", buggyCode.toString());
 
 		JsonPrimitive typeBuggyParent = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get("TYPE");
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get("TYPE");
 		assertEquals("CtLocalVariableImpl", typeBuggyParent.getAsString());
 
 		/// Move
@@ -910,18 +910,18 @@ public class SuspiciousASTFaultyTest {
 		System.out.println(json1);
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json1.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals(
 				// "(userStartTimeout != null) ? java.lang.Long.parseLong(userStartTimeout) :
 				// org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun.DEFAULT_SERVER_START_TIMEOUT",
 				"java.lang.Long.parseLong(userStartTimeout)", buggyCode1.getAsString());
 
-		JsonArray asJsonArray = json1.get("bug").getAsJsonObject().get(CNTX_Property.AFFECTED_PARENT.toString())
+		JsonArray asJsonArray = json1.get("bug").getAsJsonObject().get(CodeFeatures.AFFECTED_PARENT.toString())
 				.getAsJsonArray();
 
 		JsonPrimitive buggyCodeParent = (JsonPrimitive) asJsonArray.get(0).getAsJsonObject()
-				.get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.CODE.toString());
 		// System.out.println(buggyCodeParent);
 		assertEquals(
 				"long startTimeout = (userStartTimeout != null) ? java.lang.Long.parseLong(userStartTimeout) : org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun.DEFAULT_SERVER_START_TIMEOUT"
@@ -931,23 +931,23 @@ public class SuspiciousASTFaultyTest {
 		///
 
 		JsonPrimitive patchCode = (JsonPrimitive) json1.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("java.lang.Long.parseLong(userStartTimeout)", patchCode.getAsString());
 
-		JsonArray asJsonArraypatch = json1.get("patch").getAsJsonObject().get(CNTX_Property.AFFECTED_PARENT.toString())
+		JsonArray asJsonArraypatch = json1.get("patch").getAsJsonObject().get(CodeFeatures.AFFECTED_PARENT.toString())
 				.getAsJsonArray();
 
 		assertTrue(asJsonArraypatch.size() == 1);
 		JsonPrimitive patchCodeParent = (JsonPrimitive) asJsonArraypatch.get(0).getAsJsonObject()
-				.get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.CODE.toString());
 
 		System.out.println(patchCodeParent.getAsString());
 		assertEquals(
 				"long startTimeout = (userStartTimeout != null) ? (java.lang.Long.parseLong(userStartTimeout)) * 1000 : org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun.DEFAULT_SERVER_START_TIMEOUT",
 				patchCodeParent.getAsString());
 
-		assertTrue(hasColored((JsonObject) json0.get(CNTX_Property.AST_PARENT.toString()), "INS"));
+		assertTrue(hasColored((JsonObject) json0.get(CodeFeatures.AST_PARENT.toString()), "INS"));
 
 	}
 
@@ -965,28 +965,28 @@ public class SuspiciousASTFaultyTest {
 		System.out.println(json0);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("pageSize", buggyCode.getAsString());
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("averages = new float[pageSize]", buggyCode1.getAsString());
 
 		/////
 		System.out.println(json0);
 		JsonPrimitive patchCode = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("initialPageCount", patchCode.getAsString());
 
 		JsonPrimitive patchCodeP = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("averages = new float[initialPageCount]", patchCodeP.getAsString());
 
-		assertTrue(hasColored((JsonObject) json0.get(CNTX_Property.AST_PARENT.toString()), "UPD"));
+		assertTrue(hasColored((JsonObject) json0.get(CodeFeatures.AST_PARENT.toString()), "UPD"));
 
 	}
 
@@ -998,12 +998,12 @@ public class SuspiciousASTFaultyTest {
 
 		JsonArray allch = (JsonArray) resultjson.get("info");
 		assertTrue(allch.size() == 2);
-		assertTrue(hasColored(((JsonObject) allch.get(0)).get(CNTX_Property.AST_PARENT.toString()), "UPD"));
-		assertTrue(hasColored(((JsonObject) allch.get(1)).get(CNTX_Property.AST_PARENT.toString()), "UPD"));
-		assertFalse(hasColored(((JsonObject) allch.get(0)).get(CNTX_Property.AST_PARENT.toString()), "DEL"));
-		assertFalse(hasColored(((JsonObject) allch.get(1)).get(CNTX_Property.AST_PARENT.toString()), "DEL"));
-		assertFalse(hasColored(((JsonObject) allch.get(0)).get(CNTX_Property.AST_PARENT.toString()), "INS"));
-		assertFalse(hasColored(((JsonObject) allch.get(1)).get(CNTX_Property.AST_PARENT.toString()), "INS"));
+		assertTrue(hasColored(((JsonObject) allch.get(0)).get(CodeFeatures.AST_PARENT.toString()), "UPD"));
+		assertTrue(hasColored(((JsonObject) allch.get(1)).get(CodeFeatures.AST_PARENT.toString()), "UPD"));
+		assertFalse(hasColored(((JsonObject) allch.get(0)).get(CodeFeatures.AST_PARENT.toString()), "DEL"));
+		assertFalse(hasColored(((JsonObject) allch.get(1)).get(CodeFeatures.AST_PARENT.toString()), "DEL"));
+		assertFalse(hasColored(((JsonObject) allch.get(0)).get(CodeFeatures.AST_PARENT.toString()), "INS"));
+		assertFalse(hasColored(((JsonObject) allch.get(1)).get(CodeFeatures.AST_PARENT.toString()), "INS"));
 	}
 
 	@Test
@@ -1022,16 +1022,16 @@ public class SuspiciousASTFaultyTest {
 		System.out.println(jsonMove);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) jsonMove.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("(bytes.position())", buggyCode.getAsString());
 
 		JsonArray buggyCodeParents = (JsonArray) jsonMove.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonArray();
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonArray();
 
 		assertEquals(1, buggyCodeParents.size());
 
-		JsonPrimitive bl1 = buggyCodeParents.get(0).getAsJsonObject().get(CNTX_Property.CODE.toString())
+		JsonPrimitive bl1 = buggyCodeParents.get(0).getAsJsonObject().get(CodeFeatures.CODE.toString())
 				.getAsJsonPrimitive();
 		System.out.println(bl1);
 		assertEquals("return java.lang.String.valueOf(bytes.getLong(((bytes.position()) + (bytes.arrayOffset()))))",
@@ -1040,23 +1040,23 @@ public class SuspiciousASTFaultyTest {
 		// PATCH
 
 		JsonPrimitive patchCode = (JsonPrimitive) jsonMove.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("(bytes.position())", patchCode.getAsString());
 
 		JsonArray asJsonArraypatch = jsonMove.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonArray();
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonArray();
 
 		System.out.println("\n" + asJsonArraypatch);
 		assertTrue(asJsonArraypatch.size() == 1);
 		JsonPrimitive patchCodeParent = (JsonPrimitive) asJsonArraypatch.get(0).getAsJsonObject()
-				.get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.CODE.toString());
 
 		System.out.println(patchCodeParent);
 		assertEquals("return java.lang.String.valueOf(bytes.getLong(bytes.position()))", patchCodeParent.getAsString());
 
 		// assertTrue(hasColored((JsonObject)
-		// json0.get(CNTX_Property.AST_PARENT.toString()), "INS"));
+		// json0.get(CodeFeatures.AST_PARENT.toString()), "INS"));
 
 	}
 
@@ -1073,17 +1073,17 @@ public class SuspiciousASTFaultyTest {
 		JsonObject json0 = (JsonObject) allch.get(0);
 
 		// JsonPrimitive buggyCode = (JsonPrimitive)
-		// json0.get("bug").getAsJsonObject().get(CNTX_Property.AFFECTED.toString()).getAsJsonObject()
-		// .get(CNTX_Property.CODE.toString());
+		// json0.get("bug").getAsJsonObject().get(CodeFeatures.AFFECTED.toString()).getAsJsonObject()
+		// .get(CodeFeatures.CODE.toString());
 
-		JsonNull buggyCode = (JsonNull) json0.get("bug").getAsJsonObject().get(CNTX_Property.AFFECTED.toString());
+		JsonNull buggyCode = (JsonNull) json0.get("bug").getAsJsonObject().get(CodeFeatures.AFFECTED.toString());
 
 		// assertEquals("new org.apache.lucene.index.RandomIndexWriter(random(), dir)",
 		// buggyCode.getAsString());
 		assertEquals("null", buggyCode.toString());
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals(
 				"org.apache.lucene.index.RandomIndexWriter iw = new org.apache.lucene.index.RandomIndexWriter(random(), dir)",
@@ -1092,18 +1092,18 @@ public class SuspiciousASTFaultyTest {
 		// Patch
 
 		JsonPrimitive patchCode = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("cfg", patchCode.getAsString());
 
 		JsonPrimitive patchCodeParent = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals(
 				"org.apache.lucene.index.RandomIndexWriter iw = new org.apache.lucene.index.RandomIndexWriter(random(), dir, cfg)",
 				patchCodeParent.getAsString());
 
-		assertTrue(hasColored((JsonObject) json0.get(CNTX_Property.AST_PARENT.toString()), "INS"));
+		assertTrue(hasColored((JsonObject) json0.get(CodeFeatures.AST_PARENT.toString()), "INS"));
 	}
 
 	@Test
@@ -1118,13 +1118,13 @@ public class SuspiciousASTFaultyTest {
 		JsonObject json0 = (JsonObject) allch.get(0);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("org.apache.lucene.index.IndexFileNames.segmentFileName(id, \\\"\\\", Writer.DATA_EXTENSION)",
 				buggyCode.getAsString());
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		System.out.println(buggyCode1);
 		assertEquals(
@@ -1134,20 +1134,20 @@ public class SuspiciousASTFaultyTest {
 		/////
 		System.out.println(json0);
 		JsonPrimitive patchCode = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals(
 				"org.apache.lucene.index.IndexFileNames.segmentFileName(id, Bytes.DV_SEGMENT_SUFFIX, Writer.DATA_EXTENSION)",
 				patchCode.getAsString());
 
 		JsonPrimitive patchCodeP = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals(
 				"datIn = dir.openInput(org.apache.lucene.index.IndexFileNames.segmentFileName(id, Bytes.DV_SEGMENT_SUFFIX, Writer.DATA_EXTENSION), context)",
 				patchCodeP.getAsString());
 
-		assertTrue(hasColored((JsonObject) json0.get(CNTX_Property.AST_PARENT.toString()), "UPD"));
+		assertTrue(hasColored((JsonObject) json0.get(CodeFeatures.AST_PARENT.toString()), "UPD"));
 
 	}
 
@@ -1173,30 +1173,30 @@ public class SuspiciousASTFaultyTest {
 		JsonObject json0 = (JsonObject) allch.get(0);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("IndexWriter.MaxFieldLength.LIMITED", buggyCode.getAsString());
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 		System.out.println(buggyCode1);
 		assertEquals(
 				"org.apache.lucene.index.IndexWriter writer = new org.apache.lucene.index.IndexWriter(runData.getDirectory(), config.get(\\\"autocommit\\\", org.apache.lucene.benchmark.byTask.tasks.OpenIndexTask.DEFAULT_AUTO_COMMIT), runData.getAnalyzer(), false, IndexWriter.MaxFieldLength.LIMITED)",
 				buggyCode1.getAsString());
 
 		///
-		JsonNull patchCode = (JsonNull) json0.get("patch").getAsJsonObject().get(CNTX_Property.AFFECTED.toString());
+		JsonNull patchCode = (JsonNull) json0.get("patch").getAsJsonObject().get(CodeFeatures.AFFECTED.toString());
 		System.out.println(patchCode);
 		assertEquals("null", patchCode.toString());
 
 		JsonPrimitive patchCode1 = (JsonPrimitive) json0.get("patch").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 		System.out.println(patchCode1);
 		assertEquals(
 				"org.apache.lucene.index.IndexWriter writer = new org.apache.lucene.index.IndexWriter(runData.getDirectory(), config.get(\\\"autocommit\\\", org.apache.lucene.benchmark.byTask.tasks.OpenIndexTask.DEFAULT_AUTO_COMMIT), runData.getAnalyzer(), false)",
 				patchCode1.getAsString());
 
-		assertTrue(hasColored((JsonObject) json0.get(CNTX_Property.AST_PARENT.toString()), "DEL"));
+		assertTrue(hasColored((JsonObject) json0.get(CodeFeatures.AST_PARENT.toString()), "DEL"));
 
 	}
 
@@ -1213,25 +1213,25 @@ public class SuspiciousASTFaultyTest {
 		JsonObject json0 = (JsonObject) allch.get(0);
 
 		JsonPrimitive buggyCode = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		assertEquals("!(isSunJVM())", buggyCode.getAsString());
 
 		JsonPrimitive buggyCode1 = (JsonPrimitive) json0.get("bug").getAsJsonObject()
-				.get(CNTX_Property.AFFECTED_PARENT.toString()).getAsJsonObject().get(CNTX_Property.CODE.toString());
+				.get(CodeFeatures.AFFECTED_PARENT.toString()).getAsJsonObject().get(CodeFeatures.CODE.toString());
 
 		System.out.println(buggyCode1);
 		assertTrue(buggyCode1.getAsString().startsWith("if (!(isSunJVM())) "));
 
-		assertTrue(hasColored((JsonObject) json0.get(CNTX_Property.AST_PARENT.toString()), "DEL"));
+		assertTrue(hasColored((JsonObject) json0.get(CodeFeatures.AST_PARENT.toString()), "DEL"));
 
 		JsonObject json1 = (JsonObject) allch.get(1);
 
-		assertTrue(hasColored((JsonObject) json1.get(CNTX_Property.AST_PARENT.toString()), "INS"));
+		assertTrue(hasColored((JsonObject) json1.get(CodeFeatures.AST_PARENT.toString()), "INS"));
 
 		JsonObject json2 = (JsonObject) allch.get(2);
 
-		assertTrue(hasColored((JsonObject) json2.get(CNTX_Property.AST_PARENT.toString()), "MOV"));
+		assertTrue(hasColored((JsonObject) json2.get(CodeFeatures.AST_PARENT.toString()), "MOV"));
 	}
 
 	@Test
