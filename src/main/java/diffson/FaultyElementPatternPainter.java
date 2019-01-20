@@ -17,7 +17,8 @@ import spoon.reflect.declaration.CtElement;
 
 public class FaultyElementPatternPainter implements NodePainter {
 
-	MapList<CtElement, String> nodesAffectedByPattern = new MapList<>();
+	// MapList<CtElement, String> nodesAffectedByPattern = new MapList<>();
+	MapList<String, String> nodesAffectedByPattern = new MapList<>();
 	String label = "susp";
 
 	public FaultyElementPatternPainter(List<PatternInstance> instances) {
@@ -26,7 +27,7 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 		for (PatternInstance patternInstance : instances) {
 			for (CtElement susp : patternInstance.getFaulty()) {
-				nodesAffectedByPattern.add(susp, ("susp_" + patternInstance.getPatternName()
+				nodesAffectedByPattern.add(getKey(susp), ("susp_" + patternInstance.getPatternName()
 				//
 						+ ((includeMetadata && !patternInstance.getMetadata().isEmpty()) ? ("_" + patternInstance
 								.getMetadata().stream().map(PropertyPair::getValue).collect(Collectors.joining("_")))
@@ -35,6 +36,16 @@ public class FaultyElementPatternPainter implements NodePainter {
 			}
 		}
 
+	}
+
+	private String getKey(CtElement susp) {
+		try {
+			return susp.toString() + "_" + susp.getPath();
+		} catch (Exception e) {
+			System.err.println("Problem Getting the key");
+			e.printStackTrace();
+		}
+		return "";
 	}
 
 	@Override
@@ -53,12 +64,14 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 	private boolean paint(JsonObject jsontree, CtElement ctelement) {
 		boolean found = false;
-		if (nodesAffectedByPattern.containsKey(ctelement)
-				// workaround: siee if the same object is present
-				&& nodesAffectedByPattern.keySet().stream().filter(e -> e == ctelement).findFirst().isPresent()) {
+		if (nodesAffectedByPattern.containsKey(getKey(ctelement))
+		// workaround: siee if the same object is present
+		// && nodesAffectedByPattern.keySet().stream().filter(e -> e ==
+		// ctelement).findFirst().isPresent()
+		) {
 
 			JsonArray arr = new JsonArray();
-			List<String> ps = nodesAffectedByPattern.get(ctelement);
+			List<String> ps = nodesAffectedByPattern.get(getKey(ctelement));
 			for (String p : ps) {
 				JsonPrimitive prim = new JsonPrimitive(p);
 				arr.add(prim);

@@ -1,14 +1,13 @@
 package diffson;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
-import com.google.gson.JsonArray;
-
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import gumtree.spoon.diff.Diff;
 
 //@Ignore
 public class DiffICSE2015Test {
@@ -22,11 +21,12 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
 
-		assertTrue(arrayout.size() > 0);
+		Map<String, Diff> diffOfcommit = new HashMap();
 
-		analyzer.atEndCommit(fileDiff);
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -40,11 +40,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -66,11 +65,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -81,11 +79,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -96,11 +93,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -111,11 +107,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -126,11 +121,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -141,11 +135,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -156,11 +149,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -171,11 +163,10 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(getCompletePathICSE2015(diffId));
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
@@ -264,10 +255,37 @@ public class DiffICSE2015Test {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File("./datasets/icse2015/" + caseId);
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
 
-		assertTrue(arrayout.size() > 0);
-		System.out.println(arrayout);
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
 	}
 
+	@Test
+	public void test_1067234() throws Exception {
+		String diffId = "1067234";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
+
+	}
+
+	@Test
+	public void test_1346833() throws Exception {
+		String diffId = "1346833";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
+
+	}
 }

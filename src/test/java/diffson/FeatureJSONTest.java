@@ -210,6 +210,17 @@ public class FeatureJSONTest {
 		assertMarkedlAST(resultjson, CodeFeatures.S6_METHOD_THROWS_EXCEPTION, Boolean.TRUE);
 	}
 
+	@Test
+	public void testContext_Chart_23_NPE() {
+
+		String diffId = "Chart_23";
+
+		JsonObject resultjson = getJsonOfBugId(diffId);
+		System.out.println(resultjson);
+		// assertMarkedlAST(resultjson, CodeFeatures.S6_METHOD_THROWS_EXCEPTION,
+		// Boolean.TRUE);
+	}
+
 	public static void assertMarkedlAST(JsonObject resultjson, CodeFeatures name, Boolean b) {
 		assertMarkedlAST(resultjson, name.name(), b);
 	}

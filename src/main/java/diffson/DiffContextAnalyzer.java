@@ -86,8 +86,6 @@ public class DiffContextAnalyzer {
 		out.mkdirs();
 	}
 
-	Map<String, Diff> diffOfcommit = new HashMap();
-
 	private Logger log = Logger.getLogger(this.getClass());
 	int error = 0;
 	int zero = 0;
@@ -99,11 +97,6 @@ public class DiffContextAnalyzer {
 		error = 0;
 		zero = 0;
 		withactions = 0;
-		MapCounter<String> counter = new MapCounter<>();
-		MapCounter<String> counterParent = new MapCounter<>();
-		JsonObject root = new JsonObject();
-		JsonArray firstArray = new JsonArray();
-		root.add("diffs", firstArray);
 
 		File dir = new File(path);
 
@@ -111,6 +104,8 @@ public class DiffContextAnalyzer {
 
 		int diffanalyzed = 0;
 		for (File difffile : dir.listFiles()) {
+
+			Map<String, Diff> diffOfcommit = new HashMap();
 
 			if (difffile.isFile() || difffile.listFiles() == null)
 				continue;
@@ -125,15 +120,10 @@ public class DiffContextAnalyzer {
 				continue;
 			}
 
-			JsonObject jsondiff = new JsonObject();
-			firstArray.add(jsondiff);
-			jsondiff.addProperty("diffid", difffile.getName());
+			processDiff(difffile, diffOfcommit);
 
-			JsonArray filesArray = processDiff(counter, counterParent, difffile);
-
-			jsondiff.add("files", filesArray);
 			// here, at the end, we compute the Context
-			atEndCommit(difffile);
+			atEndCommit(difffile, diffOfcommit);
 
 			if (diffanalyzed == ConfigurationProperties.getPropertyInteger("maxdifftoanalyze")) {
 				System.out.println("max-break");
@@ -141,22 +131,6 @@ public class DiffContextAnalyzer {
 			}
 		}
 
-		Map sorted = counter.sorted();
-		System.out.println("\n***\nSorted:" + sorted);
-		///
-
-		addStats(root, "frequency", sorted);
-		addStats(root, "frequencyParent", counterParent.sorted());
-		Map prob = counter.getProbabilies();
-		addStats(root, "probability", prob);
-		Map probParent = counterParent.getProbabilies();
-		addStats(root, "probabilityParent", probParent);
-
-		root.addProperty("diffwithactions", withactions);
-		root.addProperty("diffzeroactions", zero);
-		root.addProperty("differrors", error);
-
-		System.out.println("\n***\nProb: " + counter.getProbabilies());
 		System.out.println("Withactions " + withactions);
 		System.out.println("Zero " + zero);
 		System.out.println("Error " + error);
@@ -165,8 +139,7 @@ public class DiffContextAnalyzer {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JsonArray processDiff(MapCounter<String> counter, MapCounter<String> counterParent, File difffile) {
-		JsonArray filesArray = new JsonArray();
+	public void processDiff(File difffile, Map<String, Diff> diffOfcommit) {
 		for (File fileModif : difffile.listFiles()) {
 			int i_hunk = 0;
 
@@ -193,43 +166,14 @@ public class DiffContextAnalyzer {
 					continue;
 			}
 
-			JsonObject file = new JsonObject();
-			filesArray.add(file);
-			file.addProperty("name", fileModif.getName());
-			JsonArray changesArray = new JsonArray();
-			file.add("changes", changesArray);
-
 			File postVersion = new File(pathname + "_t.java");
 			i_hunk++;
 			try {
 				Diff diff = getdiffFuture(previousVersion, postVersion);
-				if (diff == null) {
-					file.addProperty("status", "differror");
-					continue;
-				}
-				Integer maxASTChanges = ConfigurationProperties.getPropertyInteger("MAX_AST_CHANGES_PER_FILE");
-				if (diff.getRootOperations().size() > maxASTChanges) {
-					file.addProperty("status", "max_changes_" + maxASTChanges);
-					continue;
-				}
 
-				if (diff.getRootOperations().size() == 0) {
-					file.addProperty("status", "no_change");
-					continue;
-				}
-
-				System.out.println("--diff: " + diff);
-
-				JsonObject singlediff = new JsonObject();
-				changesArray.add(singlediff);
-				// singlediff.put("filename", fileModif.getName());
-				singlediff.addProperty("rootop", diff.getRootOperations().size());
-				JsonArray operationsArray = new JsonArray();
-
-				singlediff.add("operations", operationsArray);
-				singlediff.addProperty("allop", diff.getAllOperations().size());
-
-				processDiff(fileModif, diff);
+				List<Operation> ops = diff.getRootOperations();
+				String key = fileModif.getParentFile().getName() + "_" + fileModif.getName();
+				diffOfcommit.put(key, diff);
 
 				if (diff.getAllOperations().size() > 0) {
 
@@ -238,30 +182,25 @@ public class DiffContextAnalyzer {
 					for (Operation operation : diff.getRootOperations()) {
 
 						log.debug("-op->" + operation);
-						counter.add(operation.getNode().getClass().getSimpleName());
-						counterParent.add(
-								operation.getAction().getName() + "_" + operation.getNode().getClass().getSimpleName()
-										+ "_" + operation.getNode().getParent().getClass().getSimpleName());
 
-						JsonObject op = getJSONFromOperator(operation);
+						// JsonObject op = getJSONFromOperator(operation);
 
-						operationsArray.add(op);
+						// operationsArray.add(op);
 					}
 
 				} else {
 					zero++;
 					log.debug("-file->" + fileModif + " zero actions ");
 				}
-				file.addProperty("status", "ok");
+
 			} catch (Throwable e) {
 				System.out.println("error with " + previousVersion);
 				e.printStackTrace();
 				error++;
-				file.addProperty("status", "exception");
 			}
 
 		}
-		return filesArray;
+		// return filesArray;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -368,12 +307,6 @@ public class DiffContextAnalyzer {
 
 	}
 
-	public void processDiff(File fileModif, Diff diff) {
-		List<Operation> ops = diff.getRootOperations();
-		String key = fileModif.getParentFile().getName() + "_" + fileModif.getName();
-		this.diffOfcommit.put(key, diff);
-	}
-
 	protected boolean acceptFile(File fileModif) {
 		File f = new File(out.getAbsolutePath() + File.separator + fileModif.getName() + ".json");
 		// If the json file does not exist, we process it
@@ -381,11 +314,11 @@ public class DiffContextAnalyzer {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void atEndCommit(File difffile) {
+	public void atEndCommit(File difffile, Map<String, Diff> diffOfcommit) {
 		try {
 
-			JsonObject statsjsonRoot = getContextFuture(difffile.getName(), diffOfcommit);// calculateCntxJSON(difffile.getName(),
-			Gson gson = new GsonBuilder().setPrettyPrinting().create(); // diffOfcommit);
+			JsonObject statsjsonRoot = getContextFuture(difffile.getName(), diffOfcommit);
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 			boolean savePerFile = false;// testing
 			if (savePerFile) {
@@ -411,7 +344,7 @@ public class DiffContextAnalyzer {
 				// Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				String prettyJsonString = gson.toJson(statsjsonRoot);
 				fw.write(prettyJsonString);
-
+				// System.out.println(prettyJsonString);
 				fw.flush();
 				fw.close();
 			}
@@ -424,8 +357,8 @@ public class DiffContextAnalyzer {
 
 	/// -=-=--=-=-=-=--=
 
-	private Future<JsonObject> getfutureContect(ExecutorService executorService, String id,
-			Map<String, Diff> operations) {
+	private Future<JsonObject> getContextInFeature(ExecutorService executorService, String id,
+			Map<String, Diff> diffOfcommit) {
 
 		Future<JsonObject> future = executorService.submit(() -> {
 			JsonObject statsjsonRoot = calculateCntxJSON(id, diffOfcommit);
@@ -436,11 +369,11 @@ public class DiffContextAnalyzer {
 
 	public JsonObject getContextFuture(String id, Map<String, Diff> operations) throws Exception {
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		Future<JsonObject> future = getfutureContect(executorService, id, operations);
+		Future<JsonObject> future = getContextInFeature(executorService, id, operations);
 
 		JsonObject resukltDiff = null;
 		try {
-			resukltDiff = future.get(1, TimeUnit.MINUTES);
+			resukltDiff = future.get(2, TimeUnit.MINUTES);
 		} catch (InterruptedException e) { // <-- possible error cases
 			System.out.println("job was interrupted");
 		} catch (ExecutionException e) {
@@ -956,7 +889,7 @@ public class DiffContextAnalyzer {
 			painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
 			painters.add(new OperationNodePainter(diff.getAllOperations()));
 			painters.add(new FaultyElementPatternPainter(patternInstancesOriginal));
-
+			// System.out.println(patternInstance);
 			JsonObject jsonInstance = new JsonObject();
 			JsonArray affected = new JsonArray();
 			for (ITree iTree : allTreeparents) {
@@ -994,11 +927,11 @@ public class DiffContextAnalyzer {
 
 	private List<PatternInstance> merge(List<PatternInstance> patternInstancesOriginal) {
 		List<PatternInstance> patternInstancesMerged = new ArrayList<>();
-		Map<CtElement, PatternInstance> m = new HashMap<>();
+		Map<CtElement, PatternInstance> cacheFaultyLines = new HashMap<>();
 
 		for (PatternInstance patternInstance : patternInstancesOriginal) {
-			if (!m.containsKey(patternInstance.getFaultyLine())) {
-				m.put(patternInstance.getFaultyLine(), patternInstance);
+			if (!cacheFaultyLines.containsKey(patternInstance.getFaultyLine())) {
+				cacheFaultyLines.put(patternInstance.getFaultyLine(), patternInstance);
 				patternInstancesMerged.add(patternInstance);
 			}
 		}
@@ -1109,14 +1042,6 @@ public class DiffContextAnalyzer {
 				operation.getAction().getNode(), emptyList);
 		opContext.add(CodeFeatures.AST.toString(), jsonT);
 
-	}
-
-	public Map<String, Diff> getDiffOfcommit() {
-		return diffOfcommit;
-	}
-
-	public void setDiffOfcommit(Map<String, Diff> diffOfcommit) {
-		this.diffOfcommit = diffOfcommit;
 	}
 
 }

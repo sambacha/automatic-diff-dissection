@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -150,11 +151,10 @@ public class SuspiciousASTFaultyTest {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
-
+		Map<String, Diff> diffOfcommit = new HashMap();
 		// Compute the diff of the revision
-		analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileInput);
+		analyzer.processDiff(fileInput, diffOfcommit);
 		// Get the diff obtained
-		Map<String, Diff> diffOfcommit = analyzer.getDiffOfcommit();
 		for (Diff diff : diffOfcommit.values()) {
 			System.out.println("Diff: " + diff);
 		}
@@ -340,9 +340,8 @@ public class SuspiciousASTFaultyTest {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		@SuppressWarnings("unused")
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileInput);
-
-		Map<String, Diff> diffOfcommit = analyzer.getDiffOfcommit();
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileInput, diffOfcommit);
 
 		List<RepairPatterns> patterns = new ArrayList<>();
 		for (Diff diff : diffOfcommit.values()) {
@@ -1242,11 +1241,10 @@ public class SuspiciousASTFaultyTest {
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
 		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
-		JsonArray arrayout = analyzer.processDiff(new MapCounter<>(), new MapCounter<>(), fileDiff);
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
 
-		assertTrue(arrayout.size() > 0);
-
-		analyzer.atEndCommit(fileDiff);
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
 
 	}
 
