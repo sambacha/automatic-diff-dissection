@@ -373,7 +373,7 @@ public class DiffContextAnalyzer {
 
 		JsonObject resukltDiff = null;
 		try {
-			resukltDiff = future.get(2, TimeUnit.MINUTES);
+			resukltDiff = future.get(4, TimeUnit.MINUTES);
 		} catch (InterruptedException e) { // <-- possible error cases
 			System.out.println("job was interrupted");
 		} catch (ExecutionException e) {

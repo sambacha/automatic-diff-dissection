@@ -17,8 +17,8 @@ import spoon.reflect.declaration.CtElement;
 
 public class FaultyElementPatternPainter implements NodePainter {
 
-	// MapList<CtElement, String> nodesAffectedByPattern = new MapList<>();
 	MapList<String, String> nodesAffectedByPattern = new MapList<>();
+	MapList<String, PatternInstance> nodesAffectedByPatternInstances = new MapList<>();
 	String label = "susp";
 
 	public FaultyElementPatternPainter(List<PatternInstance> instances) {
@@ -27,15 +27,25 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 		for (PatternInstance patternInstance : instances) {
 			for (CtElement susp : patternInstance.getFaulty()) {
-				nodesAffectedByPattern.add(getKey(susp), ("susp_" + patternInstance.getPatternName()
-				//
-						+ ((includeMetadata && !patternInstance.getMetadata().isEmpty()) ? ("_" + patternInstance
-								.getMetadata().stream().map(PropertyPair::getValue).collect(Collectors.joining("_")))
-								: "")));
+				String patternLabel = createPatternLabel(includeMetadata, patternInstance);
+				String key = getKey(susp);
+				if (!nodesAffectedByPattern.keySet().contains(key)
+						|| !nodesAffectedByPattern.get(key).contains(patternLabel)) {
+					nodesAffectedByPattern.add(key, patternLabel);
+					nodesAffectedByPatternInstances.add(key, patternInstance);
+
+				}
 
 			}
 		}
 
+	}
+
+	public String createPatternLabel(Boolean includeMetadata, PatternInstance patternInstance) {
+		return "susp_" + patternInstance.getPatternName()
+		// if include instance metadata (i.e., sub-category of patterns)
+				+ ((includeMetadata && !patternInstance.getMetadata().isEmpty()) ? ("_" + patternInstance.getMetadata()
+						.stream().map(PropertyPair::getValue).collect(Collectors.joining("_"))) : "");
 	}
 
 	private String getKey(CtElement susp) {
@@ -64,19 +74,16 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 	private boolean paint(JsonObject jsontree, CtElement ctelement) {
 		boolean found = false;
-		if (nodesAffectedByPattern.containsKey(getKey(ctelement))
-		// workaround: siee if the same object is present
-		// && nodesAffectedByPattern.keySet().stream().filter(e -> e ==
-		// ctelement).findFirst().isPresent()
-		) {
+		if (nodesAffectedByPattern.containsKey(getKey(ctelement))) {
 
-			JsonArray arr = new JsonArray();
-			List<String> ps = nodesAffectedByPattern.get(getKey(ctelement));
-			for (String p : ps) {
-				JsonPrimitive prim = new JsonPrimitive(p);
-				arr.add(prim);
+			JsonArray labels = new JsonArray();
+			List<String> patternsOfElement = nodesAffectedByPattern.get(getKey(ctelement));
+			for (String pattern : patternsOfElement) {
+				JsonPrimitive prim = new JsonPrimitive(pattern);
+				labels.add(prim);
+
 			}
-			jsontree.add(this.label, arr);
+			jsontree.add(this.label, labels);
 			found = true;
 		}
 		return found;

@@ -95,12 +95,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								// Remove if THEN (Not else present)
 
 								List susp = new ArrayList<>();
-								// Suspicious is the removed if
-								susp.add(ctIf);
+
 								// Let's take all elements that are inside the removed if
 								//
 								List subelements = ctElement.getElements(new TypeFilter<>(CtStatement.class));
 								susp.addAll(subelements);
+								if (!susp.contains(ctIf))
+									// Suspicious is the removed if
+									susp.add(ctIf);
+
 								for (Object object : stmtsMoved) {
 									CtElement e = (CtElement) object;
 									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
@@ -141,17 +144,6 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								List susp = new ArrayList<>();
 								// Suspicious is the removed if
 								susp.add(ctIf);
-								// Let's take all elements that are inside the removed if
-								//
-								// COMMENTED related to Issue #4
-//								List subelements = ctElement.getElements(new TypeFilter<>(CtStatement.class));
-//								susp.addAll(subelements);
-//
-//								sthen.addAll(selse);
-//								for (Object object : sthen) {
-//									CtElement e = (CtElement) object;
-//									susp.removeAll(e.getElements(new TypeFilter<>(CtStatement.class)));
-//								}
 
 								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
 										(CtElement) susp.get(0));
@@ -284,7 +276,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 			ITree mappedLeft = MappingAnalysis.getLeftFromRightNodeMapped(diff, moved);
 			if (mappedLeft != null) {
 				leftTreees.add(mappedLeft);
-				leftElements.add((CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+				CtElement element = (CtElement) mappedLeft.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+				if (!leftElements.contains(element))
+					leftElements.add(element);
 			}
 		}
 	}
