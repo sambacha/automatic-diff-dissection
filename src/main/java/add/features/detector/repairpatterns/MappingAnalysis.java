@@ -20,6 +20,7 @@ import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.path.CtRole;
 import spoon.reflect.visitor.filter.LineFilter;
 
@@ -133,10 +134,18 @@ public class MappingAnalysis {
 		CtElement parentLine = null;
 
 		parentLine = element.getParent(filter);
-		if (parentLine == null)
-			parentLine = element;
-
-		return parentLine;
+		if (parentLine != null) {
+			return parentLine;
+			// the parent is not a statement
+		} else {
+			// let's see if the parent is a field
+			CtField parentField = element.getParent(CtField.class);
+			if (parentField != null)
+				return parentField;
+			else
+				// If the parent is neither field nor statement, return the same element
+				return element;
+		}
 	}
 
 	public static List<CtElement> getAllStatementsOfParent(Addition maction) {

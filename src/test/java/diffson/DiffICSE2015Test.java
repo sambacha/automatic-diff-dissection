@@ -262,7 +262,63 @@ public class DiffICSE2015Test {
 	}
 
 	@Test
-	public void test_1067234() throws Exception {
+	public void test1206439_multiple_transformation() throws Exception {
+		String diffId = "1206439";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
+
+	}
+
+	@Test
+	public void test1466707() throws Exception {
+		String diffId = "1466707";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
+
+	}
+
+	@Test
+	public void test1196228() throws Exception {
+		String diffId = "1196228";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
+
+	}
+
+	@Test
+	public void test999479() throws Exception {
+		String diffId = "999479";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		analyzer.atEndCommit(fileDiff, diffOfcommit);
+
+	}
+
+	@Test
+	public void test_1067234_nodes_not_decorated() throws Exception {
 		String diffId = "1067234";
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
