@@ -181,7 +181,7 @@ public class DiffContextAnalyzer {
 					log.debug("-file->" + fileModif + " actions " + diff.getRootOperations().size());
 					for (Operation operation : diff.getRootOperations()) {
 
-						log.debug("-op->" + operation);
+						log.debug("-op->\n" + operation);
 
 						// JsonObject op = getJSONFromOperator(operation);
 

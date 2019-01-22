@@ -63,6 +63,10 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 		CtElement ctelement = (CtElement) tree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
+		// Workaround
+		if (jsontree.get("type").getAsString().equals("Modifiers"))
+			return;
+
 		boolean found = paint(jsontree, ctelement);
 
 		if (!found) {
