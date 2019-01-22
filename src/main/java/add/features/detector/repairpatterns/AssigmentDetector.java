@@ -71,14 +71,11 @@ public class AssigmentDetector extends AbstractPatternDetector {
 			}
 
 			List<CtElement> followCtElementsInLeft = new ArrayList<>();
-			for (ITree iTree : treeInLeft) {
+			// Fixed: we are interested only in the first statement after the insertion
+			CtElement associatedLeftCtElement = (CtElement) treeInLeft.get(0)
+					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
-				CtElement associatedLeftCtElement = (CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-				followCtElementsInLeft.add(associatedLeftCtElement);
-
-			}
-
-			// lineP = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
+			followCtElementsInLeft.add(associatedLeftCtElement);
 
 			repairPatterns.incrementFeatureCounterInstance(ADD_ASSIGNMENT,
 					new PatternInstance(ADD_ASSIGNMENT, operation, operation.getSrcNode(),
