@@ -72,15 +72,20 @@ public class AssigmentDetector extends AbstractPatternDetector {
 
 			List<CtElement> followCtElementsInLeft = new ArrayList<>();
 			// Fixed: we are interested only in the first statement after the insertion
-			CtElement associatedLeftCtElement = (CtElement) treeInLeft.get(0)
+			ITree suspiciousTree = treeInLeft.get(0);
+
+			CtElement associatedLeftCtElement = (CtElement) suspiciousTree
 					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+			// Let's format the node in case that it's a control flow
+			suspiciousTree = MappingAnalysis.getFormatedTreeFromControlFlow(associatedLeftCtElement);
 
 			followCtElementsInLeft.add(associatedLeftCtElement);
 
 			repairPatterns.incrementFeatureCounterInstance(ADD_ASSIGNMENT,
 					new PatternInstance(ADD_ASSIGNMENT, operation, operation.getSrcNode(),
 
-							followCtElementsInLeft, followCtElementsInLeft.get(0), treeInLeft.get(0)));
+							followCtElementsInLeft, associatedLeftCtElement, suspiciousTree));
 
 		}
 	}

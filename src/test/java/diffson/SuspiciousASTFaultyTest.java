@@ -57,10 +57,6 @@ public class SuspiciousASTFaultyTest {
 
 		System.out.println("****************");
 
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String prettyJsonString = gson.toJson(resultjson);
-
-		// System.out.println(prettyJsonString);
 		boolean found = false;
 		JsonArray affected = (JsonArray) resultjson.get("affected_files");
 		for (JsonElement jsonElement : affected) {
@@ -80,13 +76,54 @@ public class SuspiciousASTFaultyTest {
 				JsonObject jso = suspiciousTree.getAsJsonObject();
 				// System.out.println("--> AST element: \n" + jso.get("pattern_name"));
 
-				prettyJsonString = gson.toJson(jso.get("faulty_ast"));
-				// System.out.println("suspicious element:\n" + prettyJsonString);
-
 				assertTrue("Equals to []", !jso.get("faulty_ast").toString().equals("[]"));
 				// assertTrue(printSusp(jso.get("faulty_ast"), label, type));
-				if (printSusp(jso.get("faulty_ast"), patternName, label, type)) {
+				if (assertLabelMaching(jso.get("faulty_ast"), patternName, label, type)) {
 					found = true;
+				}
+
+			}
+
+		}
+		assertTrue("Node suspicious not found", found);
+	}
+
+	public static void assertNumberOfChildrenAST(JsonObject resultjson, String type, int maxNumberChildren) {
+
+		System.out.println("****************");
+
+		// System.out.println(prettyJsonString);
+		boolean found = false;
+		JsonArray affected = (JsonArray) resultjson.get("affected_files");
+		for (JsonElement jsonElement : affected) {
+
+			JsonObject jo = (JsonObject) jsonElement;
+			// JsonElement elAST = jo.get("faulty_stmts_ast");
+			JsonElement elAST = jo.get("pattern_instances");
+
+			assertNotNull(elAST);
+			assertTrue(elAST instanceof JsonArray);
+			JsonArray arrayOfPatterns = (JsonArray) elAST;
+			// assertTrue(ar.size() > 0);
+
+			// System.out.println("--> AST element: \n" + elAST);
+			for (JsonElement suspiciousTree : arrayOfPatterns) {
+
+				JsonObject jso = suspiciousTree.getAsJsonObject();
+
+				// even it's an array, faulty ast has only one element
+				JsonObject jsonObject = jso.getAsJsonObject().get("faulty_ast").getAsJsonArray().get(0)
+						.getAsJsonObject();
+				if (jsonObject != null) {
+
+					if (jsonObject.get("type").getAsString().equals(type)) {
+						JsonArray childrenW = jsonObject.get("children").getAsJsonArray();
+						assertTrue("expected <= " + maxNumberChildren + ", obtained " + childrenW.size(),
+								childrenW.size() <= maxNumberChildren);
+						// We dont care here about the type of label, it's enough with detecting "susp"
+						assertTrue(assertLabelMaching(jsonObject, null, null, null));
+						found = true;
+					}
 				}
 
 			}
@@ -208,7 +245,7 @@ public class SuspiciousASTFaultyTest {
 		// return jon.get("susp").getAsJsonArray().contains(p);
 	}
 
-	public static boolean printSusp(JsonElement ob, String patternName, String label, String type) {
+	public static boolean assertLabelMaching(JsonElement ob, String patternName, String label, String type) {
 		boolean t = false;
 		if (ob instanceof JsonObject) {
 			JsonObject jon = ob.getAsJsonObject();
@@ -230,7 +267,7 @@ public class SuspiciousASTFaultyTest {
 				} else {
 
 					JsonElement e = jon.get(s);
-					boolean t1 = printSusp(e, patternName, label, type);
+					boolean t1 = assertLabelMaching(e, patternName, label, type);
 					if (t1) {
 						return true;
 					}
@@ -241,7 +278,7 @@ public class SuspiciousASTFaultyTest {
 			if (ob instanceof JsonArray) {
 				JsonArray arr = ob.getAsJsonArray();
 				for (JsonElement jsonElement : arr) {
-					if (printSusp(jsonElement, patternName, label, type)) {
+					if (assertLabelMaching(jsonElement, patternName, label, type)) {
 						t = true;
 					}
 				}

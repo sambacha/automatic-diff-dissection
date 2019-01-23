@@ -14,10 +14,13 @@ import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.MoveOperation;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtDo;
 import spoon.reflect.code.CtFor;
+import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtSwitch;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
@@ -30,6 +33,15 @@ import spoon.reflect.visitor.filter.LineFilter;
  *
  */
 public class MappingAnalysis {
+
+	// Those represent the max number of children we want to show in the AST i.e.,
+	// the first X children from the list of children.
+	public final static int MAX_CHILDREN_WHILE = 1;
+	public final static int MAX_CHILDREN_DO = 1;
+	public final static int MAX_CHILDREN_FOR = 3;
+	public final static int MAX_CHILDREN_IF = 1;
+	public final static int MAX_CHILDREN_FOREACH = 2;
+	public final static int MAX_CHILDREN_SWITCH = 1;
 
 	public static ITree getParentInSource(Diff diff, Action affectedAction) {
 		ITree affected = null;
@@ -161,10 +173,15 @@ public class MappingAnalysis {
 	}
 
 	@SuppressWarnings("unused")
-	public static ITree getTree(CtElement parentLine) {
+	public static ITree getFormatedTreeFromControlFlow(CtElement parentLine) {
 
 		ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null) ? parentLine.getMetadata("tree")
 				: parentLine.getMetadata("gtnode"));
+
+		return getFormatedTreeFromControlFlow(lineTree, parentLine);
+	}
+
+	public static ITree getFormatedTreeFromControlFlow(ITree lineTree, CtElement parentLine) {
 
 		if (parentLine instanceof CtIf) {
 
@@ -188,15 +205,30 @@ public class MappingAnalysis {
 
 			return copiedIfTree;
 
-		} else// todo DOUntil
-		if (parentLine instanceof CtWhile) {
+		} else if (parentLine instanceof CtWhile) {
 			ITree copiedIfTree = lineTree.deepCopy();
 
 			// we remove the then
-			if (copiedIfTree.getChildren().size() <= 2) {
+			// if (copiedIfTree.getChildren().size() <= 2) {
 
-				ITree thenTree = copiedIfTree.getChildren().get(1);
-				copiedIfTree.getChildren().remove(1);
+			// ITree thenTree = copiedIfTree.getChildren().get(1);
+			// copiedIfTree.getChildren().remove(1);
+			// }
+			CtElement metadatakeep = (CtElement) copiedIfTree.getChildren().get(0)
+					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+			System.out.println("We Keep : " + metadatakeep);
+			System.out.println("Role: " + metadatakeep.getRoleInParent());
+
+			// The first childen is the condition, the rest the then body and then
+			if (copiedIfTree.getChildren().size() >= MappingAnalysis.MAX_CHILDREN_WHILE) {
+
+				for (int i = copiedIfTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_WHILE; i--) {
+
+					printMetadata(copiedIfTree, i);
+
+					copiedIfTree.getChildren().remove(i);
+				}
+
 			}
 
 			return copiedIfTree;
@@ -205,7 +237,36 @@ public class MappingAnalysis {
 
 			ITree copiedIfTree = lineTree.deepCopy();
 
-			for (int i = lineTree.getChildren().size() - 1; i >= 3; i--) {
+			for (int i = lineTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_FOR; i--) {
+				printMetadata(copiedIfTree, i);
+
+				copiedIfTree.getChildren().remove(i);
+			}
+			return copiedIfTree;
+		} else if (parentLine instanceof CtForEach) {
+
+			ITree copiedIfTree = lineTree.deepCopy();
+
+			for (int i = lineTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_FOREACH; i--) {
+				printMetadata(copiedIfTree, i);
+
+				copiedIfTree.getChildren().remove(i);
+			}
+			return copiedIfTree;
+		} else if (parentLine instanceof CtDo) {
+
+			ITree copiedIfTree = lineTree.deepCopy();
+
+			for (int i = lineTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_DO; i--) {
+
+				copiedIfTree.getChildren().remove(i);
+			}
+			return copiedIfTree;
+		} else if (parentLine instanceof CtSwitch) {
+
+			ITree copiedIfTree = lineTree.deepCopy();
+
+			for (int i = lineTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_SWITCH; i--) {
 
 				copiedIfTree.getChildren().remove(i);
 			}
@@ -214,6 +275,13 @@ public class MappingAnalysis {
 
 		return lineTree;
 
+	}
+
+	public static void printMetadata(ITree copiedIfTree, int i) {
+		CtElement metadata = (CtElement) copiedIfTree.getChildren().get(i)
+				.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+		System.out.println("Removing: " + metadata);
+		System.out.println("Role: " + metadata.getRoleInParent());
 	}
 
 	/**

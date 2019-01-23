@@ -15,6 +15,7 @@ import gumtree.spoon.diff.operations.UpdateOperation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.visitor.filter.LineFilter;
 
@@ -40,7 +41,7 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 					continue;
 				}
 				CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), srcNode);
-				ITree lineTree = MappingAnalysis.getTree(parent);
+				ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parent);
 
 				if (srcNode instanceof CtLiteral) {
 					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
@@ -57,9 +58,15 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 				if (srcNode instanceof CtTypeAccess
 						&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
 					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
-					repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
-							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
-									lineTree, new PropertyPair("type", "typeaccess")));
+
+					CtVariableRead parentVarRead = srcNode.getParent(CtVariableRead.class);
+					// The change is not inside a VariableRead (wich ast has as node a TypeAccess)
+					if (parentVarRead == null) {
+
+						repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+								new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
+										lineTree, new PropertyPair("type", "typeaccess")));
+					}
 				}
 			} else {
 				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtLiteral) {
@@ -79,7 +86,7 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 							if (((InsertOperation) operation2Insert).getParent() == ctLiteral.getParent()
 									&& isConstantVariable) {
 								CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), ctLiteral);
-								ITree lineTree = MappingAnalysis.getTree(parent);
+								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parent);
 
 								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
 										new PatternInstance(CONST_CHANGE, operation2Insert,
