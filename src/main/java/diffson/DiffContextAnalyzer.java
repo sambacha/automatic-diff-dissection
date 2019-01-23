@@ -314,7 +314,7 @@ public class DiffContextAnalyzer {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void atEndCommit(File difffile, Map<String, Diff> diffOfcommit) {
+	public JsonObject atEndCommit(File difffile, Map<String, Diff> diffOfcommit) {
 		try {
 
 			JsonObject statsjsonRoot = getContextFuture(difffile.getName(), diffOfcommit);
@@ -348,11 +348,11 @@ public class DiffContextAnalyzer {
 				fw.flush();
 				fw.close();
 			}
-
+			return statsjsonRoot;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
-		diffOfcommit.clear();
 	}
 
 	/// -=-=--=-=-=-=--=
