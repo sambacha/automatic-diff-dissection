@@ -202,20 +202,27 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					if (srcNode instanceof CtInvocation) {
 						// srcTypeReference = ((CtInvocation) srcNode).getTarget().getType();
 						srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
-						srcCallArguments = ((CtInvocation) srcNode).getExecutable().getParameters();
+						// srcCallArguments = ((CtInvocation) srcNode).getExecutable().getParameters();
+						srcCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
 					} else {
 						srcCallMethodName = ((CtConstructorCall) srcNode).getExecutable().getSimpleName();
-						srcCallArguments = ((CtConstructorCall) srcNode).getExecutable().getParameters();
+						// srcCallArguments = ((CtConstructorCall)
+						// srcNode).getExecutable().getParameters();
+						srcCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
+
 					}
 					String dstCallMethodName;
 					CtElement dst = dstNode;
 					List<CtTypeReference> dstCallArguments;
 					if (dstNode instanceof CtInvocation) {
 						dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
-						dstCallArguments = ((CtInvocation) dstNode).getExecutable().getParameters();
+						// dstCallArguments = ((CtInvocation) dstNode).getExecutable().getParameters();
+						dstCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
 					} else {
 						dstCallMethodName = ((CtConstructorCall) dstNode).getExecutable().getSimpleName();
-						dstCallArguments = ((CtConstructorCall) dstNode).getExecutable().getParameters();
+						// dstCallArguments = ((CtConstructorCall)
+						// dstNode).getExecutable().getParameters();
+						dstCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
 					}
 
 					for (Operation operation2 : operations) {
