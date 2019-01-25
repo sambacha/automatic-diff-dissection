@@ -55,6 +55,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						CtElement statementParent = srcNode.getParent(CtStatement.class);
 						if (statementParent.getMetadata("delete") == null) {
 							// skip when it's a wrap with method call
+							CtElement newElementReplacementOfTheVar = null;
 							boolean wasVariableWrapped = false;
 							for (int j = 0; j < operations.size(); j++) {
 								Operation operation2 = operations.get(j);
@@ -94,6 +95,11 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 												}
 											}
 										}
+
+									}
+									// Save an inserted node with inside the same parent:
+									if (srcNode.getParent() == ((InsertOperation) operation2).getParent()) {
+										newElementReplacementOfTheVar = node2;
 									}
 								}
 							}
@@ -110,14 +116,27 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 								CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
 								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parentLine);
-								// Case 1
-								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
-										new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine,
-												lineTree,
 
-												// Is a variable access or a type access
-												new PropertyPair("Old", "Removed_" + srcNode.getClass().getSimpleName()
-														.replace("Ct", "").replace("Impl", ""))));
+								// Let's create the metadata
+								PropertyPair[] metadata = null;
+
+								PropertyPair propertyOldElemet = new PropertyPair("Old", "Removed_"
+										+ srcNode.getClass().getSimpleName().replace("Ct", "").replace("Impl", ""));
+
+								// if we have the element that has be inserted
+								if (newElementReplacementOfTheVar != null) {
+									PropertyPair propertyNewElement = new PropertyPair("New",
+											"Added_" + newElementReplacementOfTheVar.getClass().getSimpleName()
+													.replace("Ct", "").replace("Impl", ""));
+
+									metadata = new PropertyPair[] { propertyOldElemet, propertyNewElement };
+								} else
+									metadata = new PropertyPair[] { propertyOldElemet };
+
+								// Case 1
+
+								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF, new PatternInstance(
+										WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree, metadata));
 
 							}
 						}
