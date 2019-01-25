@@ -219,13 +219,16 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
 					List<CtTypeReference> srcCallArguments;
 					List<CtTypeReference> srcCallArgumentsFromExec;
+					List<CtTypeReference> srcCallRealArguments;
 					if (srcNode instanceof CtInvocation) {
 						srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
 						srcCallArgumentsFromExec = ((CtInvocation) srcNode).getExecutable().getParameters();
 						srcCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
+						srcCallRealArguments = ((CtInvocation) srcNode).getArguments();
 					} else {
 						srcCallMethodName = ((CtConstructorCall) srcNode).getExecutable().getSimpleName();
 						srcCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
+						srcCallRealArguments = ((CtConstructorCall) srcNode).getArguments();
 						srcCallArgumentsFromExec = ((CtConstructorCall) srcNode).getExecutable().getParameters();
 
 					}
@@ -233,6 +236,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					CtElement dst = dstNode;
 					List<CtTypeReference> dstCallArguments;
 					List<CtTypeReference> dstCallArgumentsFromExec;
+					List<CtTypeReference> dstCallRealArguments;
 
 					CtTargetedExpression dstInvocation = null;
 					if (dstNode instanceof CtInvocation) {
@@ -240,9 +244,12 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						dstCallArguments = ((CtInvocation) dstNode).getActualTypeArguments();
 						dstCallArgumentsFromExec = ((CtInvocation) dstNode).getExecutable().getParameters();
 						dstInvocation = (CtTargetedExpression) dstNode;
+						dstCallRealArguments = ((CtInvocation) dstNode).getArguments();
+
 					} else {
 						dstCallMethodName = ((CtConstructorCall) dstNode).getExecutable().getSimpleName();
 						dstCallArguments = ((CtConstructorCall) dstNode).getActualTypeArguments();
+						dstCallRealArguments = ((CtConstructorCall) dstNode).getArguments();
 						dstCallArgumentsFromExec = ((CtConstructorCall) dstNode).getExecutable().getParameters();
 						dstInvocation = (CtTargetedExpression) dstNode;
 					}
@@ -318,9 +325,14 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											new PropertyPair("Change", "differentMethodName")));
 
 						} else {
-							if (srcCallArguments.size() != dstCallArguments.size()
-									// horrible workaround
-									|| srcCallArgumentsFromExec.size() != dstCallArgumentsFromExec.size()) {
+							if (
+							// srcCallArguments.size() != dstCallArguments.size()
+							// horrible workaround
+							// || srcCallArgumentsFromExec.size() != dstCallArgumentsFromExec.size()
+							// ||
+							srcCallRealArguments.size() != dstCallRealArguments.size()
+
+							) {
 								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,

@@ -769,8 +769,40 @@ public class DiffICSE2015Test {
 		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
 		printJSON(result);
 		SuspiciousASTFaultyTest.assertMarkedlAST(result, "susp_wrongMethodRef", null, null, false);
-		// SuspiciousASTFaultyTest.assertNumberOfChildrenAST(result, "Do",
-		// MappingAnalysis.MAX_CHILDREN_DO);
+
+	}
+
+	@Test
+	public void test14255636_nodes_ifcondition() throws Exception {
+		String diffId = "1425563";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		// SuspiciousASTFaultyTest.assertMarkedlAST(result, "susp_wrongMethodRef", null,
+		// null, false);
+
+	}
+
+	@Test
+	public void test1296989_nodes_try() throws Exception {
+		String diffId = "1296989";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		// SuspiciousASTFaultyTest.assertMarkedlAST(result, "susp_wrongMethodRef", null,
+		// null, false);
 
 	}
 
