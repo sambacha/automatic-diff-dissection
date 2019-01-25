@@ -18,6 +18,7 @@ import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtTargetedExpression;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
@@ -195,34 +196,36 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				if (dstNode instanceof CtInvocation || dstNode instanceof CtConstructorCall) {
 					boolean wasMethodDefUpdated = false;
 
-					// CtTypeReference srcTypeReference;
 					String srcCallMethodName;
-					CtElement srcInvocation = srcNode;
+					CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
 					List<CtTypeReference> srcCallArguments;
+					List<CtTypeReference> srcCallArgumentsFromExec;
 					if (srcNode instanceof CtInvocation) {
-						// srcTypeReference = ((CtInvocation) srcNode).getTarget().getType();
 						srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
-						// srcCallArguments = ((CtInvocation) srcNode).getExecutable().getParameters();
+						srcCallArgumentsFromExec = ((CtInvocation) srcNode).getExecutable().getParameters();
 						srcCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
 					} else {
 						srcCallMethodName = ((CtConstructorCall) srcNode).getExecutable().getSimpleName();
-						// srcCallArguments = ((CtConstructorCall)
-						// srcNode).getExecutable().getParameters();
 						srcCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
+						srcCallArgumentsFromExec = ((CtConstructorCall) srcNode).getExecutable().getParameters();
 
 					}
 					String dstCallMethodName;
 					CtElement dst = dstNode;
 					List<CtTypeReference> dstCallArguments;
+					List<CtTypeReference> dstCallArgumentsFromExec;
+
+					CtTargetedExpression dstInvocation = null;
 					if (dstNode instanceof CtInvocation) {
 						dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
-						// dstCallArguments = ((CtInvocation) dstNode).getExecutable().getParameters();
-						dstCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
+						dstCallArguments = ((CtInvocation) dstNode).getActualTypeArguments();
+						dstCallArgumentsFromExec = ((CtInvocation) dstNode).getExecutable().getParameters();
+						dstInvocation = (CtTargetedExpression) dstNode;
 					} else {
 						dstCallMethodName = ((CtConstructorCall) dstNode).getExecutable().getSimpleName();
-						// dstCallArguments = ((CtConstructorCall)
-						// dstNode).getExecutable().getParameters();
-						dstCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
+						dstCallArguments = ((CtConstructorCall) dstNode).getActualTypeArguments();
+						dstCallArgumentsFromExec = ((CtConstructorCall) dstNode).getExecutable().getParameters();
+						dstInvocation = (CtTargetedExpression) dstNode;
 					}
 
 					for (Operation operation2 : operations) {
@@ -241,11 +244,13 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 										List<CtParameter> oldMethodPars = oldMethod.getParameters();
 										for (int k = 0; k < oldMethodPars.size(); k++) {
 											CtTypeReference methodParType = oldMethodPars.get(k).getType();
-											CtTypeReference methodCallArgType = srcCallArguments.get(k);
-											if (!methodParType.getQualifiedName()
-													.equals(methodCallArgType.getQualifiedName())) {
-												oldParEquals = false;
-												break;
+											if (k < srcCallArguments.size()) {
+												CtTypeReference methodCallArgType = srcCallArguments.get(k);
+												if (!methodParType.getQualifiedName()
+														.equals(methodCallArgType.getQualifiedName())) {
+													oldParEquals = false;
+													break;
+												}
 											}
 										}
 										if (oldParEquals) {
@@ -253,11 +258,13 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											List<CtParameter> newMethodPars = newMethod.getParameters();
 											for (int k = 0; k < newMethodPars.size(); k++) {
 												CtTypeReference methodParType = newMethodPars.get(k).getType();
-												CtTypeReference methodCallArgType = dstCallArguments.get(k);
-												if (!methodParType.getQualifiedName()
-														.equals(methodCallArgType.getQualifiedName())) {
-													newParEquals = false;
-													break;
+												if (k < dstCallArguments.size()) {
+													CtTypeReference methodCallArgType = dstCallArguments.get(k);
+													if (!methodParType.getQualifiedName()
+															.equals(methodCallArgType.getQualifiedName())) {
+														newParEquals = false;
+														break;
+													}
 												}
 											} // not sure
 											if (newParEquals) {
@@ -272,6 +279,14 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 					if (!wasMethodDefUpdated) {
 
+						// Let's check if the Target of the expression are the same, otherwise we
+						// discard this case
+						if (srcInvocation != null && dstInvocation != null && srcInvocation.getTarget() != null
+								&& dstInvocation.getTarget() != null
+								&& !srcInvocation.getTarget().equals(dstInvocation.getTarget())) {
+							continue;
+						}
+
 						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), srcInvocation);
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parentLine);
 
@@ -284,7 +299,9 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											new PropertyPair("Change", "differentMethodName")));
 
 						} else {
-							if (srcCallArguments.size() != dstCallArguments.size()) {
+							if (srcCallArguments.size() != dstCallArguments.size()
+									// horrible workaround
+									|| srcCallArgumentsFromExec.size() != dstCallArgumentsFromExec.size()) {
 								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
