@@ -858,9 +858,15 @@ public class DiffContextAnalyzer {
 			List<CtElement> faulties = null;
 
 			CtElement getAffectedCtElement = patternInstance.getFaultyLine();
-			if (patternInstance.getFaultyTree() != null)
-				allTreeparents.add(patternInstance.getFaultyTree());
-			else {
+			ITree faultyTree = patternInstance.getFaultyTree();
+			if (faultyTree != null) {
+
+				// Transform the Tree element in case it's a control flow
+				faultyTree = MappingAnalysis.getFormatedTreeFromControlFlow(faultyTree,
+						(CtElement) faultyTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+
+				allTreeparents.add(faultyTree);
+			} else {
 
 				if (getAffectedCtElement != null) {
 					faulties = new ArrayList<>();
@@ -877,7 +883,11 @@ public class DiffContextAnalyzer {
 					ITree nodeFaulty = (ITree) faulty.getMetadata("gtnode");
 
 					if (nodeFaulty != null) {
-						allTreeparents.add(nodeFaulty);
+
+						ITree transformedTree = MappingAnalysis.getFormatedTreeFromControlFlow(nodeFaulty,
+								(CtElement) faulty.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+
+						allTreeparents.add(transformedTree);
 					} else {
 						System.out.println("Error nodefaulty null");
 					}
