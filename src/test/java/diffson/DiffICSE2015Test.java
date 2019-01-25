@@ -841,6 +841,40 @@ public class DiffICSE2015Test {
 	}
 
 	@Test
+	public void test663649_nodesTypes() throws Exception {
+		String diffId = "663649";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		// SuspiciousASTFaultyTest.assertNumberOfChildrenAST(result, "Do",
+		// MappingAnalysis.MAX_CHILDREN_DO);
+
+	}
+
+	@Test
+	public void test1065143_nodesTypes() throws Exception {
+		String diffId = "1065143";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		// SuspiciousASTFaultyTest.assertNumberOfChildrenAST(result, "Do",
+		// MappingAnalysis.MAX_CHILDREN_DO);
+
+	}
+
+	@Test
 	public void test658427_nodesSwitch() throws Exception {
 		String diffId = "658427";
 

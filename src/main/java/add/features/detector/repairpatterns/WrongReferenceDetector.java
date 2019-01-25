@@ -50,7 +50,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 			if (operation instanceof DeleteOperation) {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
-				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
+				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess
+						|| srcNode instanceof CtInvocation) {
 					if (srcNode.getMetadata("delete") != null) {
 						CtElement statementParent = srcNode.getParent(CtStatement.class);
 						if (statementParent.getMetadata("delete") == null) {
@@ -134,9 +135,15 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									metadata = new PropertyPair[] { propertyOldElemet };
 
 								// Case 1
+								if (srcNode instanceof CtInvocation)
+									repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
+											new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp,
+													parentLine, lineTree, metadata));
+								else
 
-								repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF, new PatternInstance(
-										WRONG_VAR_REF, operationDelete, patch, susp, parentLine, lineTree, metadata));
+									repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
+											new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine,
+													lineTree, metadata));
 
 							}
 						}
