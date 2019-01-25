@@ -37,14 +37,14 @@ public class PatternInstance {
 	}
 
 	public PatternInstance(String patternName, Operation op, CtElement nodeAffectedOp, List<CtElement> faultyStatements,
-			CtElement faultyLine, ITree tree, PropertyPair... metadata) {
+			CtElement faultyLine, ITree faultyAST_Tree, PropertyPair... metadata) {
 		super();
 		this.patternName = patternName;
 		this.op = op;
 		this.solution = nodeAffectedOp;
 		this.faultyStatements = faultyStatements;
 		this.faultyLine = faultyLine;
-		this.faultyTree = tree;
+		this.faultyTree = faultyAST_Tree;
 		this.metadata = Arrays.asList(metadata);
 	}
 
