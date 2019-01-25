@@ -740,6 +740,58 @@ public class DiffICSE2015Test {
 	}
 
 	@Test
+	public void test398382_nodes_var_replaced_by_method_inv() throws Exception {
+		String diffId = "398382";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		// SuspiciousASTFaultyTest.assertNumberOfChildrenAST(result, "Do",
+		// MappingAnalysis.MAX_CHILDREN_DO);
+
+	}
+
+	@Test
+	public void test934156_nodes_var_replaced_by_method_inv() throws Exception {
+		String diffId = "934156";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		SuspiciousASTFaultyTest.assertMarkedlAST(result, "susp_wrongMethodRef", null, null, false);
+		// SuspiciousASTFaultyTest.assertNumberOfChildrenAST(result, "Do",
+		// MappingAnalysis.MAX_CHILDREN_DO);
+
+	}
+
+	@Test
+	public void test546831_nodes() throws Exception {
+		String diffId = "546831";
+
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
+
+		File fileDiff = new File(getCompletePathICSE2015(diffId));
+		Map<String, Diff> diffOfcommit = new HashMap();
+		analyzer.processDiff(fileDiff, diffOfcommit);
+
+		JsonObject result = analyzer.atEndCommit(fileDiff, diffOfcommit);
+		printJSON(result);
+		// SuspiciousASTFaultyTest.assertNumberOfChildrenAST(result, "Do",
+		// MappingAnalysis.MAX_CHILDREN_DO);
+
+	}
+
+	@Test
 	public void test901907_nodesTypes() throws Exception {
 		String diffId = "901907";
 

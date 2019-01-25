@@ -45,6 +45,10 @@ import gumtree.spoon.diff.Diff;
  */
 public class SuspiciousASTFaultyTest {
 
+	public static void assertMarkedlAST(JsonObject resultjson, String patternName, String label, String type) {
+		assertMarkedlAST(resultjson, patternName, label, type, true);
+	}
+
 	/**
 	 * Assert if there is at least one node marked as suspicious.
 	 * 
@@ -53,7 +57,8 @@ public class SuspiciousASTFaultyTest {
 	 * @param label
 	 * @param type
 	 */
-	public static void assertMarkedlAST(JsonObject resultjson, String patternName, String label, String type) {
+	public static void assertMarkedlAST(JsonObject resultjson, String patternName, String label, String type,
+			Boolean valueToAssert) {
 
 		System.out.println("****************");
 
@@ -85,7 +90,7 @@ public class SuspiciousASTFaultyTest {
 			}
 
 		}
-		assertTrue("Node suspicious not found", found);
+		assertEquals(valueToAssert, found);
 	}
 
 	public static void assertNumberOfChildrenAST(JsonObject resultjson, String type, int maxNumberChildren) {
@@ -252,7 +257,7 @@ public class SuspiciousASTFaultyTest {
 			for (String s : jon.keySet()) {
 				if (s.equals("susp")) {
 					// System.out.println("susp--> " + ob);
-					if (label == null && type == null) {
+					if ((label == null && type == null && (patternName == null))) {
 
 						t = true;
 						break;
@@ -1821,7 +1826,7 @@ public class SuspiciousASTFaultyTest {
 		List<RepairPatterns> patterns = analyze(input);
 
 		JsonObject resultjson = getJsonDataD4j(diffId);
-
+		System.out.println(resultjson);
 		assertSuspiciousASTNode(resultjson);
 		RepairPatterns repairPatterns = patterns.get(0);
 		System.out.println(repairPatterns);
