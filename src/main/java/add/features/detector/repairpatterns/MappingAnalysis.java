@@ -200,7 +200,7 @@ public class MappingAnalysis {
 				ITree thenTree = copiedIfTree.getChildren().get(1);
 				copiedIfTree.getChildren().remove(1);
 			} else {
-				System.err.println("ERRORIf with  More than 3 children");
+				System.err.println("ERRORIf with  More than 3 children  " + copiedIfTree.getChildren().size());
 			}
 
 			return copiedIfTree;
@@ -280,8 +280,8 @@ public class MappingAnalysis {
 	public static void printMetadata(ITree copiedIfTree, int i) {
 		CtElement metadata = (CtElement) copiedIfTree.getChildren().get(i)
 				.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-		System.out.println("Removing: " + metadata);
-		System.out.println("Role: " + metadata.getRoleInParent());
+		// System.out.println("Removing: " + metadata);
+		// System.out.println("Role: " + metadata.getRoleInParent());
 	}
 
 	/**

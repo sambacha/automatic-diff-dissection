@@ -39,6 +39,7 @@ import add.features.detector.repairactions.RepairActionDetector;
 import add.features.detector.repairpatterns.MappingAnalysis;
 import add.features.detector.repairpatterns.RepairPatternDetector;
 import add.main.Config;
+import add.main.TimeChrono;
 import fr.inria.astor.util.MapList;
 import fr.inria.coming.codefeatures.Cntx;
 import fr.inria.coming.codefeatures.CodeFeatureDetector;
@@ -105,6 +106,8 @@ public class DiffContextAnalyzer {
 		int diffanalyzed = 0;
 		for (File difffile : dir.listFiles()) {
 
+			TimeChrono cr = new TimeChrono();
+			cr.start();
 			Map<String, Diff> diffOfcommit = new HashMap();
 
 			if (difffile.isFile() || difffile.listFiles() == null)
@@ -113,7 +116,7 @@ public class DiffContextAnalyzer {
 			diffanalyzed++;
 
 			log.debug("-commit->" + difffile);
-			System.out.println(diffanalyzed + "/" + dir.listFiles().length + ": " + difffile.getName());
+			System.out.println("\n****" + diffanalyzed + "/" + dir.listFiles().length + ": " + difffile.getName());
 
 			if (!acceptFile(difffile)) {
 				System.out.println("existing json for: " + difffile.getName());
@@ -121,14 +124,20 @@ public class DiffContextAnalyzer {
 			}
 
 			processDiff(difffile, diffOfcommit);
+			double timediff = cr.getSeconds();
+			log.info("Total diff of " + difffile.getName() + ": " + timediff);
 
 			// here, at the end, we compute the Context
 			atEndCommit(difffile, diffOfcommit);
+
+			double timeProg = cr.getSeconds();
+			log.info("Total property of " + difffile.getName() + ": " + (timeProg - timediff));
 
 			if (diffanalyzed == ConfigurationProperties.getPropertyInteger("maxdifftoanalyze")) {
 				System.out.println("max-break");
 				break;
 			}
+			log.info("Total time of " + difffile.getName() + ": " + cr.stopAndGetSeconds());
 		}
 
 		System.out.println("Withactions " + withactions);
@@ -390,80 +399,6 @@ public class DiffContextAnalyzer {
 
 	/////// ---------=-=-=-=--=-=-=-
 
-	////
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JsonObject calculateCntxJSONOLD(String id, Map<String, Diff> operations) {
-		JsonObject statsjsonRoot = new JsonObject();
-		statsjsonRoot.addProperty("diffid", id);
-		JsonArray sublistJSon = new JsonArray();
-		statsjsonRoot.add("operations", sublistJSon);
-		JsonArray patternlistJSon = new JsonArray();
-		statsjsonRoot.add("patterns", patternlistJSon);
-		JsonArray repairActionslistJSon = new JsonArray();
-		statsjsonRoot.add("repairactions", repairActionslistJSon);
-
-		for (String modifiedFile : operations.keySet()) {
-
-			Diff diff = operations.get(modifiedFile);
-			List<Operation> ops = diff.getRootOperations();
-
-			System.out.println("Diff file " + modifiedFile + " " + ops.size());
-			for (Operation operation : ops) {
-				CodeFeatureDetector cresolver = new CodeFeatureDetector();
-
-				JsonObject opContext = new JsonObject();
-
-				opContext.addProperty("bug", modifiedFile);
-
-				opContext.addProperty("key", modifiedFile);
-				Cntx iContext = cresolver.retrieveCntx(operation.getSrcNode());
-				iContext.setIdentifier(modifiedFile);
-				opContext.add("cntx", iContext.toJSON());
-
-				setBuggyInformation(operation, cresolver, opContext, diff);
-
-				setPatchInformation(operation, cresolver, opContext, diff);
-
-				calculateJSONAffectedMethod(diff, operation, opContext);
-				calculateJSONAffectedElement(diff, operation, opContext);
-				sublistJSon.add(opContext);
-
-			}
-
-			// Patterns:
-
-			JsonObject patternFile = new JsonObject();
-			Config config = new Config();
-			RepairPatternDetector detector = new RepairPatternDetector(config, diff);
-			RepairPatterns rp = detector.analyze();
-
-			JsonObject patterns = new JsonObject();
-			for (String featureName : rp.getFeatureNames()) {
-				int counter = rp.getFeatureCounter(featureName);
-				patterns.addProperty(featureName, counter);
-			}
-			patternFile.add("repairpatterns", patterns);
-			patternFile.addProperty("file", modifiedFile);
-			patternlistJSon.add(patternFile);
-
-			JsonObject repairActionFile = new JsonObject();
-			JsonObject repairactions = new JsonObject();
-			RepairActionDetector pa = new RepairActionDetector(config, diff);
-			RepairActions as = pa.analyze();
-			for (String featureName : as.getFeatureNames()) {
-				int counter = as.getFeatureCounter(featureName);
-				repairactions.addProperty(featureName, counter);
-			}
-
-			repairActionFile.add("repairactions", repairactions);
-			repairActionFile.addProperty("file", modifiedFile);
-			repairActionslistJSon.add(repairActionFile);
-		}
-		// System.out.println(statsjsonRoot);
-		return statsjsonRoot;
-
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JsonObject calculateCntxJSON(String id, Map<String, Diff> operations) {
 
@@ -492,17 +427,22 @@ public class DiffContextAnalyzer {
 
 			Config config = new Config();
 			EditScriptBasedDetector.preprocessEditScript(diff);
+			TimeChrono cr = new TimeChrono();
+			cr.start();
 			RepairPatternDetector detector = new RepairPatternDetector(config, diff);
 			RepairPatterns rp = detector.analyze();
+			log.info("---Total pattern of " + ": " + cr.stopAndGetSeconds());
 
 			for (List<PatternInstance> pi : rp.getPatternInstances().values()) {
 				patternInstances.addAll(pi);
 			}
+			cr.start();
 
 			JsonArray ast_arrays = calculateJSONAffectedStatementList(diff, operationsFromFile, patternsPerOp,
 					repairactionPerOp, patternInstances);
 			// fileModified.add("faulty_stmts_ast", ast_arrays);
 			fileModified.add("pattern_instances", ast_arrays);
+			log.info("---Total feature of " + ": " + cr.stopAndGetSeconds());
 
 			includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
 
@@ -520,8 +460,10 @@ public class DiffContextAnalyzer {
 
 			JsonObject astNode = new JsonObject();
 			astNode.addProperty("change", op.getClass().getSimpleName());
-			JsonObject opContext = getContextInformation(diff, cresolver, op, op.getSrcNode());
-			astNode.add("info", opContext);
+			// TODO: we dont want to compute context of AST
+			// JsonObject opContext = getContextInformation(diff, cresolver, op,
+			// op.getSrcNode());
+			// astNode.add("info", opContext);
 
 			ast_changes_arrays.add(astNode);
 		}
@@ -612,8 +554,7 @@ public class DiffContextAnalyzer {
 	 */
 
 	@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
-	private void setBuggyInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext,
-			Diff diff) {
+	private void seInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext, Diff diff) {
 
 		Cntx bugContext = new Cntx<>();
 
@@ -929,7 +870,7 @@ public class DiffContextAnalyzer {
 		// Cntx iContext = cresolver.retrieveCntx(getAffectedCtElement);
 		// opContext.add("cntx", iContext.toJSON());
 
-		setBuggyInformation(opi, cresolver, opContext, diff);
+		seInformation(opi, cresolver, opContext, diff);
 
 		setPatchInformation(opi, cresolver, opContext, diff);
 		return opContext;

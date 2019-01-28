@@ -78,10 +78,16 @@
 			<version>0.0.2-SNAPSHOT</version>
 			<!--use this before commit d09905c02c3bea4e41be52d0af6fe8e485c8f3c7 -->
 		</dependency>
+		<dependency>
+			<groupId>fr.inria.coming</groupId>
+			<artifactId>coming</artifactId>
+			<version>0.1-SNAPSHOT</version>
+			<!--use this before commit d09905c02c3bea4e41be52d0af6fe8e485c8f3c7 -->
+		</dependency>
 	</dependencies>
 
 	<repositories>
-		<repository>
+	<!--  	<repository>
 			<id>tdurieux.github.io/maven-repository</id>
 			<name>tdurieux.github.io maven-repository</name>
 			<url>https://tdurieux.github.io/maven-repository/snapshots/</url>
@@ -91,6 +97,47 @@
 			<name>Maven Repository for Spoon Snapshot</name>
 			<url>http://spoon.gforge.inria.fr/repositories/snapshots/</url>
 			<snapshots />
+		</repository>
+		-->
+				<repository>
+			<id>inria</id>
+			<url>http://spoon.gforge.inria.fr/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>gforge.inria.fr-snapshot</id>
+			<name>Maven Repository for Spoon Snapshot</name>
+			<url>http://spoon.gforge.inria.fr/repositories/snapshots/</url>
+			<snapshots />
+		</repository>
+		<repository>
+			<id>gforge.inria.fr-release</id>
+			<name>Maven Repository for Spoon Release</name>
+			<url>http://sachaproject.gforge.inria.fr/repositories/releases/</url>
+			<snapshots />
+		</repository>
+		<repository>
+			<id>sachaproject.gforge.inria.fr-release</id>
+			<name>Maven Repository for Spoon Release</name>
+			<url>http://sachaproject.gforge.inria.fr/repositories/releases/</url>
+			<snapshots />
+		</repository>
+
+		<repository>
+			<id>tdurieux.github.io/maven-repository/snapshots/</id>
+			<name>tdurieux.github.io maven-repository</name>
+			<url>https://tdurieux.github.io/maven-repository/snapshots/</url>
+		</repository>
+
+		<repository>
+			<id>tdurieux.github.io/maven-repository/releases/</id>
+			<name>tdurieux.github.io maven-repository</name>
+			<url>https://tdurieux.github.io/maven-repository/releases/</url>
+		</repository>
+
+		<repository>
+			<id>maven.inria.fr-snapshot</id>
+			<name>Maven Repository for Spoon Snapshots</name>
+			<url>http://maven.inria.fr/artifactory/spoon-public-snapshot</url>
 		</repository>
 	</repositories>
 

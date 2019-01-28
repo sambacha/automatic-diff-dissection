@@ -33,6 +33,20 @@ public class ExperimentRunner {
 
 	}
 
+	public static void main(String[] args) throws Exception {
+		// String name = args[0];
+		String inputpath = args[0];
+		String output = args[1];
+
+		File outFile = new File(output);
+		String out = outFile.getAbsolutePath();
+		outFile.mkdirs();
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
+		String input = new File(inputpath).getAbsolutePath();
+		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
+		analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
+	}
+
 	@Test
 	public void testD4J() throws Exception {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");

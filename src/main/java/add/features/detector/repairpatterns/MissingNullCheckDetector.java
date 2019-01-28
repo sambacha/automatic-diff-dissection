@@ -52,7 +52,7 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 				for (CtBinaryOperator binaryOperator : binaryOperatorList) {
 					if (RepairPatternUtils.isNewBinaryOperator(binaryOperator)) {
 						if (RepairPatternUtils.isNewConditionInBinaryOperator(binaryOperator)) {
-							LOGGER.debug("-New null check: " + binaryOperator.toString());
+							// LOGGER.debug("-New null check: " + binaryOperator.toString());
 
 							final CtElement referenceExpression;
 							if (binaryOperator.getRightHandOperand().toString().equals("null")) {
@@ -60,7 +60,7 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 							} else {
 								referenceExpression = binaryOperator.getRightHandOperand();
 							}
-							LOGGER.debug("-Reference expression: " + referenceExpression.toString());
+							// LOGGER.debug("-Reference expression: " + referenceExpression.toString());
 
 							boolean wasPatternFound = false;
 
