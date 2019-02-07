@@ -74,7 +74,7 @@ public class DiffContextAnalyzer {
 
 	public DiffContextAnalyzer() {
 		super();
-		ConfigurationProperties.properties.setProperty("maxdifftoanalyze", "5");
+		PDDConfigurationProperties.properties.setProperty("maxdifftoanalyze", "5");
 
 		out = new File("/tmp/");
 		out.mkdirs();
@@ -133,16 +133,18 @@ public class DiffContextAnalyzer {
 			double timeProg = cr.getSeconds();
 			log.info("Total property of " + difffile.getName() + ": " + (timeProg - timediff));
 
-			if (diffanalyzed == ConfigurationProperties.getPropertyInteger("maxdifftoanalyze")) {
-				System.out.println("max-break");
-				break;
-			}
+			// if (diffanalyzed ==
+			// ConfigurationProperties.getPropertyInteger("maxdifftoanalyze")) {
+			// System.out.println("max-break");
+			// break;
+			// }
 			log.info("Total time of " + difffile.getName() + ": " + cr.stopAndGetSeconds());
 		}
-
-		System.out.println("Withactions " + withactions);
-		System.out.println("Zero " + zero);
-		System.out.println("Error " + error);
+		log.info("Final Results: ");
+		log.info("----");
+		log.info("Withactions " + withactions);
+		log.info("Zero " + zero);
+		log.info("Error " + error);
 
 		beforeEnd();
 	}
@@ -155,7 +157,7 @@ public class DiffContextAnalyzer {
 			if (".DS_Store".equals(fileModif.getName()))
 				continue;
 
-			if (ConfigurationProperties.getPropertyBoolean("excludetests")
+			if (PDDConfigurationProperties.getPropertyBoolean("excludetests")
 					&& (fileModif.getName().startsWith("Test") || fileModif.getName().endsWith("Test")))
 				continue;
 			// Commented for the ye's dataset 3Fix
@@ -203,7 +205,7 @@ public class DiffContextAnalyzer {
 				}
 
 			} catch (Throwable e) {
-				System.out.println("error with " + previousVersion);
+				log.error("error with " + previousVersion);
 				e.printStackTrace();
 				error++;
 			}
@@ -303,12 +305,12 @@ public class DiffContextAnalyzer {
 		Diff resukltDiff = null;
 		try {
 			resukltDiff = future.get(30, TimeUnit.SECONDS);
-		} catch (InterruptedException e) { // <-- possible error cases
-			System.out.println("job was interrupted");
+		} catch (InterruptedException e) {
+			log.error("job was interrupted");
 		} catch (ExecutionException e) {
-			System.out.println("caught exception: " + e.getCause());
+			log.error("caught exception: " + e.getCause());
 		} catch (TimeoutException e) {
-			System.out.println("timeout");
+			log.error("timeout");
 		}
 
 		executorService.shutdown();
@@ -383,13 +385,12 @@ public class DiffContextAnalyzer {
 		JsonObject resukltDiff = null;
 		try {
 			resukltDiff = future.get(4, TimeUnit.MINUTES);
-		} catch (InterruptedException e) { // <-- possible error cases
-			System.out.println("job was interrupted");
+		} catch (InterruptedException e) {
+			log.error("job was interrupted");
 		} catch (ExecutionException e) {
-			e.printStackTrace();
-			System.out.println("caught exception: " + e.getCause());
+			log.error("caught exception: " + e.getCause());
 		} catch (TimeoutException e) {
-			System.out.println("timeout context analyzed.");
+			log.error("timeout context analyzed.");
 		}
 
 		executorService.shutdown();
@@ -415,7 +416,7 @@ public class DiffContextAnalyzer {
 			Diff diff = operations.get(modifiedFile);
 			List<Operation> operationsFromFile = diff.getRootOperations();
 
-			System.out.println("Diff file " + modifiedFile + " " + operationsFromFile.size());
+			log.info("Diff file " + modifiedFile + " " + operationsFromFile.size());
 
 			// Patterns:
 
@@ -459,8 +460,11 @@ public class DiffContextAnalyzer {
 		for (Operation op : operationsFromFile) {
 
 			JsonObject astNode = new JsonObject();
-			astNode.addProperty("change", op.getClass().getSimpleName());
-			// TODO: we dont want to compute context of AST
+			astNode.addProperty("change_type", op.getClass().getSimpleName());
+			astNode.addProperty("entity_type",
+					op.getSrcNode().getClass().getSimpleName().replaceAll("Ct", "").replaceAll("Impl", ""));
+
+			// TODO: now we don't want to compute context of AST
 			// JsonObject opContext = getContextInformation(diff, cresolver, op,
 			// op.getSrcNode());
 			// astNode.add("info", opContext);
@@ -510,7 +514,7 @@ public class DiffContextAnalyzer {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error computing ");
+			log.error("Error computing ");
 			e.printStackTrace();
 		}
 
@@ -571,7 +575,7 @@ public class DiffContextAnalyzer {
 
 			bugContext.put(CodeFeatures.OPERATION, "MV");
 
-			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(affectedMoved));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveInfoOfElement(affectedMoved));
 
 			ITree affected = MappingAnalysis.getParentInSource(diff, movop.getAction());
 
@@ -580,7 +584,7 @@ public class DiffContextAnalyzer {
 			if (targetTreeParentNode != null) {
 				CtElement oldParentLocationInsertStmt = (CtElement) targetTreeParentNode.getMetadata("spoon_object");
 
-				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 			}
 
 		} else if (operation instanceof InsertOperation)
@@ -592,7 +596,7 @@ public class DiffContextAnalyzer {
 
 			affectedCtElement = oldLocation;
 			bugContext.put(CodeFeatures.AFFECTED, null);
-			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 			bugContext.put(CodeFeatures.OPERATION, "INS");
 
 		} else if (operation instanceof DeleteOperation) {
@@ -600,8 +604,8 @@ public class DiffContextAnalyzer {
 			DeleteOperation up = (DeleteOperation) operation;
 			CtElement oldLocation = operation.getSrcNode();
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
-			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
-			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveInfoOfElement(oldLocation));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 			bugContext.put(CodeFeatures.OPERATION, "DEL");
 
 			affectedCtElement = oldLocation;
@@ -611,8 +615,8 @@ public class DiffContextAnalyzer {
 			UpdateOperation up = (UpdateOperation) operation;
 			CtElement oldLocation = operation.getSrcNode();
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
-			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
-			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveInfoOfElement(oldLocation));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 			bugContext.put(CodeFeatures.OPERATION, "UPD");
 
 			affectedCtElement = oldLocation;
@@ -620,7 +624,7 @@ public class DiffContextAnalyzer {
 
 		//
 		if (affectedCtElement != null) {
-			Cntx iContext = cresolver.retrieveCntx(affectedCtElement);
+			Cntx iContext = cresolver.analyzeFeatures(affectedCtElement);
 			opContext.add("cntx", iContext.toJSON());
 		}
 
@@ -657,13 +661,13 @@ public class DiffContextAnalyzer {
 			// This parent is from the dst
 			ITree newParentSRC = ma.getParent();
 
-			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(affectedMoved));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveInfoOfElement(affectedMoved));
 
 			ITree parentInRight = MappingAnalysis.getParentInRight(diff, ma);
 
 			CtElement parentMovedElementInDst = getStmtParent((CtElement) parentInRight.getMetadata("spoon_object"));
 			nodeToCalculateContext = parentMovedElementInDst;
-			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(parentMovedElementInDst));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(parentMovedElementInDst));
 
 		} else if (operation instanceof InsertOperation)
 
@@ -672,8 +676,8 @@ public class DiffContextAnalyzer {
 			CtElement affectedElement = op.getSrcNode();
 			CtElement newParentLocationInsertStmt = getStmtParent(affectedElement);
 
-			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(affectedElement));
-			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(newParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveInfoOfElement(affectedElement));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(newParentLocationInsertStmt));
 			bugContext.put(CodeFeatures.OPERATION, "INS");
 			nodeToCalculateContext = affectedElement;
 		} else if (operation instanceof DeleteOperation) {
@@ -694,7 +698,7 @@ public class DiffContextAnalyzer {
 				CtElement oldParentLocationInsertStmt = getStmtParent(parentDstInDst);
 				nodeToCalculateContext = oldParentLocationInsertStmt;
 				bugContext.put(CodeFeatures.AFFECTED, null);
-				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 				bugContext.put(CodeFeatures.OPERATION, "DEL");
 			}
 
@@ -705,8 +709,8 @@ public class DiffContextAnalyzer {
 			CtElement oldParentLocationInsertStmt = getStmtParent(oldLocation);
 
 			bugContext.put(CodeFeatures.OPERATION, "UPD");
-			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveBuggyInfo(oldLocation));
-			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveBuggyInfo(oldParentLocationInsertStmt));
+			bugContext.put(CodeFeatures.AFFECTED, cresolver.retrieveInfoOfElement(oldLocation));
+			bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 			// Is it located in parent?
 			nodeToCalculateContext = oldLocation;
 		}

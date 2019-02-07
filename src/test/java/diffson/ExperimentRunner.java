@@ -65,7 +65,7 @@ public class ExperimentRunner {
 	public void testCODEREP() throws Exception {
 		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
 		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
-		diffson.ConfigurationProperties.properties.setProperty("excludetests", "false");
+		diffson.PDDConfigurationProperties.properties.setProperty("excludetests", "false");
 		for (int i = 3; i <= 4; i++) {
 			File outFile = new File("./out/" + "codeRepDS" + i + "_" + (new Date()));
 			String out = outFile.getAbsolutePath();

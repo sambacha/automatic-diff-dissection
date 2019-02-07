@@ -23,7 +23,7 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 	public FaultyElementPatternPainter(List<PatternInstance> instances) {
 		// Collect all nodes and get the operator
-		Boolean includeMetadata = ConfigurationProperties.getPropertyBoolean("include_pattern_metadata");
+		Boolean includeMetadata = PDDConfigurationProperties.getPropertyBoolean("include_pattern_metadata");
 
 		for (PatternInstance patternInstance : instances) {
 			for (CtElement susp : patternInstance.getFaulty()) {
@@ -42,10 +42,16 @@ public class FaultyElementPatternPainter implements NodePainter {
 	}
 
 	public String createPatternLabel(Boolean includeMetadata, PatternInstance patternInstance) {
-		return "susp_" + patternInstance.getPatternName()
-		// if include instance metadata (i.e., sub-category of patterns)
-				+ ((includeMetadata && !patternInstance.getMetadata().isEmpty()) ? ("_" + patternInstance.getMetadata()
-						.stream().map(PropertyPair::getValue).collect(Collectors.joining("_"))) : "");
+
+		try {
+			return "susp_" + patternInstance.getPatternName()
+			// if include instance metadata (i.e., sub-category of patterns)
+					+ ((// includeMetadata &&
+					!patternInstance.getMetadata().isEmpty()) ? ("_" + patternInstance.getMetadata().stream()
+							.map(PropertyPair::getValue).collect(Collectors.joining("_"))) : "");
+		} catch (Exception e) {
+			return "";
+		}
 	}
 
 	private String getKey(CtElement susp) {

@@ -3997,7 +3997,7 @@ public class SuspiciousASTFaultyTest {
 
 		String input = getCompletePath("icse2015", diffId);
 		// We force to analyze the test, there we have the pattern instance
-		diffson.ConfigurationProperties.properties.setProperty("excludetests", "false");
+		diffson.PDDConfigurationProperties.properties.setProperty("excludetests", "false");
 		List<RepairPatterns> patterns = analyze(input);
 
 		RepairPatterns repairPatterns = patterns.get(0);

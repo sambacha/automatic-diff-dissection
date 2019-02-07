@@ -8,7 +8,7 @@ import java.util.Properties;
  * @author Matias Martinez, matias.martinez@inria.fr
  *
  */
-public class ConfigurationProperties {
+public class PDDConfigurationProperties {
 
 	public static Properties properties;
 
@@ -20,7 +20,7 @@ public class ConfigurationProperties {
 		InputStream propFile;
 		try {
 			properties = new Properties();
-			propFile = ConfigurationProperties.class.getClassLoader().getResourceAsStream("configuration.properties");
+			propFile = PDDConfigurationProperties.class.getClassLoader().getResourceAsStream("configuration.properties");
 
 			properties.load(propFile);
 		} catch (Exception e) {
@@ -45,7 +45,7 @@ public class ConfigurationProperties {
 	}
 
 	public static void main(String[] s) {
-		String ss = ConfigurationProperties.properties.getProperty("test");
+		String ss = PDDConfigurationProperties.properties.getProperty("test");
 		System.out.println("-->" + ss);
 	}
 }

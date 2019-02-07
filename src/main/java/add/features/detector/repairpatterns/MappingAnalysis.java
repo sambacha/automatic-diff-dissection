@@ -197,10 +197,8 @@ public class MappingAnalysis {
 			// we remove the then
 			if (copiedIfTree.getChildren().size() == 2) {
 
-				ITree thenTree = copiedIfTree.getChildren().get(1);
+				// ITree thenTree = copiedIfTree.getChildren().get(1);
 				copiedIfTree.getChildren().remove(1);
-			} else {
-				System.err.println("ERRORIf with  More than 3 children  " + copiedIfTree.getChildren().size());
 			}
 
 			return copiedIfTree;
@@ -208,16 +206,8 @@ public class MappingAnalysis {
 		} else if (parentLine instanceof CtWhile) {
 			ITree copiedIfTree = lineTree.deepCopy();
 
-			// we remove the then
-			// if (copiedIfTree.getChildren().size() <= 2) {
-
-			// ITree thenTree = copiedIfTree.getChildren().get(1);
-			// copiedIfTree.getChildren().remove(1);
-			// }
-			CtElement metadatakeep = (CtElement) copiedIfTree.getChildren().get(0)
-					.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-			System.out.println("We Keep : " + metadatakeep);
-			System.out.println("Role: " + metadatakeep.getRoleInParent());
+			// CtElement metadatakeep = (CtElement) copiedIfTree.getChildren().get(0)
+			// .getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 			// The first childen is the condition, the rest the then body and then
 			if (copiedIfTree.getChildren().size() >= MappingAnalysis.MAX_CHILDREN_WHILE) {
@@ -238,7 +228,7 @@ public class MappingAnalysis {
 			ITree copiedIfTree = lineTree.deepCopy();
 
 			for (int i = lineTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_FOR; i--) {
-				printMetadata(copiedIfTree, i);
+				// printMetadata(copiedIfTree, i);
 
 				copiedIfTree.getChildren().remove(i);
 			}
@@ -248,7 +238,7 @@ public class MappingAnalysis {
 			ITree copiedIfTree = lineTree.deepCopy();
 
 			for (int i = lineTree.getChildren().size() - 1; i >= MappingAnalysis.MAX_CHILDREN_FOREACH; i--) {
-				printMetadata(copiedIfTree, i);
+				// printMetadata(copiedIfTree, i);
 
 				copiedIfTree.getChildren().remove(i);
 			}
