@@ -33,6 +33,38 @@ public class ExperimentRunner {
 
 	}
 
+	@Test
+	public void testHDRepair() throws Exception {
+		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
+		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
+		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "20");
+		File outFile = new File("./out/HdRepair_" + (new Date()));
+		String out = outFile.getAbsolutePath();
+		outFile.mkdirs();
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
+		String input = new File("/Users/matias/develop/sketch-repair/datasets/pairs-bug-fixes-saner16")
+				.getAbsolutePath();
+		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
+		analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
+
+	}
+
+	@Test
+	public void testICSE2018All() throws Exception {
+		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
+		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
+		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "20");
+		File outFile = new File("./out/icse18_" + (new Date()));
+		String out = outFile.getAbsolutePath();
+		outFile.mkdirs();
+		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
+		String input = new File("/Users/matias/develop/sketch-repair/git-sketch4repair/datasets/icse2018-pairs-all")
+				.getAbsolutePath();
+		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
+		analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
+
+	}
+
 	public static void main(String[] args) throws Exception {
 		// String name = args[0];
 		String inputpath = args[0];
