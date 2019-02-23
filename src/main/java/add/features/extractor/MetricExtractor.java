@@ -1,15 +1,20 @@
 package add.features.extractor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import add.entities.Metrics;
 import add.features.FeatureAnalyzer;
 import add.features.diffanalyzer.Change;
 import add.features.diffanalyzer.Changes;
 import add.features.diffanalyzer.JGitBasedDiffAnalyzer;
 import add.main.Config;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by tdurieux

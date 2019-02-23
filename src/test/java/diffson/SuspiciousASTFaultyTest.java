@@ -34,8 +34,8 @@ import add.features.detector.repairpatterns.WrapsWithDetector;
 import add.features.detector.repairpatterns.WrongReferenceDetector;
 import add.main.Config;
 import add.utils.TestUtils;
-import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.coming.codefeatures.CodeFeatures;
+import fr.inria.coming.main.ComingProperties;
 import gumtree.spoon.diff.Diff;
 
 /**
@@ -190,8 +190,8 @@ public class SuspiciousASTFaultyTest {
 		File fileInput = new File(input);
 		System.out.println(input);
 
-		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
-		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
+		ComingProperties.setProperty("max_synthesis_step", "100000");
+		ComingProperties.properties.setProperty("max_synthesis_step", "100000");
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 		Map<String, Diff> diffOfcommit = new HashMap();
 		// Compute the diff of the revision
@@ -748,7 +748,7 @@ public class SuspiciousASTFaultyTest {
 	@Test
 	public void testD4JMath_88() throws Exception {
 		String diffId = "Math_88";
-		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
+		ComingProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
 		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
@@ -827,7 +827,7 @@ public class SuspiciousASTFaultyTest {
 	@Test
 	public void testD4JTime_11() throws Exception {
 		String diffId = "Time_11";
-		ConfigurationProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
+		ComingProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
 		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
@@ -1282,7 +1282,7 @@ public class SuspiciousASTFaultyTest {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ConfigurationProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(ComingProperties.getProperty("icse15difffolder") + "/" + diffId);
 		Map<String, Diff> diffOfcommit = new HashMap();
 		analyzer.processDiff(fileDiff, diffOfcommit);
 
@@ -3997,7 +3997,7 @@ public class SuspiciousASTFaultyTest {
 
 		String input = getCompletePath("icse2015", diffId);
 		// We force to analyze the test, there we have the pattern instance
-		diffson.PDDConfigurationProperties.properties.setProperty("excludetests", "false");
+		ComingProperties.properties.setProperty("excludetests", "false");
 		List<RepairPatterns> patterns = analyze(input);
 
 		RepairPatterns repairPatterns = patterns.get(0);

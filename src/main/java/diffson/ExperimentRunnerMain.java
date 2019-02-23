@@ -2,7 +2,7 @@ package diffson;
 
 import java.io.File;
 
-import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.coming.main.ComingProperties;
 
 /**
  * Experiment runners
@@ -19,8 +19,8 @@ public class ExperimentRunnerMain {
 		outFile.mkdirs();
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);
 		String input = new File(inputpath).getAbsolutePath();
-		ConfigurationProperties.properties.setProperty("icse15difffolder", input);
-		analyzer.run(ConfigurationProperties.getProperty("icse15difffolder"));
+		ComingProperties.properties.setProperty("icse15difffolder", input);
+		analyzer.run(ComingProperties.getProperty("icse15difffolder"));
 	}
 
 }

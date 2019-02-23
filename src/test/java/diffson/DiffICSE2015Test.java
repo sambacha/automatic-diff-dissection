@@ -11,7 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import add.features.detector.repairpatterns.MappingAnalysis;
-import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.coming.main.ComingProperties;
 import gumtree.spoon.diff.Diff;
 
 //@Ignore
@@ -20,8 +20,8 @@ public class DiffICSE2015Test {
 	@Test
 	public void testFailingTimeoutCase_1555_Move() throws Exception {
 		String diffId = "1555";
-		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
-		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
+		ComingProperties.setProperty("max_synthesis_step", "100000");
+		ComingProperties.properties.setProperty("max_synthesis_step", "100000");
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
@@ -38,8 +38,8 @@ public class DiffICSE2015Test {
 	@Test
 	public void testFailing_MaxNodes_966027() throws Exception {
 		String diffId = "966027";
-		ConfigurationProperties.setProperty("max_synthesis_step", "100000");
-		ConfigurationProperties.properties.setProperty("max_synthesis_step", "100000");
+		ComingProperties.setProperty("max_synthesis_step", "100000");
+		ComingProperties.properties.setProperty("max_synthesis_step", "100000");
 
 		String out = new File("./out/tests/case" + "_unidiff").getAbsolutePath();
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer(out);

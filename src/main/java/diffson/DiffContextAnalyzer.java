@@ -40,10 +40,10 @@ import add.features.detector.repairpatterns.MappingAnalysis;
 import add.features.detector.repairpatterns.RepairPatternDetector;
 import add.main.Config;
 import add.main.TimeChrono;
-import fr.inria.astor.util.MapList;
 import fr.inria.coming.codefeatures.Cntx;
 import fr.inria.coming.codefeatures.CodeFeatureDetector;
 import fr.inria.coming.codefeatures.CodeFeatures;
+import fr.inria.coming.utils.MapList;
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.builder.Json4SpoonGenerator;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
@@ -584,7 +584,8 @@ public class DiffContextAnalyzer {
 			if (targetTreeParentNode != null) {
 				CtElement oldParentLocationInsertStmt = (CtElement) targetTreeParentNode.getMetadata("spoon_object");
 
-				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
+				bugContext.put(CodeFeatures.AFFECTED_PARENT,
+						cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 			}
 
 		} else if (operation instanceof InsertOperation)
@@ -698,7 +699,8 @@ public class DiffContextAnalyzer {
 				CtElement oldParentLocationInsertStmt = getStmtParent(parentDstInDst);
 				nodeToCalculateContext = oldParentLocationInsertStmt;
 				bugContext.put(CodeFeatures.AFFECTED, null);
-				bugContext.put(CodeFeatures.AFFECTED_PARENT, cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
+				bugContext.put(CodeFeatures.AFFECTED_PARENT,
+						cresolver.retrieveInfoOfElement(oldParentLocationInsertStmt));
 				bugContext.put(CodeFeatures.OPERATION, "DEL");
 			}
 

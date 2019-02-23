@@ -1,10 +1,11 @@
 package add.features.detector.repairpatterns;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Created by fermadeiral

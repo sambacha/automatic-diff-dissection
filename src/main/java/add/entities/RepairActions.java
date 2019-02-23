@@ -1,5 +1,6 @@
 package add.entities;
 
+import fr.inria.coming.utils.MapList;
 import spoon.reflect.declaration.CtElement;
 
 /**

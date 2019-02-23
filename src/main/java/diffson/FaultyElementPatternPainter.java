@@ -10,7 +10,7 @@ import com.google.gson.JsonPrimitive;
 
 import add.entities.PatternInstance;
 import add.entities.PropertyPair;
-import fr.inria.astor.util.MapList;
+import fr.inria.coming.utils.MapList;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.builder.jsonsupport.NodePainter;
 import spoon.reflect.declaration.CtElement;

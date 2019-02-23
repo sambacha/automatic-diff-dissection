@@ -1,8 +1,10 @@
 package add.main;
 
-import add.utils.TestUtils;
-import com.martiansoftware.jsap.JSAPException;
 import org.junit.Test;
+
+import com.martiansoftware.jsap.JSAPException;
+
+import add.utils.TestUtils;
 
 /**
  * Created by fermadeiral
