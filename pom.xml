@@ -56,12 +56,6 @@
 		</dependency>
 		<!-- <dependency> <groupId>fr.inria.gforge.spoon.labs</groupId> <artifactId>gumtree-spoon-ast-diff</artifactId> 
 			<version>1.5-SNAPSHOT</version> </dependency> -->
-
-		<dependency>
-			<groupId>fr.inria.gforge.spoon.labs </groupId>
-			<artifactId>gumtree-spoon-ast-diff</artifactId>
-			<version>1.6-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -72,12 +66,7 @@
 			<artifactId>nanohttpd</artifactId>
 			<version>2.2.0</version>
 		</dependency>
-		<dependency>
-			<groupId>fr.inria.coming</groupId>
-			<artifactId>coming</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<!--use this before commit d09905c02c3bea4e41be52d0af6fe8e485c8f3c7 -->
-		</dependency>
+		
 	</dependencies>
 
 	<repositories>

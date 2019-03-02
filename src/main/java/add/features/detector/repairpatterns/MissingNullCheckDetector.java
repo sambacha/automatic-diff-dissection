@@ -70,23 +70,26 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 							CtElement parent = binaryOperator.getParent(new LineFilter());
 
 							if (parent instanceof CtIf) {
-								CtBlock thenBlock = ((CtIf) parent).getThenStatement();
-								CtBlock elseBlock = ((CtIf) parent).getElseStatement();
+								if(RepairPatternUtils.isNewIf((CtIf) parent)) {
+								    CtBlock thenBlock = ((CtIf) parent).getThenStatement();
+								    CtBlock elseBlock = ((CtIf) parent).getElseStatement();
 
-								if (thenBlock != null) {
-									soldt = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								   if (thenBlock != null) {
+									  soldt = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
 											thenBlock.getStatements());
-									if (!soldt.isEmpty())
-										wasPatternFound = true;
+									  if (!soldt.isEmpty())
+										 wasPatternFound = true;
 
-								} // else
-								if (elseBlock != null) {
-									soldelse = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
+								   } // else
+								   if (elseBlock != null) {
+									  soldelse = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
 											elseBlock.getStatements());
-									if (!soldelse.isEmpty())
-										wasPatternFound = true;
+									  if (!soldelse.isEmpty())
+										 wasPatternFound = true;
+								   }
 								}
 							} else if (binaryOperator.getParent() instanceof CtConditional) {
+								
 								CtConditional c = (CtConditional) binaryOperator.getParent();
 								CtElement thenExpr = c.getThenExpression();
 								CtElement elseExp = c.getElseExpression();
@@ -95,7 +98,8 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 									soldt = new ArrayList<>();
 									// If it's not new the THEN
 									if (thenExpr.getMetadata("new") == null) {
-										soldt.add(thenExpr);
+									//	soldelse.add(thenExpr);
+										soldt.add(RepairPatternUtils.getElementInOld(diff, thenExpr));
 										wasPatternFound = true;
 									}
 								}
@@ -103,11 +107,11 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 									soldelse = new ArrayList<>();
 									// If it's not new the ELSE
 									if (elseExp.getMetadata("new") == null) {
-										soldelse.add(elseExp);
+									//	soldelse.add(elseExp);
+										soldt.add(RepairPatternUtils.getElementInOld(diff, elseExp));
 										wasPatternFound = true;
 									}
 								}
-
 							}
 
 							if (wasPatternFound) {
@@ -123,7 +127,6 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 								if (!susp.isEmpty()) {
 
 									lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));
-
 									lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
 								} else {
@@ -146,7 +149,6 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 
 									lineP = susp.get(0);
 									lineTree = treeInLeft.get(0);
-
 								}
 
 								if (binaryOperator.getKind().equals(BinaryOperatorKind.EQ)) {

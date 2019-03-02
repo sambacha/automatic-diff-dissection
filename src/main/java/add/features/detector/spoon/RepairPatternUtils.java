@@ -312,6 +312,13 @@ public class RepairPatternUtils {
 		}
 		return statementsNotNew;
 	}
+	
+	public static CtElement getElementInOld(Diff diff, CtElement elementInNew) {
+		ITree leftTree = MappingAnalysis.getLeftFromRightNodeMapped(diff, elementInNew);
+		CtElement oldElement = (CtElement) leftTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+		return oldElement;
+	}
 
 	public static List<CtStatement> getIsThereOldStatementInStatementList_old(List<CtStatement> statements) {
 		List<CtStatement> statementsNotNew = new ArrayList<>();

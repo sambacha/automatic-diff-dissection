@@ -158,7 +158,7 @@ public class DiffContextAnalyzer {
 				continue;
 
 			if (PDDConfigurationProperties.getPropertyBoolean("excludetests")
-					&& (fileModif.getName().startsWith("Test") || fileModif.getName().endsWith("Test")))
+					&& (fileModif.getName().toLowerCase().indexOf("test")!=-1))
 				continue;
 			// Commented for the ye's dataset 3Fix
 			// String pathname = fileModif.getAbsolutePath() + File.separator +
@@ -182,7 +182,6 @@ public class DiffContextAnalyzer {
 			try {
 				Diff diff = getdiffFuture(previousVersion, postVersion);
 
-				List<Operation> ops = diff.getRootOperations();
 				String key = fileModif.getParentFile().getName() + "_" + fileModif.getName();
 				diffOfcommit.put(key, diff);
 
@@ -630,10 +629,10 @@ public class DiffContextAnalyzer {
 		}
 
 		//
-		if (bugContext != null)
-			opContext.add("bug", bugContext.toJSON());
-		else
-			System.out.println("Operation not known: " + operation.getClass().getSimpleName());
+//		if (bugContext != null)
+//			opContext.add("bug", bugContext.toJSON());
+//		else
+//			System.out.println("Operation not known: " + operation.getClass().getSimpleName());
 
 	}
 //////
@@ -844,7 +843,7 @@ public class DiffContextAnalyzer {
 			List<NodePainter> painters = new ArrayList();
 			painters.add(new PatternPainter(patternsPerOp, "patterns"));
 			painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
-			painters.add(new OperationNodePainter(diff.getAllOperations()));
+		//	painters.add(new OperationNodePainter(diff.getAllOperations()));
 			painters.add(new FaultyElementPatternPainter(patternInstancesOriginal));
 			painters.add(new ReturnTypePainter());
 
@@ -880,7 +879,7 @@ public class DiffContextAnalyzer {
 
 		seInformation(opi, cresolver, opContext, diff);
 
-		setPatchInformation(opi, cresolver, opContext, diff);
+	//	setPatchInformation(opi, cresolver, opContext, diff);
 		return opContext;
 	}
 
