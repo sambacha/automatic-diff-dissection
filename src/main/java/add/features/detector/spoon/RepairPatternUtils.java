@@ -17,6 +17,7 @@ import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
+import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
@@ -318,6 +319,22 @@ public class RepairPatternUtils {
 		CtElement oldElement = (CtElement) leftTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 		return oldElement;
+	}
+	
+	public static boolean getIsMovedExpressionInStatemnt(Diff diff, CtStatement oldstat, CtExpression oldexpression) {
+		
+		ITree rightTreeStat= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldstat); 
+		ITree rightTreeExper= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldexpression); 
+
+		if(rightTreeStat==null || rightTreeExper==null)
+			return true;
+		
+		CtElement newstatement = (CtElement) rightTreeStat.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+		CtElement newexper = (CtElement) rightTreeExper.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+		CtStatement statementParent = newexper.getParent(new TypeFilter<>(CtStatement.class));
+
+		return newstatement==statementParent;
 	}
 
 	public static List<CtStatement> getIsThereOldStatementInStatementList_old(List<CtStatement> statements) {

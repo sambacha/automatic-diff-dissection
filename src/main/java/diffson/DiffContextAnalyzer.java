@@ -431,6 +431,7 @@ public class DiffContextAnalyzer {
 			cr.start();
 			RepairPatternDetector detector = new RepairPatternDetector(config, diff);
 			RepairPatterns rp = detector.analyze();
+
 			log.info("---Total pattern of " + ": " + cr.stopAndGetSeconds());
 
 			for (List<PatternInstance> pi : rp.getPatternInstances().values()) {

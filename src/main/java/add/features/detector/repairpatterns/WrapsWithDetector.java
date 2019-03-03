@@ -294,16 +294,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 					List<CtCatch> catchList = ctTry.getCatchers();
 					if (RepairPatternUtils.isThereOnlyNewCatch(catchList)) {
 						CtBlock tryBodyBlock = ctTry.getBody();
-
 						List olds = RepairPatternUtils.getIsThereOldStatementInStatementList(diff,
 								tryBodyBlock.getStatements());
+						
 						if (tryBodyBlock != null && !olds.isEmpty()) {
 
 							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) olds.get(0));
 							ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
 							if (operation instanceof InsertOperation) {
-
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
 										new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry, olds, lineP, lineTree));
 							} else {
@@ -324,9 +323,12 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 													operationAux.getSrcNode());
 											ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
+//											repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
+//													new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry,
+//															operationAux.getSrcNode(), lineP, lineTree));
 											repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
 													new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry,
-															operationAux.getSrcNode(), lineP, lineTree));
+															lineP, lineP, lineTree));
 										}
 									}
 								}
@@ -405,12 +407,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
 
-								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
+								{
+								   CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
 										operation.getSrcNode());
-								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+								   ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
-								repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
+								   repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
 										UNWRAP_METHOD, operation, statementParent, ctInvocation, lineP, lineTree));
+								}
 							}
 						}
 					}

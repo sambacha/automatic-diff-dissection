@@ -401,6 +401,13 @@ public class MappingAnalysis {
 
 		return null;
 	}
+	
+	public static ITree getRightFromLeftNodeMapped(Diff diff, CtElement element) {
+
+		ITree rightMoved = MappingAnalysis.getRightFromLeftNodeMapped(diff, (ITree) element.getMetadata("gtnode"));
+
+		return getRightFromLeftNodeMapped(diff, rightMoved);
+	}
 
 	public static ITree getRightFromLeftNodeMapped(Diff diff, ITree iTree) {
 

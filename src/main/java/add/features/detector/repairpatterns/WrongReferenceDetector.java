@@ -124,26 +124,43 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								PropertyPair propertyOldElemet = new PropertyPair("Old", "Removed_"
 										+ srcNode.getClass().getSimpleName().replace("Ct", "").replace("Impl", ""));
 
+								String replaceElementType="";
 								// if we have the element that has be inserted
 								if (newElementReplacementOfTheVar != null) {
 									PropertyPair propertyNewElement = new PropertyPair("New",
 											"Added_" + newElementReplacementOfTheVar.getClass().getSimpleName()
 													.replace("Ct", "").replace("Impl", ""));
+									replaceElementType=newElementReplacementOfTheVar.getClass().getSimpleName()
+											.replace("Ct", "").replace("Impl", "");
 
 									metadata = new PropertyPair[] { propertyOldElemet, propertyNewElement };
 								} else
 									metadata = new PropertyPair[] { propertyOldElemet };
 
+								Boolean whetherConsiderInitial=false;
+								
+								if(metadata.length==2) {
+									if(replaceElementType.equals("Invocation")||replaceElementType.equals("VariableRead")
+											||replaceElementType.equals("FieldRead")||replaceElementType.equals("ConstructorCall")
+											||replaceElementType.equals("Literal")||replaceElementType.equals("FieldWrite")
+											||replaceElementType.equals("VariableWrite"))
+										whetherConsiderInitial=true;
+								}
 								// Case 1
-								if (srcNode instanceof CtInvocation)
-									repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
-											new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp,
-													parentLine, lineTree, metadata));
-								else
+								if(whetherConsiderInitial) {
+								   if (srcNode instanceof CtInvocation)
+//									repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
+//											new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp,
+//													parentLine, lineTree, metadata));
+								      repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+										new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp,
+												parentLine, lineTree, metadata));
+								  else
 
-									repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
+									  repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
 											new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine,
 													lineTree, metadata));
+								}
 
 							}
 						}
@@ -151,34 +168,34 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				} else {
 					// Inside delete but node is Not access var
 
-					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
-
-						CtElement susp = null;// operationDelete.getSrcNode();
-						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
-						if (susp == null)
-							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
-
-						CtElement patch = null;
-
-						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
-						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-								? parentLine.getMetadata("tree")
-								: parentLine.getMetadata("gtnode"));
-
-						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
-						if (parentRight != null) {
-							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-						}
-
-						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
-										lineTree,
-										//
-										new PropertyPair("Change", "ArgumentRemovement")
-
-								));
-
-					}
+//					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
+//
+//						CtElement susp = null;// operationDelete.getSrcNode();
+//						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
+//						if (susp == null)
+//							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
+//
+//						CtElement patch = null;
+//
+//						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
+//						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+//								? parentLine.getMetadata("tree")
+//								: parentLine.getMetadata("gtnode"));
+//
+//						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+//						if (parentRight != null) {
+//							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+//						}
+//
+//						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+//								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
+//										lineTree,
+//										//
+//										new PropertyPair("Change", "ArgumentRemovement")
+//
+//								));
+//
+//					}
 				}
 			}
 			/// UPDATE NODE
