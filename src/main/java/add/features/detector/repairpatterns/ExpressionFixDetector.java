@@ -36,7 +36,7 @@ import spoon.reflect.visitor.filter.TypeFilter;
 public class ExpressionFixDetector extends AbstractPatternDetector {
 
 	public static final String BIN_OPERATOR_MODIF = "binOperatorModif";
-	public static final String EXP_LOGIC_MOD = "expLogicMod";
+//	public static final String EXP_LOGIC_MOD = "expLogicMod";
 	public static final String EXP_LOGIC_REDUCE = "expLogicReduce";
 	public static final String EXP_LOGIC_EXPAND = "expLogicExpand";
 

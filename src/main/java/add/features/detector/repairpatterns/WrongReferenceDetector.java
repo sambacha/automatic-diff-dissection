@@ -50,8 +50,10 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 			if (operation instanceof DeleteOperation) {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
-				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess
-						|| srcNode instanceof CtInvocation) {
+//				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess
+//						|| srcNode instanceof CtInvocation) {
+					if (srcNode instanceof CtVariableAccess 
+							|| srcNode instanceof CtInvocation) {
 					if (srcNode.getMetadata("delete") != null) {
 						CtElement statementParent = srcNode.getParent(CtStatement.class);
 						if (statementParent.getMetadata("delete") == null) {
@@ -143,7 +145,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									if(replaceElementType.equals("Invocation")||replaceElementType.equals("VariableRead")
 											||replaceElementType.equals("FieldRead")||replaceElementType.equals("ConstructorCall")
 											||replaceElementType.equals("Literal")||replaceElementType.equals("FieldWrite")
-											||replaceElementType.equals("VariableWrite"))
+											||replaceElementType.equals("VariableWrite")||replaceElementType.equals("TypeAccess"))
 										whetherConsiderInitial=true;
 								}
 								// Case 1
@@ -210,7 +212,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						|| srcNode.getParent().getMetadata("isMoved") != null) {
 					continue;
 				}
-				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
+		//		if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {// let CtTypeAccess be constant related changes
+				if (srcNode instanceof CtVariableAccess) {
 					if (operation.getDstNode() instanceof CtVariableAccess
 							|| operation.getDstNode() instanceof CtTypeAccess
 							|| operation.getDstNode() instanceof CtInvocation) {

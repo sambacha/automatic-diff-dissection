@@ -24,11 +24,13 @@ import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtThisAccess;
 import spoon.reflect.code.CtThrow;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtWhile;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
@@ -469,16 +471,26 @@ public class RepairPatternUtils {
 	}
 
 	public static boolean isConstantTypeAccess(CtTypeAccess ctTypeAccess) {
+		
 		Set<ModifierKind> modifiers = ctTypeAccess.getType().getModifiers();
 		if (modifiers.contains(ModifierKind.FINAL)) {
 			return true;
 		} else {
 			String simpleName = ctTypeAccess.getAccessedType().getSimpleName();
+			System.out.println(simpleName);
 			if (simpleName.toUpperCase().equals(simpleName)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	public static boolean isThisAccess(CtTypeAccess ctTypeAccess) {
+		// Ignore CtThisAccess
+				CtClass classname =(CtClass) ctTypeAccess.getParent(CtClass.class);
+				if(classname.getSimpleName().equals(ctTypeAccess.getAccessedType().getSimpleName())) 
+					return true;
+				else return false;
 	}
 
 }

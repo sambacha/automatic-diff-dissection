@@ -1886,65 +1886,65 @@ public class SuspiciousASTFaultyTest {
 
 	}
 
-	@Test
-	public void testD4JVchart21_wrapElse() throws Exception {
-		String diffId = "Chart_21";
-
-		String input = getCompletePathD4J(diffId);
-
-		List<RepairPatterns> patterns = analyze(input);
-		assertTrue(patterns.size() > 0);
-
-		RepairPatterns repairPatterns = patterns.get(0);
-
-		System.out.println(repairPatterns);
-		Assert.assertTrue(repairPatterns.getFeatureCounter(WrapsWithDetector.WRAPS_ELSE) > 0);
-
-		// Pattern 1
-		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_ELSE);
-		System.out.println(insts);
-		assertTrue(insts.size() > 0);
-
-		PatternInstance pi1 = insts.get(0);
-		// assertTrue(pi1.getNodeAffectedOp().toString().contains("r != null"));
-		// assertEquals(2, pi1.getFaulty().size());
-		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("double minval = java.lang.Double.NaN"))
-				.findFirst().isPresent());
-		assertNotNull(pi1.getFaultyTree());
-		assertEquals("double minval = java.lang.Double.NaN", pi1.getFaultyLine().toString());
-
-		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
-		System.out.println("END 1\n" + resultjson.toString());
-		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsElse", "minval", "LocalVariable");
-
-		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "", "wrapsElse");
-		assertTrue(market.size() > 0);
-		System.out.println("First marked:\n" + market.get(0));
-		assertEquals("LocalVariable", ((JsonObject) market.get(0)).get("type").getAsString());
-
-		// Pattern addassignment
-
-		insts = repairPatterns.getPatternInstances().get("addassignment");
-		System.out.println(insts);
-		assertTrue(insts.size() == 4);
-
-		pi1 = insts.get(2);
-		// assertTrue(pi1.getNodeAffectedOp().toString().contains("r != null"));
-		// assertEquals(2, pi1.getFaulty().size());
-		assertTrue(pi1.getFaulty().stream()
-				.filter(e -> e.toString().contains("this.maximumRangeValue = java.lang.Double.NaN")).findFirst()
-				.isPresent());
-		assertNotNull(pi1.getFaultyTree());
-		assertEquals("this.maximumRangeValue = java.lang.Double.NaN", pi1.getFaultyLine().toString());
-
-		System.out.println("END 1\n" + resultjson.toString());
-		// TODO:
-		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "addassignment", "\u003d"/* "maximumRangeValue" */,
-				"Assignment");
-
-		showJSONFaultyAST(resultjson);
-
-	}
+//	@Test
+//	public void testD4JVchart21_wrapElse() throws Exception {
+//		String diffId = "Chart_21";
+//
+//		String input = getCompletePathD4J(diffId);
+//
+//		List<RepairPatterns> patterns = analyze(input);
+//		assertTrue(patterns.size() > 0);
+//
+//		RepairPatterns repairPatterns = patterns.get(0);
+//
+//		System.out.println(repairPatterns);
+//		Assert.assertTrue(repairPatterns.getFeatureCounter(WrapsWithDetector.WRAPS_ELSE) > 0);
+//
+//		// Pattern 1
+//		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.WRAPS_ELSE);
+//		System.out.println(insts);
+//		assertTrue(insts.size() > 0);
+//
+//		PatternInstance pi1 = insts.get(0);
+//		// assertTrue(pi1.getNodeAffectedOp().toString().contains("r != null"));
+//		// assertEquals(2, pi1.getFaulty().size());
+//		assertTrue(pi1.getFaulty().stream().filter(e -> e.toString().contains("double minval = java.lang.Double.NaN"))
+//				.findFirst().isPresent());
+//		assertNotNull(pi1.getFaultyTree());
+//		assertEquals("double minval = java.lang.Double.NaN", pi1.getFaultyLine().toString());
+//
+//		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+//		System.out.println("END 1\n" + resultjson.toString());
+//		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsElse", "minval", "LocalVariable");
+//
+//		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "", "wrapsElse");
+//		assertTrue(market.size() > 0);
+//		System.out.println("First marked:\n" + market.get(0));
+//		assertEquals("LocalVariable", ((JsonObject) market.get(0)).get("type").getAsString());
+//
+//		// Pattern addassignment
+//
+//		insts = repairPatterns.getPatternInstances().get("addassignment");
+//		System.out.println(insts);
+//		assertTrue(insts.size() == 4);
+//
+//		pi1 = insts.get(2);
+//		// assertTrue(pi1.getNodeAffectedOp().toString().contains("r != null"));
+//		// assertEquals(2, pi1.getFaulty().size());
+//		assertTrue(pi1.getFaulty().stream()
+//				.filter(e -> e.toString().contains("this.maximumRangeValue = java.lang.Double.NaN")).findFirst()
+//				.isPresent());
+//		assertNotNull(pi1.getFaultyTree());
+//		assertEquals("this.maximumRangeValue = java.lang.Double.NaN", pi1.getFaultyLine().toString());
+//
+//		System.out.println("END 1\n" + resultjson.toString());
+//		// TODO:
+//		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "addassignment", "\u003d"/* "maximumRangeValue" */,
+//				"Assignment");
+//
+//		showJSONFaultyAST(resultjson);
+//
+//	}
 
 	@Test
 	public void testD4JVchart22() throws Exception {
