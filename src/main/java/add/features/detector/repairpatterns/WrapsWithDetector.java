@@ -41,7 +41,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 	public static final String WRAPS_LOOP = "wrapsLoop";
 	public static final String UNWRAP_METHOD = "unwrapMethod";
-	public static final String UNWRAP_TRY_CATCH = "unwrapTryCatch";
+//	public static final String UNWRAP_TRY_CATCH = "unwrapTryCatch";
 	public static final String WRAPS_METHOD = "wrapsMethod";
 	public static final String WRAPS_TRY_CATCH = "wrapsTryCatch";
 //	public static final String WRAPS_ELSE = "wrapsElse";
@@ -114,9 +114,12 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
+//								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
+//										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) stmtsMoved.get(0),
+//												susp, lineP, lineTree, new PropertyPair("case", "elsenull")));
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE, //
 										new PatternInstance(UNWRAP_IF_ELSE, operation, (CtElement) stmtsMoved.get(0),
-												susp, lineP, lineTree, new PropertyPair("case", "elsenull")));
+												lineP, lineP, lineTree, new PropertyPair("case", "elsenull")));
 							}
 						}
 					} else {// ELSE has content
@@ -299,18 +302,18 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								tryBodyBlock.getStatements());
 						
 						if (tryBodyBlock != null && !olds.isEmpty()) {
-
 							CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) olds.get(0));
+
 							ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
+						if(!((CtElement) olds.get(0) instanceof CtTry))
 							if (operation instanceof InsertOperation) {
 								repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
 										new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry, olds, lineP, lineTree));
 							} else {
-
-								ITree tryTree = (ITree) ctTry.getMetadata("gtnode");
-								repairPatterns.incrementFeatureCounterInstance(UNWRAP_TRY_CATCH,
-										new PatternInstance(UNWRAP_TRY_CATCH, operation, ctTry, ctTry, ctTry, tryTree));
+//								ITree tryTree = (ITree) ctTry.getMetadata("gtnode");
+//								repairPatterns.incrementFeatureCounterInstance(UNWRAP_TRY_CATCH,
+//										new PatternInstance(UNWRAP_TRY_CATCH, operation, ctTry, ctTry, ctTry, tryTree));
 							}
 						} else { // try to find a move into the body of the try
 							for (Operation operationAux : this.operations) {
@@ -323,11 +326,12 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 											CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
 													operationAux.getSrcNode());
 											ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
-
+				                            
 //											repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
 //													new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry,
 //															operationAux.getSrcNode(), lineP, lineTree));
-											repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
+											if(!(operationAux.getSrcNode() instanceof CtTry))
+											     repairPatterns.incrementFeatureCounterInstance(WRAPS_TRY_CATCH,
 													new PatternInstance(WRAPS_TRY_CATCH, operation, ctTry,
 															lineP, lineP, lineTree));
 										}
@@ -458,9 +462,15 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 												operationAux.getSrcNode());
 										ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
-										repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
+//										repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
+//												new PatternInstance(WRAPS_LOOP, operation, ctLoop,
+//														operationAux.getSrcNode(), lineP, lineTree));
+										// loop add happens for the statement, not any specific nodes of it
+
+										if(!RepairPatternUtils.isOldStatementInLoop(lineP))
+										   repairPatterns.incrementFeatureCounterInstance(WRAPS_LOOP,
 												new PatternInstance(WRAPS_LOOP, operation, ctLoop,
-														operationAux.getSrcNode(), lineP, lineTree));
+														lineP, lineP, lineTree));
 									}
 								}
 							}

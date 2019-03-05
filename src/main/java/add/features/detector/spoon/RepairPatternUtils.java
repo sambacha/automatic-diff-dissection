@@ -493,4 +493,14 @@ public class RepairPatternUtils {
 				else return false;
 	}
 
+	public static boolean isOldStatementInLoop(CtElement oldStatement) {
+		
+		if((oldStatement.getParent() instanceof CtFor)||(oldStatement.getParent() instanceof CtForEach)
+				|| (oldStatement.getParent() instanceof CtWhile))
+			return true;
+		else if ((oldStatement.getParent().getParent() instanceof CtFor)||(oldStatement.getParent().getParent() instanceof CtForEach)
+				|| (oldStatement.getParent().getParent() instanceof CtWhile))
+			return true;
+		else return false;
+	}
 }

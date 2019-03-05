@@ -3256,42 +3256,42 @@ public class SuspiciousASTFaultyTest {
 		SuspiciousASTFaultyTest.assertMarkedlAST(resultjson, "wrapsMethod", "elitismRate", "FieldWrite");
 	}
 
-	@Test
-	public void testD4Jmath60_unwrap_try() throws Exception {
-		String diffId = "Math_60";
-
-		String input = getCompletePathD4J(diffId);
-
-		List<RepairPatterns> patterns = analyze(input);
-
-		RepairPatterns repairPatterns = patterns.get(0);
-		Assert.assertTrue(repairPatterns.getFeatureCounter(WrapsWithDetector.UNWRAP_TRY_CATCH) > 0);
-
-		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.UNWRAP_TRY_CATCH);
-		System.out.println(insts);
-		assertTrue(insts.size() > 0);
-
-		PatternInstance pi1 = insts.get(0);
-		assertNotNull(pi1.getFaultyTree());
-		assertTrue(pi1.getFaultyLine().toString().startsWith("try"));
-
-		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
-
-		System.out.println("END 1\n" + resultjson.toString());
-		// SuspiciousASTFaultyTest.assertMarkedlAST(resultjson,
-		// WrapsWithDetector.UNWRAP_TRY_CATCH, "", "");
-
-		showJSONFaultyAST(resultjson);
-
-		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "",
-				WrapsWithDetector.UNWRAP_TRY_CATCH);
-		assertTrue(market.size() > 0);
-		System.out.println("First marked:\n" + market.get(0));
-		assertTrue(market.stream().filter(e -> ((JsonObject) e).get("type").getAsString().equals("Try")).findFirst()
-				.isPresent());
-		assertTrue(market.size() == 1);
-
-	}
+//	@Test
+//	public void testD4Jmath60_unwrap_try() throws Exception {
+//		String diffId = "Math_60";
+//
+//		String input = getCompletePathD4J(diffId);
+//
+//		List<RepairPatterns> patterns = analyze(input);
+//
+//		RepairPatterns repairPatterns = patterns.get(0);
+//		Assert.assertTrue(repairPatterns.getFeatureCounter(WrapsWithDetector.UNWRAP_TRY_CATCH) > 0);
+//
+//		List<PatternInstance> insts = repairPatterns.getPatternInstances().get(WrapsWithDetector.UNWRAP_TRY_CATCH);
+//		System.out.println(insts);
+//		assertTrue(insts.size() > 0);
+//
+//		PatternInstance pi1 = insts.get(0);
+//		assertNotNull(pi1.getFaultyTree());
+//		assertTrue(pi1.getFaultyLine().toString().startsWith("try"));
+//
+//		JsonObject resultjson = SuspiciousASTFaultyTest.getContext(diffId, input);
+//
+//		System.out.println("END 1\n" + resultjson.toString());
+//		// SuspiciousASTFaultyTest.assertMarkedlAST(resultjson,
+//		// WrapsWithDetector.UNWRAP_TRY_CATCH, "", "");
+//
+//		showJSONFaultyAST(resultjson);
+//
+//		List<JsonElement> market = SuspiciousASTFaultyTest.getMarkedlAST(resultjson, "",
+//				WrapsWithDetector.UNWRAP_TRY_CATCH);
+//		assertTrue(market.size() > 0);
+//		System.out.println("First marked:\n" + market.get(0));
+//		assertTrue(market.stream().filter(e -> ((JsonObject) e).get("type").getAsString().equals("Try")).findFirst()
+//				.isPresent());
+//		assertTrue(market.size() == 1);
+//
+//	}
 
 	@Test
 	public void testD4Jmath103_wrap_try_case1() throws Exception {

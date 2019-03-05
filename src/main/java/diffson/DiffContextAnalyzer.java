@@ -419,34 +419,35 @@ public class DiffContextAnalyzer {
 
 			// Patterns:
 
-			JsonObject fileModified = new JsonObject();
+			if(diff.getRootOperations().size()<=15) {
+			   JsonObject fileModified = new JsonObject();
 
-			fileModified.addProperty("file", modifiedFile);
-			fileModified.addProperty("nr_root_ast_changes", diff.getRootOperations().size());
-			filesArray.add(fileModified);
+			   fileModified.addProperty("file", modifiedFile);
+			   fileModified.addProperty("nr_root_ast_changes", diff.getRootOperations().size());
+			   filesArray.add(fileModified);
 
-			Config config = new Config();
-			EditScriptBasedDetector.preprocessEditScript(diff);
-			TimeChrono cr = new TimeChrono();
-			cr.start();
-			RepairPatternDetector detector = new RepairPatternDetector(config, diff);
-			RepairPatterns rp = detector.analyze();
+			   Config config = new Config();
+			   EditScriptBasedDetector.preprocessEditScript(diff);
+			   TimeChrono cr = new TimeChrono();
+			   cr.start();
+			   RepairPatternDetector detector = new RepairPatternDetector(config, diff);
+			   RepairPatterns rp = detector.analyze();
 
-			log.info("---Total pattern of " + ": " + cr.stopAndGetSeconds());
+			   log.info("---Total pattern of " + ": " + cr.stopAndGetSeconds());
 
-			for (List<PatternInstance> pi : rp.getPatternInstances().values()) {
-				patternInstances.addAll(pi);
-			}
-			cr.start();
+			   for (List<PatternInstance> pi : rp.getPatternInstances().values()) {
+				  patternInstances.addAll(pi);
+			   }
+			   cr.start();
 
-			JsonArray ast_arrays = calculateJSONAffectedStatementList(diff, operationsFromFile, patternsPerOp,
+			   JsonArray ast_arrays = calculateJSONAffectedStatementList(diff, operationsFromFile, patternsPerOp,
 					repairactionPerOp, patternInstances);
 			// fileModified.add("faulty_stmts_ast", ast_arrays);
-			fileModified.add("pattern_instances", ast_arrays);
-			log.info("---Total feature of " + ": " + cr.stopAndGetSeconds());
+			   fileModified.add("pattern_instances", ast_arrays);
+			   log.info("---Total feature of " + ": " + cr.stopAndGetSeconds());
 
-			includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
-
+			   includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
+		   }
 		}
 
 		return statsjsonRoot;
@@ -809,6 +810,7 @@ public class DiffContextAnalyzer {
 			if (faultyTree != null) {
 
 				// Transform the Tree element in case it's a control flow
+
 				faultyTree = MappingAnalysis.getFormatedTreeFromControlFlow(faultyTree,
 						(CtElement) faultyTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
 
@@ -855,19 +857,19 @@ public class DiffContextAnalyzer {
 				JsonObject jsonT = jsongen.getJSONwithCustorLabels(((DiffImpl) diff).getContext(), iTree, painters);
 				affected.add(jsonT);
 			}
-			jsonInstance.add("faulty_ast", affected);
+			
+			   jsonInstance.add("faulty_ast", affected);
+
 			// Removed in this version
 			// jsonInstance.addProperty("pattern_name", patternInstance.getPatternName());
-			ast_affected.add(jsonInstance);
+			   ast_affected.add(jsonInstance);
 
-			JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
+			   JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
 
-			jsonInstance.add("context", opContext);
-
+			   jsonInstance.add("context", opContext);
 		}
 
 		return ast_affected;
-
 	}
 
 	public JsonObject getContextInformation(Diff diff, CodeFeatureDetector cresolver, Operation opi,
