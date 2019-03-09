@@ -20,6 +20,7 @@ import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtConditional;
+import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
@@ -394,7 +395,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
-						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation))
+						   repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
 										new PropertyPair("New", "Invocation")));
@@ -420,6 +422,89 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 								   repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
 										UNWRAP_METHOD, operation, statementParent, ctInvocation, lineP, lineTree));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+
+		if (operation.getSrcNode() instanceof CtConstructorCall) {
+			if (operation instanceof InsertOperation) {
+				CtConstructorCall ctConstructor = (CtConstructorCall) operation.getSrcNode();
+				List<CtExpression> constructorArguments = ctConstructor.getArguments();
+
+				for (Operation operation2 : this.operations) {
+					if (operation2 instanceof DeleteOperation) {
+						CtElement elementRemoved = operation2.getSrcNode();
+
+						if (elementRemoved instanceof CtVariableRead) {
+
+							if (constructorArguments.contains(elementRemoved)) {
+
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), elementRemoved);
+								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+										new PatternInstance(WRAPS_METHOD, operation, ctConstructor, elementRemoved,
+												lineP, lineTree, new PropertyPair("Old", "VarRead"),
+												new PropertyPair("New", "Constructor")));
+							}
+						}
+						if (elementRemoved instanceof CtAssignment) {
+
+							if (constructorArguments.contains(((CtAssignment) elementRemoved).getAssignment())) {
+
+								CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), elementRemoved);
+								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+
+								repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+										new PatternInstance(WRAPS_METHOD, operation, ctConstructor,
+												// ((CtAssignment) elementRemoved).getAssigned()
+												elementRemoved, lineP, lineTree, new PropertyPair("Old", "Assignment"),
+												new PropertyPair("New", "Constructor")));
+							}
+						}
+					}
+				}
+
+				for (CtExpression ctExpression : constructorArguments) {
+					if (ctExpression.getMetadata("isMoved") != null) {
+						// Operation is an Insert
+						// TODO:
+						List<CtElement> suspLeft = MappingAnalysis.getTreeLeftMovedFromRight(diff, ctConstructor);
+						if (suspLeft == null || suspLeft.isEmpty())
+							return;
+
+						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
+						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+								new PatternInstance(WRAPS_METHOD, operation, ctConstructor, ctExpression, lineP,
+										lineTree, new PropertyPair("Old", "MovedExpression"),
+										new PropertyPair("New", "Constructor")));
+					}
+				}
+			} else {
+				if (operation instanceof DeleteOperation) {
+					CtConstructorCall ctConstructor = (CtConstructorCall) operation.getSrcNode();
+					CtStatement statementParent = ctConstructor.getParent(new TypeFilter<>(CtStatement.class));
+
+					if (statementParent.getMetadata("delete") == null) {
+						List<CtExpression> invocationArguments = ctConstructor.getArguments();
+
+						for (CtExpression ctExpression : invocationArguments) {
+							if (ctExpression.getMetadata("isMoved") != null
+									&& ctExpression.getMetadata("movingSrc") != null) {
+
+								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
+								{
+								   CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
+										operation.getSrcNode());
+								   ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+
+								   repairPatterns.incrementFeatureCounterInstance(UNWRAP_METHOD, new PatternInstance(
+										UNWRAP_METHOD, operation, statementParent, ctConstructor, lineP, lineTree));
 								}
 							}
 						}

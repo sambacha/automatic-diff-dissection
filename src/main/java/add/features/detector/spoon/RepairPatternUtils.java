@@ -35,6 +35,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.filter.LineFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 /**
@@ -321,6 +322,20 @@ public class RepairPatternUtils {
 		CtElement oldElement = (CtElement) leftTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 		return oldElement;
+	}
+	
+    public static boolean getIsInvocationInStatemnt(Diff diff, CtElement oldline, CtInvocation newinvocation) {
+    	
+		CtElement newline = MappingAnalysis.getParentLine(new LineFilter(), newinvocation);
+
+		ITree treeoldline= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldline); 
+
+		if(treeoldline==null)
+			return false;
+		
+		CtElement newoldline = (CtElement) treeoldline.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+		return newline==newoldline;
 	}
 	
 	public static boolean getIsMovedExpressionInStatemnt(Diff diff, CtStatement oldstat, CtExpression oldexpression) {
