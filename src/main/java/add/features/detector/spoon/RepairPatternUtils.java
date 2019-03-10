@@ -324,9 +324,9 @@ public class RepairPatternUtils {
 		return oldElement;
 	}
 	
-    public static boolean getIsInvocationInStatemnt(Diff diff, CtElement oldline, CtInvocation newinvocation) {
+    public static boolean getIsInvocationInStatemnt(Diff diff, CtElement oldline, CtElement newinvocationorconstructor) {
     	
-		CtElement newline = MappingAnalysis.getParentLine(new LineFilter(), newinvocation);
+		CtElement newline = MappingAnalysis.getParentLine(new LineFilter(), newinvocationorconstructor);
 
 		ITree treeoldline= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldline); 
 
@@ -334,7 +334,7 @@ public class RepairPatternUtils {
 			return false;
 		
 		CtElement newoldline = (CtElement) treeoldline.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-
+        
 		return newline==newoldline;
 	}
 	
@@ -492,7 +492,6 @@ public class RepairPatternUtils {
 			return true;
 		} else {
 			String simpleName = ctTypeAccess.getAccessedType().getSimpleName();
-			System.out.println(simpleName);
 			if (simpleName.toUpperCase().equals(simpleName)) {
 				return true;
 			}

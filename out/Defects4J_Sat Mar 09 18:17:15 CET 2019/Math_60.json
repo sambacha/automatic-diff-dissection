@@ -1,0 +1,271 @@
+{
+  "diffid": "Math_60",
+  "affected_files": [
+    {
+      "file": "Math_60_NormalDistributionImpl",
+      "nr_root_ast_changes": 12,
+      "pattern_instances": [
+        {
+          "faulty_ast": [
+            {
+              "label": "return",
+              "type": "Return",
+              "children": [
+                {
+                  "label": "1",
+                  "type": "Literal",
+                  "susp": [
+                    "susp_wrapsIfElse"
+                  ],
+                  "return_type": "int",
+                  "children": []
+                }
+              ]
+            }
+          ],
+          "context": {
+            "cntx": {
+              "S5_SIMILAR_PRIMITIVE_TYPE_WITH_GUARD": "false",
+              "VARS": [
+                {
+                  "VAR_MODIF": [
+                    "public",
+                    "static",
+                    "final"
+                  ],
+                  "VAR_VISIB": "public",
+                  "VAR_NAME": "DEFAULT_INVERSE_ABSOLUTE_ACCURACY",
+                  "VAR_TYPE": "double"
+                },
+                {
+                  "VAR_MODIF": [
+                    "static",
+                    "private",
+                    "final"
+                  ],
+                  "VAR_VISIB": "private",
+                  "VAR_NAME": "SQRT2PI",
+                  "VAR_TYPE": "double"
+                },
+                {
+                  "VAR_MODIF": [
+                    "private",
+                    "final"
+                  ],
+                  "VAR_VISIB": "private",
+                  "VAR_NAME": "mean",
+                  "VAR_TYPE": "double"
+                },
+                {
+                  "VAR_MODIF": [
+                    "private",
+                    "final"
+                  ],
+                  "VAR_VISIB": "private",
+                  "VAR_NAME": "standardDeviation",
+                  "VAR_TYPE": "double"
+                },
+                {
+                  "VAR_MODIF": [
+                    "private",
+                    "final"
+                  ],
+                  "VAR_VISIB": "private",
+                  "VAR_NAME": "solverAbsoluteAccuracy",
+                  "VAR_TYPE": "double"
+                },
+                {
+                  "VAR_MODIF": [],
+                  "VAR_VISIB": "",
+                  "VAR_NAME": "x",
+                  "VAR_TYPE": "double"
+                },
+                {
+                  "VAR_MODIF": [
+                    "final"
+                  ],
+                  "VAR_VISIB": "",
+                  "VAR_NAME": "dev",
+                  "VAR_TYPE": "double"
+                }
+              ],
+              "NR_OBJECT_ASSIGNED_LOCAL": "0",
+              "UNARY_PROPERTIES": {
+                "involve_COMPL_relation_operators": "false",
+                "involve_POSTDEC_relation_operators": "false",
+                "involve_POS_relation_operators": "false",
+                "involve_PREDEC_relation_operators": "false",
+                "involved_relation_unary_operators": [],
+                "involve_PREINC_relation_operators": "false",
+                "involve_POSTINC_relation_operators": "false",
+                "involve_NOT_relation_operators": "false",
+                "involve_NEG_relation_operators": "false"
+              },
+              "V1_IS_TYPE_COMPATIBLE_METHOD_CALL_PARAM_RETURN": "false",
+              "NR_PRIMITIVE_NOT_USED_LOCAL_VAR": "0",
+              "METHOD_PARAMETERS": [
+                "double"
+              ],
+              "LE6_HAS_NEGATION": "false",
+              "NR_VARIABLE_ASSIGNED": "0",
+              "LE1_EXISTS_RELATED_BOOLEAN_EXPRESSION": "false",
+              "NR_OBJECT_NOT_USED": "0",
+              "LE3_IS_COMPATIBLE_VAR_NOT_INCLUDED": "false",
+              "M3_ANOTHER_METHOD_WITH_PARAMETER_RETURN_COMP": "false",
+              "S6_METHOD_THROWS_EXCEPTION": "true",
+              "V3_HAS_CONSTANT": "false",
+              "NR_FIELD_INCOMPLETE_INIT": "false",
+              "NR_PRIMITIVE_USED_LOCAL_VAR": "0",
+              "LE2_IS_BOOLEAN_METHOD_PARAM_TYPE_VAR": "false",
+              "M6_RETURN_PRIMITIVE": "true",
+              "C2_USES_ENUMERATION": "false",
+              "HAS_VAR_SIM_NAME": "false",
+              "NR_OBJECT_USED": "0",
+              "C1_SAME_TYPE_CONSTANT": "true",
+              "NR_VARIABLE_NOT_ASSIGNED": "0",
+              "V5_HAS_VAR_IN_TRANSFORMATION": "false",
+              "NR_OBJECT_NOT_USED_LOCAL_VAR": "0",
+              "S1_LOCAL_VAR_NOT_ASSIGNED": "false",
+              "METHOD_MODIFIERS": [
+                "public"
+              ],
+              "V2_HAS_VAR_SIM_NAME_COMP_TYPE": "false",
+              "HAS_VAR_SIM_TYPE": "false",
+              "NR_OBJECT_USED_LOCAL_VAR": "0",
+              "NUMBER_PRIMITIVE_VARS_IN_STMT": "0",
+              "LE5_BOOLEAN_EXPRESSIONS_IN_FAULTY": "false",
+              "BIN_PROPERTIES": {
+                "involve_GE_relation_operators": "false",
+                "involved_relation_bin_operators": [],
+                "involve_LT_relation_operators": "false",
+                "involve_USR_relation_operators": "false",
+                "involve_MOD_relation_operators": "false",
+                "involve_AND_relation_operators": "false",
+                "involve_SR_relation_operators": "false",
+                "involve_NE_relation_operators": "false",
+                "involve_OR_relation_operators": "false",
+                "involve_BITAND_relation_operators": "false",
+                "involve_PLUS_relation_operators": "false",
+                "involve_SL_relation_operators": "false",
+                "involve_EQ_relation_operators": "false",
+                "involve_INSTANCEOF_relation_operators": "false",
+                "involve_LE_relation_operators": "false",
+                "involve_GT_relation_operators": "false",
+                "involve_MINUS_relation_operators": "false",
+                "involve_MUL_relation_operators": "false",
+                "involve_DIV_relation_operators": "false",
+                "involve_BITOR_relation_operators": "false",
+                "involve_BITXOR_relation_operators": "false"
+              },
+              "M1_OVERLOADED_METHOD": "false",
+              "USES_ENUM": "false",
+              "V4B_USED_MULTIPLE_AS_PARAMETER": "false",
+              "LE7_SIMPLE_VAR_IN_LOGIC": "false",
+              "S2_SIMILAR_OBJECT_TYPE_WITH_GUARD": "false",
+              "METHOD_COMMENTS": [],
+              "METHOD_RETURN_TYPE": "double",
+              "M4_PARAMETER_RETURN_COMPABILITY": "false",
+              "LE_8_LOGICAL_WITH_USED_LOCAL_VARS": "true",
+              "S4_USED_FIELD": "false",
+              "NUMBER_TOTAL_VARS_IN_STMT": "0",
+              "PARENTS_TYPE": [
+                "CtBlockImpl",
+                "CtIfImpl",
+                "CtBlockImpl",
+                "CtIfImpl",
+                "CtBlockImpl",
+                "CtCatchImpl",
+                "CtTryImpl",
+                "CtBlockImpl",
+                "CtMethodImpl",
+                "CtClassImpl",
+                "CtPackageImpl",
+                "CtPackageImpl",
+                "CtPackageImpl",
+                "CtPackageImpl",
+                "CtPackageImpl",
+                "CtRootPackage",
+                "CtUnnamedModule",
+                ""
+              ],
+              "CONSTANT": {
+                "1": {
+                  "C1_SAME_TYPE_CONSTANT": "true"
+                }
+              },
+              "M5_MI_WITH_COMPATIBLE_VAR_TYPE": "false",
+              "VARS_IN_SCOPE": [
+                "public static final double DEFAULT_INVERSE_ABSOLUTE_ACCURACY \u003d 1.0E-9;",
+                "private static final double SQRT2PI \u003d org.apache.commons.math.util.FastMath.sqrt((2 * (org.apache.commons.math.util.FastMath.PI)));",
+                "private final double mean;",
+                "private final double standardDeviation;",
+                "private final double solverAbsoluteAccuracy;",
+                "double x",
+                "final double dev \u003d x - (mean)"
+              ],
+              "NR_OBJECT_NOT_ASSIGNED_LOCAL": "0",
+              "V6_IS_METHOD_RETURN_TYPE_VAR": "false",
+              "LE4_EXISTS_LOCAL_UNUSED_VARIABLES": "false",
+              "USES_CONSTANT": "true",
+              "NUMBER_OBJECT_REFERENCE_VARS_IN_STMT": "0",
+              "M2_SIMILAR_METHOD_WITH_SAME_RETURN": "false",
+              "S1_LOCAL_VAR_NOT_USED": "false",
+              "S3_TYPE_OF_FAULTY_STATEMENT": "Return",
+              "AE1_COMPATIBLE_RETURN_TYPE": "false"
+            }
+          }
+        }
+      ],
+      "ast_changes": [
+        {
+          "change_type": "UpdateOperation",
+          "entity_type": "Literal"
+        },
+        {
+          "change_type": "DeleteOperation",
+          "entity_type": "BinaryOperator"
+        },
+        {
+          "change_type": "DeleteOperation",
+          "entity_type": "FieldRead"
+        },
+        {
+          "change_type": "DeleteOperation",
+          "entity_type": "Try"
+        },
+        {
+          "change_type": "DeleteOperation",
+          "entity_type": "VariableRead"
+        },
+        {
+          "change_type": "DeleteOperation",
+          "entity_type": "Literal"
+        },
+        {
+          "change_type": "InsertOperation",
+          "entity_type": "Conditional"
+        },
+        {
+          "change_type": "InsertOperation",
+          "entity_type": "Invocation"
+        },
+        {
+          "change_type": "InsertOperation",
+          "entity_type": "If"
+        },
+        {
+          "change_type": "MoveOperation",
+          "entity_type": "Block"
+        },
+        {
+          "change_type": "MoveOperation",
+          "entity_type": "BinaryOperator"
+        },
+        {
+          "change_type": "MoveOperation",
+          "entity_type": "Return"
+        }
+      ]
+    }
+  ]
+}

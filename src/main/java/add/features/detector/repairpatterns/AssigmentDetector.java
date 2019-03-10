@@ -81,7 +81,7 @@ public class AssigmentDetector extends AbstractPatternDetector {
 			suspiciousTree = MappingAnalysis.getFormatedTreeFromControlFlow(associatedLeftCtElement);
 
 			followCtElementsInLeft.add(associatedLeftCtElement);
-
+			
 			repairPatterns.incrementFeatureCounterInstance(ADD_ASSIGNMENT,
 					new PatternInstance(ADD_ASSIGNMENT, operation, operation.getSrcNode(),
 

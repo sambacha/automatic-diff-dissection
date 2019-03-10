@@ -154,8 +154,7 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 							}
 						}
 					}
-				}
-				
+				}	
 			}
 		}
 	}
