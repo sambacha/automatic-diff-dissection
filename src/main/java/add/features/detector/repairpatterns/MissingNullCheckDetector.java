@@ -148,7 +148,8 @@ public class MissingNullCheckDetector extends AbstractPatternDetector {
 									}
 
 									lineP = susp.get(0);
-									lineTree = treeInLeft.get(0);
+								//	lineTree = treeInLeft.get(0);
+									lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 								}
 
 								if (binaryOperator.getKind().equals(BinaryOperatorKind.EQ)) {

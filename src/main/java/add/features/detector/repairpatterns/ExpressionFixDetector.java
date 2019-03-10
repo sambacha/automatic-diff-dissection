@@ -113,7 +113,7 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 						: dstNode.getParent(CtUnaryOperator.class);
 				if (unaryOperator != null) {
 					if (unaryOperators.contains(unaryOperator.getKind())) {
-						repairPatterns.incrementFeatureCounter("expArithMod", operation);
+						// repairPatterns.incrementFeatureCounter("expArithMod", operation);
 					}
 				}
 				if (dstNode.getParent() instanceof CtIf && dstNode.getRoleInParent() == CtRole.CONDITION) {

@@ -10,13 +10,16 @@ import add.entities.PropertyPair;
 import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import add.features.detector.spoon.SpoonHelper;
+import add.features.detector.spoon.filter.NullCheckFilter;
 import add.main.Config;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.operations.DeleteOperation;
 import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
 import gumtree.spoon.diff.operations.UpdateOperation;
+import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAssignment;
+import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtConstructorCall;
@@ -49,6 +52,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 	public static final String CONST_CHANGE = "constChange";
 	public static final String WRAPS_IF_ELSE = "wrapsIfElse";
 	public static final String UNWRAP_IF_ELSE = "unwrapIfElse";
+	public static final String MISS_NULL_CHECK_N = "missNullCheckN";
+	public static final String MISS_NULL_CHECK_P = "missNullCheckP";
 
 	private Config config;
 
@@ -517,6 +522,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		}
 		
 		this.detectConstantChange(invocationArgumentsold,invocationArgumentsnew,repairPatterns);
+		this.detectNullCheckChange(invocationArgumentsold,invocationArgumentsnew,repairPatterns);
 		
 		for (int i = 0; i < diff.getAllOperations().size(); i++) {
 
@@ -1151,6 +1157,122 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							}
 						}
 					} 
+				}
+			}
+		}
+	}
+	
+	public void detectNullCheckChange(List<CtExpression> invocationArgumentsold, List<CtExpression> invocationArgumentsnew, 
+			 RepairPatterns repairPatterns) {
+
+		for (Operation operation : diff.getAllOperations()) {
+			if (operation instanceof InsertOperation) {
+
+				CtElement srcNode = operation.getSrcNode();
+
+				if (srcNode instanceof spoon.reflect.declaration.CtMethod || !invocationArgumentsnew.contains(srcNode))
+					continue;
+
+				SpoonHelper.printInsertOrDeleteOperation(srcNode.getFactory().getEnvironment(), srcNode, operation);
+
+				List<CtBinaryOperator> binaryOperatorList = srcNode.getElements(new NullCheckFilter());
+				
+				for (CtBinaryOperator binaryOperator : binaryOperatorList) {
+					if (RepairPatternUtils.isNewBinaryOperator(binaryOperator)) {
+						if (RepairPatternUtils.isNewConditionInBinaryOperator(binaryOperator)) {
+
+							final CtElement referenceExpression;
+							if (binaryOperator.getRightHandOperand().toString().equals("null")) {
+								referenceExpression = binaryOperator.getLeftHandOperand();
+							} else {
+								referenceExpression = binaryOperator.getRightHandOperand();
+							}
+
+							boolean wasPatternFound = false;
+
+							List soldt = null;
+							List soldelse = null;
+							
+							CtElement parent = binaryOperator.getParent(new LineFilter());
+
+							if (binaryOperator.getParent() instanceof CtConditional) {
+								
+								CtConditional c = (CtConditional) binaryOperator.getParent();
+								CtElement thenExpr = c.getThenExpression();
+								CtElement elseExp = c.getElseExpression();
+
+								if (thenExpr != null) {
+									soldt = new ArrayList<>();
+									// If it's not new the THEN
+									if (thenExpr.getMetadata("new") == null && invocationArgumentsold.
+											contains(RepairPatternUtils.getElementInOld(diff, thenExpr))) {
+									//	soldelse.add(thenExpr);
+										soldt.add(RepairPatternUtils.getElementInOld(diff, thenExpr));
+										wasPatternFound = true;
+									}
+								}
+								if (elseExp != null) {
+									soldelse = new ArrayList<>();
+									// If it's not new the ELSE
+									if (elseExp.getMetadata("new") == null && invocationArgumentsold.
+											contains(RepairPatternUtils.getElementInOld(diff, elseExp))) {
+									//	soldelse.add(elseExp);
+										soldt.add(RepairPatternUtils.getElementInOld(diff, elseExp));
+										wasPatternFound = true;
+									}
+								}
+							}
+
+							if (wasPatternFound) {
+
+								List<CtElement> susp = new ArrayList<>();
+								if (soldt != null)
+									susp.addAll(soldt);
+								if (soldelse != null)
+									susp.addAll(soldelse);
+
+								CtElement lineP = null;
+								ITree lineTree = null;
+								if (!susp.isEmpty()) {
+
+									lineP = MappingAnalysis.getParentLine(new LineFilter(), (CtElement) susp.get(0));
+									lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+
+								} else {
+
+									// The next
+									InsertOperation operationIns = (InsertOperation) operation;
+
+									List<ITree> treeInLeft = MappingAnalysis.getFollowStatementsInLeft(diff,
+											operationIns.getAction());
+
+									if (treeInLeft.isEmpty()) {
+										System.out.println(
+												"Problem!!!! Empty parent in " + MISS_NULL_CHECK_N.toLowerCase());
+										continue;
+									}
+
+									for (ITree iTree : treeInLeft) {
+										susp.add((CtElement) iTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT));
+									}
+
+									lineP = susp.get(0);
+								//	lineTree = treeInLeft.get(0);
+									lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
+								}
+
+								if (binaryOperator.getKind().equals(BinaryOperatorKind.EQ)) {
+									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_P,
+											new PatternInstance(MISS_NULL_CHECK_P, operation, parent, susp, lineP,
+													lineTree));
+								} else {
+									repairPatterns.incrementFeatureCounterInstance(MISS_NULL_CHECK_N,
+											new PatternInstance(MISS_NULL_CHECK_N, operation, parent, susp, lineP,
+													lineTree));
+								}
+							}
+						}
+					}
 				}
 			}
 		}

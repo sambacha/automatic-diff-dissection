@@ -38,7 +38,6 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 			}
 		}
-
 	}
 
 	public String createPatternLabel(Boolean includeMetadata, PatternInstance patternInstance) {
