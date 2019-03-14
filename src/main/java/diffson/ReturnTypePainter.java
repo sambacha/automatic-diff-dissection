@@ -39,7 +39,6 @@ public class ReturnTypePainter implements NodePainter {
 						|| binOp.getKind().equals(BinaryOperatorKind.LE)
 						|| binOp.getKind().equals(BinaryOperatorKind.LT)
 						|| binOp.getKind().equals(BinaryOperatorKind.NE))
-					;
 				type = Boolean.class.getCanonicalName();
 
 			}

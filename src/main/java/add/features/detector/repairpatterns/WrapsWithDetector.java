@@ -396,7 +396,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
-						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation))
+						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation) &&
+								!(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall)
+								&& !(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation))
 						   repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
@@ -414,7 +416,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						for (CtExpression ctExpression : invocationArguments) {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
-
+                                System.out.println(ctExpression);
 								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
 								{
 								   CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
@@ -479,7 +481,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
-						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctConstructor))
+						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctConstructor) &&
+								!(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
+								&& !(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall))
 						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 								new PatternInstance(WRAPS_METHOD, operation, ctConstructor, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
