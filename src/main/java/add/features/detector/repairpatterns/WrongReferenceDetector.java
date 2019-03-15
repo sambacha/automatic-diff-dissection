@@ -1221,7 +1221,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 				// note enum type will be deemed as type access for partial program
 				if (srcNode instanceof CtTypeAccess
-							&& !RepairPatternUtils.isThisAccess((CtTypeAccess) srcNode)) {
+							&& !RepairPatternUtils.isThisAccess((CtTypeAccess) srcNode) &&
+							RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
 
 					CtVariableRead parentVarRead = srcNode.getParent(CtVariableRead.class);
 					// The change is not inside a VariableRead (wich ast has as node a TypeAccess)
@@ -1249,7 +1250,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 							boolean isConstantVariable = false;
 							if (ctElement instanceof CtVariableAccess
-									|| (ctElement instanceof CtTypeAccess && !RepairPatternUtils.isThisAccess((CtTypeAccess) ctElement))) {
+									|| (ctElement instanceof CtTypeAccess && !RepairPatternUtils.isThisAccess((CtTypeAccess) ctElement)
+										&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) ctElement))) {
 								isConstantVariable = true;
 							}
 							if (isConstantVariable && !alreadyconsidered.contains(ctElement)) {
@@ -1272,7 +1274,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					CtTypeAccess cttypeaccess = (CtTypeAccess) operation.getSrcNode();
 					
 					// try to search a replacement for the literal
-					if(!RepairPatternUtils.isThisAccess((CtTypeAccess) cttypeaccess))
+					if(!RepairPatternUtils.isThisAccess(cttypeaccess)
+							&& RepairPatternUtils.isConstantTypeAccess(cttypeaccess))
 					  for (int j = 0; j < diff.getAllOperations().size(); j++) {
 						Operation operation2Insert = diff.getAllOperations().get(j);
 						if (operation2Insert instanceof InsertOperation && 

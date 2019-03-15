@@ -59,7 +59,8 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 				// old if
 //				if (srcNode instanceof CtTypeAccess  
 //						&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
-					if (srcNode instanceof CtTypeAccess
+					if (srcNode instanceof CtTypeAccess &&
+							RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)
 							&& !RepairPatternUtils.isThisAccess((CtTypeAccess) srcNode)) {
 					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
 
@@ -111,7 +112,8 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 							CtElement ctElement = operation2Insert.getSrcNode();
 							boolean isConstantVariable = false;
 							if (ctElement instanceof CtVariableAccess
-									|| (ctElement instanceof CtTypeAccess && !RepairPatternUtils.isThisAccess((CtTypeAccess) ctElement))) {
+									|| (ctElement instanceof CtTypeAccess && !RepairPatternUtils.isThisAccess((CtTypeAccess) ctElement)
+											&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) ctElement))) {
 								isConstantVariable = true;
 							}
 							if (((InsertOperation) operation2Insert).getParent() == ctLiteral.getParent()
@@ -132,7 +134,8 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 					CtTypeAccess cttypeaccess = (CtTypeAccess) operation.getSrcNode();
 					
 					// try to search a replacement for the literal
-					if(!RepairPatternUtils.isThisAccess((CtTypeAccess) cttypeaccess))
+					if(!RepairPatternUtils.isThisAccess(cttypeaccess) &&
+							RepairPatternUtils.isConstantTypeAccess(cttypeaccess))
 					  for (int j = 0; j < operations.size(); j++) {
 						Operation operation2Insert = operations.get(j);
 						if (operation2Insert instanceof InsertOperation) {

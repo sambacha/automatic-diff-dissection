@@ -485,17 +485,29 @@ public class RepairPatternUtils {
 		return false;
 	}
 
-	public static boolean isConstantTypeAccess(CtTypeAccess ctTypeAccess) {
+//	public static boolean isConstantTypeAccess(CtTypeAccess ctTypeAccess) {
+//		
+//		Set<ModifierKind> modifiers = ctTypeAccess.getType().getModifiers();
+//		if (modifiers.contains(ModifierKind.FINAL)) {
+//			return true;
+//		} else {
+//			String simpleName = ctTypeAccess.getAccessedType().getSimpleName();
+//			if (simpleName.toUpperCase().equals(simpleName)) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+	
+   public static boolean isConstantTypeAccess(CtTypeAccess ctTypeAccess) {
 		
-		Set<ModifierKind> modifiers = ctTypeAccess.getType().getModifiers();
-		if (modifiers.contains(ModifierKind.FINAL)) {
-			return true;
-		} else {
-			String simpleName = ctTypeAccess.getAccessedType().getSimpleName();
-			if (simpleName.toUpperCase().equals(simpleName)) {
+		String fullname=ctTypeAccess.getAccessedType().getQualifiedName();
+		String[] splitname=fullname.split(".");
+		if (splitname.length>1) {
+			String simplename=splitname[splitname.length-1];
+			if (simplename.toUpperCase().equals(simplename)) 
 				return true;
-			}
-		}
+		}		
 		return false;
 	}
 	
