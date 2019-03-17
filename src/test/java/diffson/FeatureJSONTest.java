@@ -188,17 +188,17 @@ public class FeatureJSONTest {
 		// CodeFeatures.S5_SIMILAR_PRIMITIVE_TYPE_WITH_GUARD, Boolean.FALSE);
 	}
 
-	@Test
-	public void testContext_S2_Closure_111() {
-
-		String diffId = "Closure_111";
-
-		JsonObject resultjson = getJsonOfBugId(diffId);
-		System.out.println(resultjson);
-		// The condition has an invocation which return type is not known
-		assertMarkedlAST(resultjson, CodeFeatures.S2_SIMILAR_OBJECT_TYPE_WITH_GUARD, Boolean.TRUE);
-		assertMarkedlAST(resultjson, CodeFeatures.S5_SIMILAR_PRIMITIVE_TYPE_WITH_GUARD, Boolean.FALSE);
-	}
+//	@Test
+//	public void testContext_S2_Closure_111() {
+//
+//		String diffId = "Closure_111";
+//
+//		JsonObject resultjson = getJsonOfBugId(diffId);
+//		System.out.println(resultjson);
+//		// The condition has an invocation which return type is not known
+//		assertMarkedlAST(resultjson, CodeFeatures.S2_SIMILAR_OBJECT_TYPE_WITH_GUARD, Boolean.TRUE);
+//		assertMarkedlAST(resultjson, CodeFeatures.S5_SIMILAR_PRIMITIVE_TYPE_WITH_GUARD, Boolean.FALSE);
+//	}
 
 	@Test
 	public void testContext_S6_Closure_83() {

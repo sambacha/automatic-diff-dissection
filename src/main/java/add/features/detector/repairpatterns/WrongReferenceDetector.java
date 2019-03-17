@@ -74,7 +74,6 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 			if (operation instanceof DeleteOperation) {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
-
 //				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess
 //						|| srcNode instanceof CtInvocation) {
 					if (srcNode instanceof CtVariableAccess 
@@ -175,6 +174,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											||replaceElementType.equals("VariableWrite")||replaceElementType.equals("TypeAccess"))
 										whetherConsiderInitial=true;
 								}
+								
 								// Case 1
 								if(whetherConsiderInitial) {
 								   if (srcNode instanceof CtInvocation) {

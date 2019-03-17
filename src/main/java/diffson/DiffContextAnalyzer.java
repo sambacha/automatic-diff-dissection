@@ -559,7 +559,7 @@ public class DiffContextAnalyzer {
 	 */
 
 	@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
-	private void seInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext, Diff diff) {
+	private void seInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext, Diff diff, CtElement affectedelement) {
 
 		Cntx bugContext = new Cntx<>();
 
@@ -626,7 +626,7 @@ public class DiffContextAnalyzer {
 
 		//
 		if (affectedCtElement != null) {
-			Cntx iContext = cresolver.analyzeFeatures(affectedCtElement);
+			Cntx iContext = cresolver.analyzeFeatures(affectedelement);
 			opContext.add("cntx", iContext.toJSON());
 		}
 
@@ -880,7 +880,7 @@ public class DiffContextAnalyzer {
 		// Cntx iContext = cresolver.retrieveCntx(getAffectedCtElement);
 		// opContext.add("cntx", iContext.toJSON());
 
-		seInformation(opi, cresolver, opContext, diff);
+		seInformation(opi, cresolver, opContext, diff, getAffectedCtElement);
 
 	//	setPatchInformation(opi, cresolver, opContext, diff);
 		return opContext;
