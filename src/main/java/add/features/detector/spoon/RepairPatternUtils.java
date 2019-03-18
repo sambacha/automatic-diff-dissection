@@ -502,7 +502,8 @@ public class RepairPatternUtils {
    public static boolean isConstantTypeAccess(CtTypeAccess ctTypeAccess) {
 		
 		String fullname=ctTypeAccess.getAccessedType().getQualifiedName();
-		String[] splitname=fullname.split(".");
+		
+		String[] splitname=fullname.split("\\.");
 		if (splitname.length>1) {
 			String simplename=splitname[splitname.length-1];
 			if (simplename.toUpperCase().equals(simplename)) 

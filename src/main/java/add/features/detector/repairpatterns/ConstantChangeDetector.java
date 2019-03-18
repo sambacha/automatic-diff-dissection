@@ -59,20 +59,20 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 				// old if
 //				if (srcNode instanceof CtTypeAccess  
 //						&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
-					if (srcNode instanceof CtTypeAccess &&
-							RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)
-							&& !RepairPatternUtils.isThisAccess((CtTypeAccess) srcNode)) {
-					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
-
-					CtVariableRead parentVarRead = srcNode.getParent(CtVariableRead.class);
-					// The change is not inside a VariableRead (wich ast has as node a TypeAccess)
-					if (parentVarRead == null) {
-
-						repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
-								new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
-										lineTree, new PropertyPair("type", "typeaccess")));
-					}
-				}
+				
+//					if (srcNode instanceof CtTypeAccess &&
+//							RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)
+//							&& !RepairPatternUtils.isThisAccess((CtTypeAccess) srcNode)) {
+//					// repairPatterns.incrementFeatureCounter(CONST_CHANGE, operation);
+//					CtVariableRead parentVarRead = srcNode.getParent(CtVariableRead.class);
+//					// The change is not inside a VariableRead (wich ast has as node a TypeAccess)
+//					if (parentVarRead == null) {
+//
+//						repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+//								new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
+//										lineTree, new PropertyPair("type", "typeaccess")));
+//					}
+//				}
 			} else {
 //				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtLiteral) {
 //					CtLiteral ctLiteral = (CtLiteral) operation.getSrcNode();
@@ -130,34 +130,34 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 					}
 				}
 			
-				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtTypeAccess) {
-					CtTypeAccess cttypeaccess = (CtTypeAccess) operation.getSrcNode();
-					
-					// try to search a replacement for the literal
-					if(!RepairPatternUtils.isThisAccess(cttypeaccess) &&
-							RepairPatternUtils.isConstantTypeAccess(cttypeaccess))
-					  for (int j = 0; j < operations.size(); j++) {
-						Operation operation2Insert = operations.get(j);
-						if (operation2Insert instanceof InsertOperation) {
-							CtElement ctElement = operation2Insert.getSrcNode();
-							boolean isliteralorvariable = false;
-							if (ctElement instanceof CtLiteral
-									|| (ctElement instanceof CtVariableAccess)) {
-								isliteralorvariable = true;
-							}
-							if (((InsertOperation) operation2Insert).getParent() == cttypeaccess.getParent()
-									&& isliteralorvariable) {
-								CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), cttypeaccess);
-								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parent);
-
-								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
-										new PatternInstance(CONST_CHANGE, operation2Insert,
-												operation2Insert.getSrcNode(), cttypeaccess, parent, lineTree,
-												new PropertyPair("type", "typeaccess_by_literalvariable")));
-							}
-						}
-					}
-				}	
+//				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtTypeAccess) {
+//					CtTypeAccess cttypeaccess = (CtTypeAccess) operation.getSrcNode();
+//					
+//					// try to search a replacement for the literal
+//					if(!RepairPatternUtils.isThisAccess(cttypeaccess) &&
+//							RepairPatternUtils.isConstantTypeAccess(cttypeaccess))
+//					  for (int j = 0; j < operations.size(); j++) {
+//						Operation operation2Insert = operations.get(j);
+//						if (operation2Insert instanceof InsertOperation) {
+//							CtElement ctElement = operation2Insert.getSrcNode();
+//							boolean isliteralorvariable = false;
+//							if (ctElement instanceof CtLiteral
+//									|| (ctElement instanceof CtVariableAccess)) {
+//								isliteralorvariable = true;
+//							}
+//							if (((InsertOperation) operation2Insert).getParent() == cttypeaccess.getParent()
+//									&& isliteralorvariable) {
+//								CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), cttypeaccess);
+//								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parent);
+//
+//								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
+//										new PatternInstance(CONST_CHANGE, operation2Insert,
+//												operation2Insert.getSrcNode(), cttypeaccess, parent, lineTree,
+//												new PropertyPair("type", "typeaccess_by_literalvariable")));
+//							}
+//						}
+//					}
+//				}	
 			}
 		}
 	}

@@ -396,13 +396,18 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
-						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation) &&
-								!(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall)
-								&& !(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation))
-						   repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
-								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
+						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation)) {
+							  if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
+									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
+									  RepairPatternUtils.getElementInOld(diff, ctInvocation.getParent())) {
+							  }
+							  else
+						      repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+								   new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
 										new PropertyPair("New", "Invocation")));
+						}
 					}
 				}
 			} else {
@@ -481,13 +486,19 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
-						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctConstructor) &&
-								!(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
-								&& !(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall))
-						repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctConstructor)) {
+							
+							 if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
+									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
+									  RepairPatternUtils.getElementInOld(diff, ctConstructor.getParent())) {
+							  }
+							  else
+						       repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 								new PatternInstance(WRAPS_METHOD, operation, ctConstructor, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
 										new PropertyPair("New", "Constructor")));
+						}
 					}
 				}
 			} else {

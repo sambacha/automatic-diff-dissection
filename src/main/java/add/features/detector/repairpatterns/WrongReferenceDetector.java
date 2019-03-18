@@ -77,7 +77,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 //				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess
 //						|| srcNode instanceof CtInvocation) {
 					if (srcNode instanceof CtVariableAccess 
-							|| srcNode instanceof CtInvocation || srcNode instanceof CtConstructorCall) {
+							|| srcNode instanceof CtInvocation || srcNode instanceof CtConstructorCall||
+							srcNode instanceof CtTypeAccess) {
 					if (srcNode.getMetadata("delete") != null) {
 						CtElement statementParent = srcNode.getParent(CtStatement.class);
 						if (statementParent.getMetadata("delete") == null) {
@@ -234,7 +235,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									  repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
 											new PatternInstance(WRONG_VAR_REF, operationDelete, patch, susp, parentLine,
 													lineTree, metadata));
-								}
+							    }
 							}
 						}
 					}
@@ -285,7 +286,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					continue;
 				}
 		//		if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {// let CtTypeAccess be constant related changes
-				if (srcNode instanceof CtVariableAccess) {
+				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
 					if (operation.getDstNode() instanceof CtVariableAccess
 							|| operation.getDstNode() instanceof CtTypeAccess
 							|| operation.getDstNode() instanceof CtInvocation) {
@@ -623,7 +624,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
 				if ((srcNode instanceof CtVariableAccess || srcNode instanceof CtInvocation ||
-						srcNode instanceof CtConstructorCall) && invocationArgumentsold.contains(srcNode)
+						srcNode instanceof CtConstructorCall || srcNode instanceof CtTypeAccess) && invocationArgumentsold.contains(srcNode)
 						&&  srcNode.getParent()==source) { 
 						// skip when it's a wrap with method call
 					CtElement newElementReplacementOfTheVar = null;
@@ -753,7 +754,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						|| !invocationArgumentsnew.contains(dstNode) || dstNode.getParent()!=destination)
 					continue;
 				
-				if (srcNode instanceof CtVariableAccess) {
+				if (srcNode instanceof CtVariableAccess ||srcNode instanceof CtTypeAccess) {
 					if (operation.getDstNode() instanceof CtVariableAccess
 							|| operation.getDstNode() instanceof CtTypeAccess
 							|| operation.getDstNode() instanceof CtInvocation) {
@@ -1080,14 +1081,19 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 						
 						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation) &&
-							!(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall)
-							&& !(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation) &&
-							invocationArgumentsold.contains(ctExpression) && ctExpression.getParent()==source)
+							invocationArgumentsold.contains(ctExpression) && ctExpression.getParent()==source) {
 								
-						   repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+							if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
+									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
+									  RepairPatternUtils.getElementInOld(diff, ctInvocation.getParent())) {
+							  }
+							else
+						    repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
 										new PropertyPair("New", "Invocation")));
+						}
 					}
 				}
 			  }
@@ -1157,13 +1163,19 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 							
 						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation) &&
-							!(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
-						   && !(RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall) &&
-						   invocationArgumentsold.contains(ctExpression) && ctExpression.getParent()==source)
-						   repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
+						   invocationArgumentsold.contains(ctExpression) && ctExpression.getParent()==source) {
+
+							 if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
+									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
+									  RepairPatternUtils.getElementInOld(diff, ctInvocation.getParent())) {
+							}
+						     else
+						     repairPatterns.incrementFeatureCounterInstance(WRAPS_METHOD,
 								new PatternInstance(WRAPS_METHOD, operation, ctInvocation, ctExpression, lineP,
 										lineTree, new PropertyPair("Old", "MovedExpression"),
 										new PropertyPair("New", "Constructor")));
+						}
 					}
 				}
 			  }
@@ -1218,21 +1230,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
 									lineTree, new PropertyPair("type", "literal")));
 				}
-
-				// note enum type will be deemed as type access for partial program
-				if (srcNode instanceof CtTypeAccess
-							&& !RepairPatternUtils.isThisAccess((CtTypeAccess) srcNode) &&
-							RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) srcNode)) {
-
-					CtVariableRead parentVarRead = srcNode.getParent(CtVariableRead.class);
-					// The change is not inside a VariableRead (wich ast has as node a TypeAccess)
-					if (parentVarRead == null) {
-
-						repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
-								new PatternInstance(CONST_CHANGE, operation, operation.getDstNode(), srcNode, parent,
-										lineTree, new PropertyPair("type", "typeaccess")));
-					}
-				}
+				
 			} else {			
 
 				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtLiteral &&
@@ -1263,39 +1261,6 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 										new PatternInstance(CONST_CHANGE, operation2Insert,
 												operation2Insert.getSrcNode(), ctLiteral, parent, lineTree,
 												new PropertyPair("type", "literal_by_varaccess")));
-								break;
-							}
-						}
-					}
-				}
-			
-				if (operation instanceof DeleteOperation && operation.getSrcNode() instanceof CtTypeAccess
-						&& invocationArgumentsold.contains(operation.getSrcNode()) && operation.getSrcNode().getParent()==source) {
-					CtTypeAccess cttypeaccess = (CtTypeAccess) operation.getSrcNode();
-					
-					// try to search a replacement for the literal
-					if(!RepairPatternUtils.isThisAccess(cttypeaccess)
-							&& RepairPatternUtils.isConstantTypeAccess(cttypeaccess))
-					  for (int j = 0; j < diff.getAllOperations().size(); j++) {
-						Operation operation2Insert = diff.getAllOperations().get(j);
-						if (operation2Insert instanceof InsertOperation && 
-								invocationArgumentsnew.contains(operation2Insert.getSrcNode())
-								&& operation2Insert.getSrcNode().getParent()==destination) {
-							CtElement ctElement = operation2Insert.getSrcNode();
-							boolean isliteralorvariable = false;
-							if (ctElement instanceof CtLiteral
-									|| (ctElement instanceof CtVariableAccess)) {
-								isliteralorvariable = true;
-							}
-							if (isliteralorvariable && !alreadyconsidered.contains(ctElement)) {
-								alreadyconsidered.add(ctElement);
-								CtElement parent = MappingAnalysis.getParentLine(new LineFilter(), cttypeaccess);
-								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parent);
-
-								repairPatterns.incrementFeatureCounterInstance(CONST_CHANGE,
-										new PatternInstance(CONST_CHANGE, operation2Insert,
-												operation2Insert.getSrcNode(), cttypeaccess, parent, lineTree,
-												new PropertyPair("type", "typeaccess_by_literalvariable")));
 								break;
 							}
 						}
