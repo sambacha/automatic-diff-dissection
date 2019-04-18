@@ -237,34 +237,34 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				} else {
 					// Inside delete but node is Not access var
 
-					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
-
-						CtElement susp = null;// operationDelete.getSrcNode();
-						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
-						if (susp == null)
-							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
-
-						CtElement patch = null;
-
-						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
-						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-								? parentLine.getMetadata("tree")
-								: parentLine.getMetadata("gtnode"));
-
-						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
-						if (parentRight != null) {
-							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-						}
-
-						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
-										lineTree,
-										//
-										new PropertyPair("Change", "ArgumentRemovement")
-
-								));
-
-					}
+//					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
+//
+//						CtElement susp = null;// operationDelete.getSrcNode();
+//						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
+//						if (susp == null)
+//							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
+//
+//						CtElement patch = null;
+//
+//						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
+//						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+//								? parentLine.getMetadata("tree")
+//								: parentLine.getMetadata("gtnode"));
+//
+//						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+//						if (parentRight != null) {
+//							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+//						}
+//
+//						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+//								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
+//										lineTree,
+//										//
+//										new PropertyPair("Change", "ArgumentRemovement")
+//
+//								));
+//
+//					}
 				}
 			}
 			/// UPDATE NODE
