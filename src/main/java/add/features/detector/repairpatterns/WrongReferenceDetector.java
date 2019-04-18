@@ -3,8 +3,6 @@ package add.features.detector.repairpatterns;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
@@ -20,13 +18,10 @@ import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
 import gumtree.spoon.diff.operations.UpdateOperation;
 import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
-import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
@@ -242,34 +237,34 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				} else {
 					// Inside delete but node is Not access var
 
-//					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
-//
-//						CtElement susp = null;// operationDelete.getSrcNode();
-//						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
-//						if (susp == null)
-//							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
-//
-//						CtElement patch = null;
-//
-//						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
-//						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
-//								? parentLine.getMetadata("tree")
-//								: parentLine.getMetadata("gtnode"));
-//
-//						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
-//						if (parentRight != null) {
-//							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-//						}
-//
-//						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
-//								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
-//										lineTree,
-//										//
-//										new PropertyPair("Change", "ArgumentRemovement")
-//
-//								));
-//
-//					}
+					if (srcNode.getRoleInParent() == CtRole.ARGUMENT) {
+
+						CtElement susp = null;// operationDelete.getSrcNode();
+						susp = operationDelete.getSrcNode().getParent(CtInvocation.class);
+						if (susp == null)
+							susp = operationDelete.getSrcNode().getParent(CtConstructorCall.class);
+
+						CtElement patch = null;
+
+						CtElement parentLine = MappingAnalysis.getParentLine(new LineFilter(), susp);
+						ITree lineTree = (ITree) ((parentLine.getMetadata("tree") != null)
+								? parentLine.getMetadata("tree")
+								: parentLine.getMetadata("gtnode"));
+
+						ITree parentRight = MappingAnalysis.getParentInRight(diff, operationDelete.getAction());
+						if (parentRight != null) {
+							patch = (CtElement) parentRight.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+						}
+
+						repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+								new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
+										lineTree,
+										//
+										new PropertyPair("Change", "ArgumentRemovement")
+
+								));
+
+					}
 				}
 			}
 			/// UPDATE NODE
