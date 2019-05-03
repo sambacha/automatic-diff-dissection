@@ -848,7 +848,7 @@ public class DiffContextAnalyzer {
 			painters.add(new PatternPainter(repairactionPerOp, "repairactions"));
 		//	painters.add(new OperationNodePainter(diff.getAllOperations()));
 			painters.add(new FaultyElementPatternPainter(patternInstancesOriginal));
-			painters.add(new ReturnTypePainter());
+			painters.add(new ReturnTypePainter(getAffectedCtElement));
 
 			// System.out.println(patternInstance);
 			JsonObject jsonInstance = new JsonObject();

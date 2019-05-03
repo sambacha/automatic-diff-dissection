@@ -2,12 +2,14 @@ package add.features.detector.repairpatterns;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.gumtreediff.tree.ITree;
 
 import add.entities.PatternInstance;
 import add.entities.PropertyPair;
 import add.entities.RepairPatterns;
+import add.features.detector.spoon.LogicalExpressionAnalyzer;
 import add.features.detector.spoon.RepairPatternUtils;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.diff.operations.InsertOperation;
@@ -205,8 +207,28 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parentLine);
 						///
+						
+						CtElement susplogical=suspLeft.get(0);
+						
+						List<CtExpression> allrootlogicalexpers=LogicalExpressionAnalyzer.getAllRootLogicalExpressions(parentLine);
+						
+						for(int index=0; index<allrootlogicalexpers.size(); index++) {
+							
+							CtExpression experunderstudy=allrootlogicalexpers.get(index);
+							List<CtExpression> expressionssFromFaultyLine = experunderstudy.getElements(e -> (e instanceof CtExpression)).stream()
+									.map(CtExpression.class::cast).collect(Collectors.toList());
+							
+							if(expressionssFromFaultyLine.contains(susplogical)) {
+								susplogical=experunderstudy;
+								break;
+							}
+						}
+						
+//						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_EXPAND, new PatternInstance(
+//								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, suspLeft, parentLine, lineTree));
+						
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_EXPAND, new PatternInstance(
-								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, suspLeft, parentLine, lineTree));
+								EXP_LOGIC_EXPAND, operation, parentBinaryOperator, susplogical, parentLine, lineTree));
 
 						isExpLogicExOrRed = true;
 					}
@@ -226,9 +248,28 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 						CtElement parentLine = MappingAnalysis.getParentLine(filter, binary);
 
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parentLine);
-
+						
+                        CtElement susplogical= removedNode;
+						
+						List<CtExpression> allrootlogicalexpers=LogicalExpressionAnalyzer.getAllRootLogicalExpressions(parentLine);
+						
+						for(int index=0; index<allrootlogicalexpers.size(); index++) {
+							
+							CtExpression experunderstudy=allrootlogicalexpers.get(index);
+							List<CtExpression> expressionssFromFaultyLine = experunderstudy.getElements(e -> (e instanceof CtExpression)).stream()
+									.map(CtExpression.class::cast).collect(Collectors.toList());
+							
+							if(expressionssFromFaultyLine.contains(susplogical)) {
+								susplogical=experunderstudy;
+								break;
+							}
+						}
+						
+//						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_REDUCE, new PatternInstance(
+//								EXP_LOGIC_REDUCE, operation, affected, removedNode, parentLine, lineTree));
+						
 						repairPatterns.incrementFeatureCounterInstance(EXP_LOGIC_REDUCE, new PatternInstance(
-								EXP_LOGIC_REDUCE, operation, affected, removedNode, parentLine, lineTree));
+								EXP_LOGIC_REDUCE, operation, affected, susplogical, parentLine, lineTree));
 
 						// repairPatterns.incrementFeatureCounter(EXP_LOGIC_REDUCE, operation);
 
@@ -299,7 +340,6 @@ public class ExpressionFixDetector extends AbstractPatternDetector {
 				}
 			}
 		}
-
 	}
 
 	private boolean idem(CtExpression rightHandOperand, CtExpression ctExpression) {

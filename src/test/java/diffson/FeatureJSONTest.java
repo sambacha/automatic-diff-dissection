@@ -139,7 +139,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CodeFeatures.LE5_BOOLEAN_EXPRESSIONS_IN_FAULTY, Boolean.TRUE);
+	//	assertMarkedlAST(resultjson, CodeFeatures.LE5_BOOLEAN_EXPRESSIONS_IN_FAULTY, Boolean.TRUE);
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class FeatureJSONTest {
 		JsonObject resultjson = getJsonOfBugId(diffId);
 		System.out.println(resultjson);
 		//
-		assertMarkedlAST(resultjson, CodeFeatures.LE7_SIMPLE_VAR_IN_LOGIC, Boolean.TRUE);
+		assertMarkedlAST(resultjson, CodeFeatures.LE7_SIMPLE_VAR_OR_METHOD_IN_LOGIC, Boolean.TRUE);
 	}
 
 	@Test
