@@ -422,7 +422,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						for (CtExpression ctExpression : invocationArguments) {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
-                                System.out.println(ctExpression);
+
 								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
 								{
 								   CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
