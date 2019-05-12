@@ -1,6 +1,7 @@
 package add.features.detector.spoon;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,8 @@ import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtSwitch;
+import spoon.reflect.code.CtThisAccess;
+import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtElement;
 
@@ -37,6 +40,30 @@ public class LogicalExpressionAnalyzer {
 	    } 
 		
 		return logicalExpressions;
+	}
+	
+    public static List<CtExpression> getAllExpressions (CtElement parentline) {
+
+		CtElement elementToStudy = retrieveElementToStudy(parentline);
+
+		List<CtExpression> expressionssFromFaultyLine = elementToStudy.getElements(e -> (e instanceof CtExpression)).stream()
+				.map(CtExpression.class::cast).collect(Collectors.toList());
+		
+		LinkedHashSet<CtExpression> hashSetExpressions = new LinkedHashSet<>(expressionssFromFaultyLine);
+        ArrayList<CtExpression> listExpressionWithoutDuplicates = new ArrayList<>(hashSetExpressions);
+        
+        ArrayList<CtExpression> removeUndesirable = new ArrayList<>();
+		
+		for(int index=0; index<listExpressionWithoutDuplicates.size(); index++) {
+			CtExpression certainExpression = listExpressionWithoutDuplicates.get(index);
+			
+			if(certainExpression instanceof CtTypeAccess || certainExpression instanceof CtThisAccess) {
+				// ignore type access
+			} 
+			else removeUndesirable.add(certainExpression);
+		}
+		
+		return removeUndesirable;
 	}
 
 	public static CtElement retrieveElementToStudy(CtElement element) {

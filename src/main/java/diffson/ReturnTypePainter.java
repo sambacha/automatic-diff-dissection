@@ -20,8 +20,11 @@ public class ReturnTypePainter implements NodePainter {
 	
 	List<CtExpression> allrootlogicalexpers;
 	
+	List<CtExpression> allExpressions;
+	
 	public ReturnTypePainter(CtElement faultyLine) {
 		allrootlogicalexpers = LogicalExpressionAnalyzer.getAllRootLogicalExpressions(faultyLine);
+		allExpressions = LogicalExpressionAnalyzer.getAllExpressions(faultyLine);
 	}
 
 	@Override
@@ -54,6 +57,14 @@ public class ReturnTypePainter implements NodePainter {
 //			}
 			
 			jsontree.addProperty("return_type", type);
+			
+			for(int index=0; index<allExpressions.size(); index++) {
+				CtExpression specificExpression = allExpressions.get(index);
+				if(specificExpression.equals(exp)) {
+					jsontree.addProperty("index_of_exper", "expression_"+Integer.toString(index));
+					break;
+				}
+			}
 			
 			if(type.toLowerCase().equals("boolean") || type.toLowerCase().equals("java.lang.boolean")) {
 				
