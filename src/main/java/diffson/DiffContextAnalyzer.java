@@ -419,7 +419,7 @@ public class DiffContextAnalyzer {
 
 			// Patterns:
 
-			if(diff.getRootOperations().size()<=15) {
+			if(diff.getRootOperations().size()<=10) {
 			   JsonObject fileModified = new JsonObject();
 
 			   fileModified.addProperty("file", modifiedFile);

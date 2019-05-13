@@ -6,16 +6,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import spoon.reflect.code.BinaryOperatorKind;
+import spoon.reflect.code.CtArrayRead;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConditional;
+import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtDo;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
+import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtSwitch;
 import spoon.reflect.code.CtThisAccess;
 import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtElement;
 
@@ -54,16 +59,38 @@ public class LogicalExpressionAnalyzer {
         
         ArrayList<CtExpression> removeUndesirable = new ArrayList<>();
 		
-		for(int index=0; index<listExpressionWithoutDuplicates.size(); index++) {
+        for(int index=0; index<listExpressionWithoutDuplicates.size(); index++) {
+			
 			CtExpression certainExpression = listExpressionWithoutDuplicates.get(index);
 			
-			if(certainExpression instanceof CtTypeAccess || certainExpression instanceof CtThisAccess) {
-				// ignore type access
-			} 
-			else removeUndesirable.add(certainExpression);
-		}
+			if(certainExpression instanceof CtVariableAccess || certainExpression instanceof CtLiteral ||
+					certainExpression instanceof CtInvocation || certainExpression instanceof CtConstructorCall ||
+					certainExpression instanceof CtArrayRead || analyzeWhetherAE(certainExpression))
+				removeUndesirable.add(certainExpression);
+		 }
 		
 		return removeUndesirable;
+	}
+    
+    private static boolean analyzeWhetherAE(CtExpression expression) {
+		
+		try {
+
+			List<BinaryOperatorKind> opKinds = new ArrayList<>();
+			opKinds.add(BinaryOperatorKind.DIV);
+			opKinds.add(BinaryOperatorKind.PLUS);
+			opKinds.add(BinaryOperatorKind.MINUS);
+			opKinds.add(BinaryOperatorKind.MUL);
+			opKinds.add(BinaryOperatorKind.MOD);
+			
+			if(expression instanceof CtBinaryOperator && opKinds.contains(((CtBinaryOperator) expression).getKind()))
+				return true;
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 
 	public static CtElement retrieveElementToStudy(CtElement element) {
