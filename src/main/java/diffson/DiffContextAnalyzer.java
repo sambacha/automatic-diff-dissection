@@ -105,14 +105,15 @@ public class DiffContextAnalyzer {
 
 		int diffanalyzed = 0;
 		for (File difffile : dir.listFiles()) {
-			System.out.println("Max memory (bytes): " + 
-					  Runtime.getRuntime().maxMemory()/ (1024*1024) + "MB");
 			
-			System.out.println("Total memory (bytes): " + 
-					  Runtime.getRuntime().totalMemory()/ (1024*1024) + "MB");
-			
-			System.out.println("Free memory (bytes): " + 
-					  Runtime.getRuntime().freeMemory()/ (1024*1024) + "MB");
+//			System.out.println("Max memory (bytes): " + 
+//					  Runtime.getRuntime().maxMemory()/ (1024*1024) + "MB");
+//			
+//			System.out.println("Total memory (bytes): " + 
+//					  Runtime.getRuntime().totalMemory()/ (1024*1024) + "MB");
+//			
+//			System.out.println("Free memory (bytes): " + 
+//					  Runtime.getRuntime().freeMemory()/ (1024*1024) + "MB");
 
 			TimeChrono cr = new TimeChrono();
 			cr.start();
