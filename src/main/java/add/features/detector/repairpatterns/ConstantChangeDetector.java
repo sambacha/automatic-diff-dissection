@@ -12,10 +12,10 @@ import gumtree.spoon.diff.operations.DeleteOperation;
 import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
 import gumtree.spoon.diff.operations.UpdateOperation;
+import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.visitor.filter.LineFilter;
 
@@ -111,7 +111,7 @@ public class ConstantChangeDetector extends AbstractPatternDetector {
 						if (operation2Insert instanceof InsertOperation) {
 							CtElement ctElement = operation2Insert.getSrcNode();
 							boolean isConstantVariable = false;
-							if (ctElement instanceof CtVariableAccess
+							if (ctElement instanceof CtVariableAccess || ctElement instanceof CtArrayAccess 
 									|| (ctElement instanceof CtTypeAccess && !RepairPatternUtils.isThisAccess((CtTypeAccess) ctElement)
 											&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) ctElement))) {
 								isConstantVariable = true;

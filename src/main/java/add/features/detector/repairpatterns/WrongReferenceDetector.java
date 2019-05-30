@@ -18,6 +18,7 @@ import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.Operation;
 import gumtree.spoon.diff.operations.UpdateOperation;
 import spoon.reflect.code.BinaryOperatorKind;
+import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtConstructorCall;
@@ -233,6 +234,20 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 											detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
 								       }
+								       
+//								       if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
+//								    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
+//											if (srcNode instanceof CtInvocation) {
+//												invocationArgumentsold = ((CtInvocation) srcNode).getArguments();
+//											}
+//											
+//											List<CtExpression> invocationArgumentnew = new ArrayList<>();
+//											if (newElementReplacementOfTheVar instanceof CtConstructorCall) {
+//												invocationArgumentnew = ((CtConstructorCall) newElementReplacementOfTheVar).getArguments();
+//											}
+//
+//											detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
+//								       }
 								    }
 								  else  if (srcNode instanceof CtConstructorCall) {
 									  
@@ -278,6 +293,20 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											
 										detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
 							       }
+							       
+//							       if(newElementReplacementOfTheVar instanceof CtInvocation) {
+//							    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
+//										if (srcNode instanceof CtConstructorCall) {
+//											invocationArgumentsold = ((CtConstructorCall) srcNode).getArguments();
+//										}
+//										
+//										List<CtExpression> invocationArgumentnew = new ArrayList<>();
+//										if (newElementReplacementOfTheVar instanceof CtInvocation) {
+//											invocationArgumentnew = ((CtInvocation) newElementReplacementOfTheVar).getArguments();
+//										}
+//											
+//										detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
+//							       }
 							    }
 								  else
 									  repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
@@ -331,7 +360,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 //					}
 				}
 			}
-
+			
 			/// UPDATE NODE
 			if (operation instanceof UpdateOperation) {
 				CtElement srcNode = operation.getSrcNode();
@@ -345,6 +374,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						|| srcNode.getParent().getMetadata("isMoved") != null) {
 					continue;
 				}
+
 		//		if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {// let CtTypeAccess be constant related changes
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
 					if (operation.getDstNode() instanceof CtVariableAccess
@@ -371,6 +401,12 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				if (!(srcNode instanceof CtInvocation) && !(srcNode instanceof CtConstructorCall)) {
 					continue;
 				}
+				
+				if(srcNode instanceof CtInvocation && srcNode.toString().startsWith("this(")) {
+					if(!(srcNode instanceof CtInvocation) || !dstNode.toString().startsWith("this("))
+						continue;
+				}
+
 				// Update a method invocation
 				if (dstNode instanceof CtInvocation || dstNode instanceof CtConstructorCall) {
 					boolean wasMethodDefUpdated = false;
@@ -624,21 +660,21 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											new PropertyPair("Change", "differentMethodName")));
 
 						} else {
-							if (
-							// srcCallArguments.size() != dstCallArguments.size()
-							// horrible workaround
-							// || srcCallArgumentsFromExec.size() != dstCallArgumentsFromExec.size()
-							// ||
-							srcCallRealArguments.size() != dstCallRealArguments.size()
-
-							) {
+//							if (
+//							// srcCallArguments.size() != dstCallArguments.size()
+//							// horrible workaround
+//							// || srcCallArgumentsFromExec.size() != dstCallArgumentsFromExec.size()
+//							// ||
+//							srcCallRealArguments.size() != dstCallRealArguments.size()
+//
+//							) {
 								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
 												lineTree,
 												//
 												new PropertyPair("Change", "SameNamedifferentArgument")));
-							}
+//							}
 						}
 						
 						List<CtExpression> invocationArgumentsold = new ArrayList<>();
@@ -683,6 +719,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 			if (operation instanceof DeleteOperation) {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
+
 				if ((srcNode instanceof CtVariableAccess || srcNode instanceof CtInvocation ||
 						srcNode instanceof CtConstructorCall || srcNode instanceof CtTypeAccess) && invocationArgumentsold.contains(srcNode)
 						&&  srcNode.getParent()==source) { 
@@ -1122,11 +1159,11 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
 											lineTree, new PropertyPair("Change", "differentMethodName")));
 						} else {
-							if (srcCallRealArguments.size() != dstCallRealArguments.size()) {
+							//if (srcCallRealArguments.size() != dstCallRealArguments.size()) {
 							   repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
 											lineTree, new PropertyPair("Change", "SameNamedifferentArgument")));
-							}
+							//}
 						}
 					}
 				}
@@ -1340,7 +1377,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							CtElement ctElement = operation2Insert.getSrcNode();
 
 							boolean isConstantVariable = false;
-							if (ctElement instanceof CtVariableAccess
+							if (ctElement instanceof CtVariableAccess || ctElement instanceof CtArrayAccess 
 									|| (ctElement instanceof CtTypeAccess && !RepairPatternUtils.isThisAccess((CtTypeAccess) ctElement)
 										&& RepairPatternUtils.isConstantTypeAccess((CtTypeAccess) ctElement))) {
 								isConstantVariable = true;

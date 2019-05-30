@@ -425,9 +425,8 @@ public class DiffContextAnalyzer {
 			List<Operation> operationsFromFile = diff.getRootOperations();
 
 			log.info("Diff file " + modifiedFile + " " + operationsFromFile.size());
-
 			// Patterns:
-
+          //  System.out.println(diff.getRootOperations().size());
 			if(diff.getRootOperations().size()<=10) {
 			   JsonObject fileModified = new JsonObject();
 
