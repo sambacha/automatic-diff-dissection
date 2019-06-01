@@ -246,7 +246,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 								ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 
 								repairPatterns.incrementFeatureCounterInstance(UNWRAP_IF_ELSE,
-										new PatternInstance(UNWRAP_IF_ELSE, operation, patch, susps, lineP, lineTree));
+										new PatternInstance(UNWRAP_IF_ELSE, operation, patch, ctConditional, lineP, lineTree));
 							}
 						}
 					} else {

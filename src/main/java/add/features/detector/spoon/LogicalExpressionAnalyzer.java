@@ -47,6 +47,16 @@ public class LogicalExpressionAnalyzer {
 		return logicalExpressions;
 	}
 	
+   public static List<CtBinaryOperator> getAllBinaryOperators (CtElement parentline) {
+
+		CtElement elementToStudy = retrieveElementToStudy(parentline);
+
+		List<CtBinaryOperator> binaryOperatorsFromFaultyLine = elementToStudy.getElements(e -> (e instanceof CtBinaryOperator)).stream()
+				.map(CtBinaryOperator.class::cast).collect(Collectors.toList());
+		
+		return binaryOperatorsFromFaultyLine;
+	}
+	
     public static List<CtExpression> getAllExpressions (CtElement parentline) {
 
 		CtElement elementToStudy = retrieveElementToStudy(parentline);

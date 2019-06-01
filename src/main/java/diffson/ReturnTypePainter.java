@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import add.features.detector.spoon.LogicalExpressionAnalyzer;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
 import gumtree.spoon.builder.jsonsupport.NodePainter;
+import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtElement;
 
@@ -22,9 +23,12 @@ public class ReturnTypePainter implements NodePainter {
 	
 	List<CtExpression> allExpressions;
 	
+	List<CtBinaryOperator> allBinOperators;
+
 	public ReturnTypePainter(CtElement faultyLine) {
 		allrootlogicalexpers = LogicalExpressionAnalyzer.getAllRootLogicalExpressions(faultyLine);
 		allExpressions = LogicalExpressionAnalyzer.getAllExpressions(faultyLine);
+		allBinOperators = LogicalExpressionAnalyzer.getAllBinaryOperators(faultyLine);
 	}
 
 	@Override
@@ -62,6 +66,14 @@ public class ReturnTypePainter implements NodePainter {
 				CtExpression specificExpression = allExpressions.get(index);
 				if(specificExpression.equals(exp)) {
 					jsontree.addProperty("index_of_exper", "expression_"+Integer.toString(index));
+					break;
+				}
+			}
+			
+			for(int index=0; index<allBinOperators.size(); index++) {
+				CtBinaryOperator specificBinOperator = allBinOperators.get(index);
+				if(specificBinOperator.equals(exp)) {
+					jsontree.addProperty("index_of_binary_operator", "BinOperator_"+Integer.toString(index));
 					break;
 				}
 			}
