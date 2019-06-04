@@ -379,9 +379,11 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
 					if (operation.getDstNode() instanceof CtVariableAccess
 							|| operation.getDstNode() instanceof CtTypeAccess
-							|| operation.getDstNode() instanceof CtInvocation) {
+							) {
 						// repairPatterns.incrementFeatureCounter(WRONG_VAR_REF, operationUpdate);
+						boolean wasVarDefUpdated = false;
 
+						
 						CtElement susp = operation.getSrcNode();
 						CtElement patch = null;
 
@@ -398,6 +400,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 										+ srcNode.getClass().getSimpleName().replace("Ct", "").replace("Impl", ""))));
 					}
 				}
+				
 				if (!(srcNode instanceof CtInvocation) && !(srcNode instanceof CtConstructorCall)) {
 					continue;
 				}
