@@ -22,5 +22,4 @@ public class ExperimentRunnerMain {
 		ComingProperties.properties.setProperty("icse15difffolder", input);
 		analyzer.run(ComingProperties.getProperty("icse15difffolder"));
 	}
-
 }

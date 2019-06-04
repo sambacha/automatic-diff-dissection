@@ -83,9 +83,8 @@ public class DiffContextAnalyzer {
 
 		beforeStart();
 
-		int diffanalyzed = 0;
 		for (File difffile : dir.listFiles()) {
-
+			
 			TimeChrono cr = new TimeChrono();
 			cr.start();
 			Map<String, Diff> diffOfcommit = new HashMap();
@@ -93,28 +92,17 @@ public class DiffContextAnalyzer {
 			if (difffile.isFile() || difffile.listFiles() == null)
 				continue;
 
-			diffanalyzed++;
-
-			log.debug("-commit->" + difffile);
-			System.out.println("\n****" + diffanalyzed + "/" + dir.listFiles().length + ": " + difffile.getName());
-
 			if (!acceptFile(difffile)) {
-				System.out.println("existing json for: " + difffile.getName());
 				continue;
 			}
 
 			processDiff(difffile, diffOfcommit);
-			double timediff = cr.getSeconds();
-			log.info("Total diff of " + difffile.getName() + ": " + timediff);
 
 			// here, at the end, we compute the Context
 			atEndCommit(difffile, diffOfcommit);
-
-			double timeProg = cr.getSeconds();
-			log.info("Total property of " + difffile.getName() + ": " + (timeProg - timediff));
-
-			log.info("Total time of " + difffile.getName() + ": " + cr.stopAndGetSeconds());
+			
 		}
+		
 		log.info("Final Results: ");
 		log.info("----");
 		log.info("Withactions " + withactions);
@@ -159,19 +147,12 @@ public class DiffContextAnalyzer {
 				if (diff.getAllOperations().size() > 0) {
 
 					withactions++;
-					log.debug("-file->" + fileModif + " actions " + diff.getRootOperations().size());
-					for (Operation operation : diff.getRootOperations()) {
-
-						log.debug("-op->\n" + operation);
-					}
 
 				} else {
 					zero++;
-					log.debug("-file->" + fileModif + " zero actions ");
 				}
 
 			} catch (Throwable e) {
-				log.error("error with " + previousVersion);
 				e.printStackTrace();
 				error++;
 			}
@@ -328,8 +309,6 @@ public class DiffContextAnalyzer {
 			   RepairPatternDetector detector = new RepairPatternDetector(config, diff);
 			   RepairPatterns rp = detector.analyze();
 
-			   log.info("---Total pattern of " + ": " + cr.stopAndGetSeconds());
-
 			   for (List<PatternInstance> pi : rp.getPatternInstances().values()) {
 				  patternInstances.addAll(pi);
 			   }
@@ -339,7 +318,6 @@ public class DiffContextAnalyzer {
 					repairactionPerOp, patternInstances);
 			// fileModified.add("faulty_stmts_ast", ast_arrays);
 			   fileModified.add("pattern_instances", ast_arrays);
-			   log.info("---Total feature of " + ": " + cr.stopAndGetSeconds());
 
 			   includeAstChangeInfoInJSon(diff, operationsFromFile, fileModified);
 		   }
@@ -389,11 +367,11 @@ public class DiffContextAnalyzer {
 			affectedCtElement = oldLocation;
 		} 
 
-		
 		if (affectedCtElement != null) {
 			Cntx iContext = cresolver.analyzeFeatures(affectedelement);
 			opContext.add("cntx", iContext.toJSON());
 		}
+		
 	}
 
 	CodeFeatureDetector cresolver = new CodeFeatureDetector();
@@ -469,13 +447,13 @@ public class DiffContextAnalyzer {
 				affected.add(jsonT);
 			}
 			
-			   jsonInstance.add("faulty_ast", affected);
+			jsonInstance.add("faulty_ast", affected);
 
-			   ast_affected.add(jsonInstance);
+			ast_affected.add(jsonInstance);
 
-			   JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
+			JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
 
-			   jsonInstance.add("context", opContext);
+			jsonInstance.add("context", opContext);
 		}
 
 		return ast_affected;
