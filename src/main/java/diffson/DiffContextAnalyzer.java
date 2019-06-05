@@ -416,8 +416,8 @@ public class DiffContextAnalyzer {
 
 			CtElement getAffectedCtElement = patternInstance.getFaultyLine();
 			
-			if(whetherDiscardElement(getAffectedCtElement))
-			       continue;
+//			if(whetherDiscardElement(getAffectedCtElement))
+//			       continue;
 			
 			ITree faultyTree = patternInstance.getFaultyTree();
 			if (faultyTree != null) {
@@ -496,7 +496,7 @@ public class DiffContextAnalyzer {
 					parent=parent.getParent();
 					
 				} while (parent instanceof CtBinaryOperator &&
-						((CtBinaryOperator)parent).getKind().equals(BinaryOperatorKind.PLUS));
+						((CtBinaryOperator) parent).getKind().equals(BinaryOperatorKind.PLUS));
 				
 				if(numberString>=4)
 					return true;
@@ -507,6 +507,7 @@ public class DiffContextAnalyzer {
 	}
 	
 	private int getNumberOfStringInBinary (CtBinaryOperator binarytostudy) {
+		
 		int stringnumber=0;
 		
 		if(binarytostudy.getKind().equals(BinaryOperatorKind.PLUS)) {
@@ -518,6 +519,7 @@ public class DiffContextAnalyzer {
 		   if(binarytostudy.getRightHandOperand() instanceof CtLiteral && 
 				((CtLiteral) binarytostudy.getRightHandOperand()).toString().trim().startsWith("\""))
 			stringnumber++;
+		   
 		}
 		
 		return stringnumber;
