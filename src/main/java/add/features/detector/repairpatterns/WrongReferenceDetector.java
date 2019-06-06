@@ -431,6 +431,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		for (int i = 0; i < diff.getAllOperations().size(); i++) {
 
 			Operation operation = diff.getAllOperations().get(i);
+
 			if (operation instanceof DeleteOperation) {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
