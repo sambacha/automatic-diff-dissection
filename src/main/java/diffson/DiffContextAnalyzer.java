@@ -416,8 +416,8 @@ public class DiffContextAnalyzer {
 
 			CtElement getAffectedCtElement = patternInstance.getFaultyLine();
 			
-//			if(whetherDiscardElement(getAffectedCtElement))
-//			       continue;
+			if(whetherDiscardElement(getAffectedCtElement))
+			       continue;
 			
 			ITree faultyTree = patternInstance.getFaultyTree();
 			if (faultyTree != null) {

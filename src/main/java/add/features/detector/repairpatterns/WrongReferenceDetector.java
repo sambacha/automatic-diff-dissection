@@ -1603,15 +1603,44 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				// See whether a method signature was modified
 				if (insertedNode instanceof CtParameter) {
 					
-					if(((CtParameter)insertedNode).getSimpleName().equals(variableaccess.getVariable().getSimpleName()))
-						return true;
+					if(((CtParameter)insertedNode).getSimpleName().equals(variableaccess.getVariable().getSimpleName())) {
 						
+						CtMethod parentParameter = ((CtParameter)insertedNode).getParent(CtMethod.class);
+
+						CtMethod parentVarAccess = variableaccess.getParent(CtMethod.class);
+
+						if(parentParameter!=null && parentVarAccess!=null && parentParameter.equals(parentVarAccess))
+						    return true;
+						
+						CtConstructor parentParameterConstructor = ((CtParameter)insertedNode).getParent(CtConstructor.class);
+
+						CtConstructor parentVarAccessConstructor = variableaccess.getParent(CtConstructor.class);
+
+						if(parentParameterConstructor!=null && parentVarAccessConstructor!=null &&
+								parentParameterConstructor.equals(parentVarAccessConstructor))
+						    return true;
+					}
 				}
 				
                 if (insertedNode instanceof CtLocalVariable) {
 
-					if(((CtLocalVariable) insertedNode).getSimpleName().equals(variableaccess.getVariable().getSimpleName()))
-						return true;	
+					if(((CtLocalVariable) insertedNode).getSimpleName().equals(variableaccess.getVariable().getSimpleName())) {
+						
+						CtMethod parentLocalVariable = ((CtLocalVariable)insertedNode).getParent(CtMethod.class);
+
+						CtMethod parentVarAccess = variableaccess.getParent(CtMethod.class);
+						
+						if(parentLocalVariable!=null && parentVarAccess!=null && parentLocalVariable.equals(parentVarAccess))
+						    return true;
+						
+						CtConstructor parentLocalVariableConstructor = ((CtLocalVariable)insertedNode).getParent(CtConstructor.class);
+
+						CtConstructor parentVarAccessConstructor = variableaccess.getParent(CtConstructor.class);
+
+						if(parentLocalVariableConstructor!=null && parentVarAccessConstructor!=null &&
+								parentLocalVariableConstructor.equals(parentVarAccessConstructor))
+						    return true;
+					}
 				}
                 
                 if (insertedNode instanceof CtField) {
@@ -1639,8 +1668,71 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 				if(originalparent!=null && newparent!=null) {
 					if(((CtVariable)originalparent).getSimpleName().equals(varaccessoriginal.getVariable().getSimpleName())
-							&& ((CtVariable)newparent).getSimpleName().equals(varaccessnew.getVariable().getSimpleName()))
-						return true;
+							&& ((CtVariable)newparent).getSimpleName().equals(varaccessnew.getVariable().getSimpleName())) {
+						
+						if(originalparent instanceof CtParameter) {
+							if(newparent instanceof CtParameter) {
+								CtMethod parentParameterOriginal = originalparent.getParent(CtMethod.class);
+
+								CtMethod parentVarAccessOriginal = varaccessoriginal.getParent(CtMethod.class);
+								
+								CtMethod parentParameterNew = newparent.getParent(CtMethod.class);
+
+								CtMethod parentVarAccessNew = varaccessnew.getParent(CtMethod.class);
+
+								if(parentParameterOriginal!=null && parentVarAccessOriginal!=null && parentParameterOriginal.equals(parentVarAccessOriginal) &&
+									parentParameterNew!=null && parentVarAccessNew!=null && parentParameterNew.equals(parentVarAccessNew))
+								    return true;
+								
+								CtConstructor parentParameterOriginalCon = originalparent.getParent(CtConstructor.class);
+
+								CtConstructor parentVarAccessOriginalCon = varaccessoriginal.getParent(CtConstructor.class);
+								
+								CtConstructor parentParameterNewCon = newparent.getParent(CtConstructor.class);
+
+								CtConstructor parentVarAccessNewCon = varaccessnew.getParent(CtConstructor.class);
+
+								if(parentParameterOriginalCon!=null && parentVarAccessOriginalCon!=null && parentParameterOriginalCon.equals(parentVarAccessOriginalCon) &&
+									parentParameterNewCon!=null && parentVarAccessNewCon!=null && parentParameterNewCon.equals(parentVarAccessNewCon))
+								    return true;
+							}
+						}
+						
+						if(originalparent instanceof CtLocalVariable) {
+							if(newparent instanceof CtLocalVariable) {
+								CtMethod parentLocalVariableOriginal = originalparent.getParent(CtMethod.class);
+
+								CtMethod parentVarAccessOriginal = varaccessoriginal.getParent(CtMethod.class);
+								
+								CtMethod parentLocalVariableNew = newparent.getParent(CtMethod.class);
+
+								CtMethod parentVarAccessNew = varaccessnew.getParent(CtMethod.class);
+
+								if(parentLocalVariableOriginal!=null && parentVarAccessOriginal!=null && parentLocalVariableOriginal.equals(parentVarAccessOriginal) &&
+										parentLocalVariableNew!=null && parentVarAccessNew!=null && parentLocalVariableNew.equals(parentVarAccessNew))
+								    return true;
+								
+								CtConstructor parentLocalVariableOriginalCon = originalparent.getParent(CtConstructor.class);
+
+								CtConstructor parentVarAccessOriginalCon = varaccessoriginal.getParent(CtConstructor.class);
+								
+								CtConstructor parentLocalVariableNewCon = newparent.getParent(CtConstructor.class);
+
+								CtConstructor parentVarAccessNewCon = varaccessnew.getParent(CtConstructor.class);
+
+								if(parentLocalVariableOriginalCon!=null && parentVarAccessOriginalCon!=null && parentLocalVariableOriginalCon.equals(parentVarAccessOriginalCon) &&
+										parentLocalVariableNewCon!=null && parentVarAccessNewCon!=null && parentLocalVariableNewCon.equals(parentVarAccessNewCon))
+								    return true;
+							}
+						}
+						
+						if(originalparent instanceof CtField) {
+							if(newparent instanceof CtField) {
+								return true;
+							}
+						}
+						
+					}	
 				}
 			}	
 		}
