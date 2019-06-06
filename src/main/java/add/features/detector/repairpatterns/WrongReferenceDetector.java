@@ -23,6 +23,8 @@ import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldRead;
+import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLocalVariable;
@@ -31,6 +33,7 @@ import spoon.reflect.code.CtTargetedExpression;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
@@ -173,6 +176,31 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								Boolean whetherConsiderInitial=false;
 								
 								if(metadata.length==2) {
+									
+									if(newElementReplacementOfTheVar instanceof CtFieldRead) {
+										
+										if(whethervariablenewlydeclared((CtFieldRead)newElementReplacementOfTheVar))
+											continue;
+									}
+										
+                                    if(newElementReplacementOfTheVar instanceof CtFieldWrite) {
+										
+										if(whethervariablenewlydeclared((CtFieldWrite)newElementReplacementOfTheVar))
+											continue;
+									}
+                                    
+                                    if(newElementReplacementOfTheVar instanceof CtVariableRead) {
+										
+										if(whethervariablenewlydeclared((CtVariableRead)newElementReplacementOfTheVar))
+											continue;
+									}
+										
+                                    if(newElementReplacementOfTheVar instanceof CtVariableWrite) {
+										
+										if(whethervariablenewlydeclared((CtVariableWrite)newElementReplacementOfTheVar))
+											continue;
+									}
+									
 									if(replaceElementType.equals("Invocation")||replaceElementType.equals("VariableRead")
 											||replaceElementType.equals("FieldRead")||replaceElementType.equals("ConstructorCall")
 											||replaceElementType.equals("Literal")||replaceElementType.equals("FieldWrite")
@@ -215,31 +243,23 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								       if(newElementReplacementOfTheVar instanceof CtInvocation) {
 								    	   
 								    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
-											if (srcNode instanceof CtInvocation) {
-												invocationArgumentsold = ((CtInvocation) srcNode).getArguments();
-											}
+											invocationArgumentsold = ((CtInvocation) srcNode).getArguments();
 											
 											List<CtExpression> invocationArgumentnew = new ArrayList<>();
-											if (newElementReplacementOfTheVar instanceof CtInvocation) {
-												invocationArgumentnew = ((CtInvocation) newElementReplacementOfTheVar).getArguments();
-											}
+											invocationArgumentnew = ((CtInvocation) newElementReplacementOfTheVar).getArguments();
 
 											detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
 								       }
 								       
-//								       if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
-//								    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
-//											if (srcNode instanceof CtInvocation) {
-//												invocationArgumentsold = ((CtInvocation) srcNode).getArguments();
-//											}
-//											
-//											List<CtExpression> invocationArgumentnew = new ArrayList<>();
-//											if (newElementReplacementOfTheVar instanceof CtConstructorCall) {
-//												invocationArgumentnew = ((CtConstructorCall) newElementReplacementOfTheVar).getArguments();
-//											}
-//
-//											detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
-//								       }
+								       if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
+								    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
+											invocationArgumentsold = ((CtInvocation) srcNode).getArguments();
+											
+											List<CtExpression> invocationArgumentnew = new ArrayList<>();
+											invocationArgumentnew = ((CtConstructorCall) newElementReplacementOfTheVar).getArguments();
+
+											detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
+								       }
 								    }
 								  else  if (srcNode instanceof CtConstructorCall) {
 									  
@@ -280,31 +300,23 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							       if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
 							    	   
 							    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
-										if (srcNode instanceof CtConstructorCall) {
-											invocationArgumentsold = ((CtConstructorCall) srcNode).getArguments();
-										}
+										invocationArgumentsold = ((CtConstructorCall) srcNode).getArguments();
 										
 										List<CtExpression> invocationArgumentnew = new ArrayList<>();
-										if (newElementReplacementOfTheVar instanceof CtConstructorCall) {
-											invocationArgumentnew = ((CtConstructorCall) newElementReplacementOfTheVar).getArguments();
-										}
+										invocationArgumentnew = ((CtConstructorCall) newElementReplacementOfTheVar).getArguments();
 											
 										detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
 							       }
 							       
-//							       if(newElementReplacementOfTheVar instanceof CtInvocation) {
-//							    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
-//										if (srcNode instanceof CtConstructorCall) {
-//											invocationArgumentsold = ((CtConstructorCall) srcNode).getArguments();
-//										}
-//										
-//										List<CtExpression> invocationArgumentnew = new ArrayList<>();
-//										if (newElementReplacementOfTheVar instanceof CtInvocation) {
-//											invocationArgumentnew = ((CtInvocation) newElementReplacementOfTheVar).getArguments();
-//										}
-//											
-//										detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
-//							       }
+							       if(newElementReplacementOfTheVar instanceof CtInvocation) {
+							    	    List<CtExpression> invocationArgumentsold = new ArrayList<>();
+										invocationArgumentsold = ((CtConstructorCall) srcNode).getArguments();
+										
+										List<CtExpression> invocationArgumentnew = new ArrayList<>();
+										invocationArgumentnew = ((CtInvocation) newElementReplacementOfTheVar).getArguments();
+											
+										detectVarArgumentChange(invocationArgumentsold, invocationArgumentnew, repairPatterns, srcNode, newElementReplacementOfTheVar);
+							       }
 							    }
 								  else
 									  repairPatterns.incrementFeatureCounterInstance(WRONG_VAR_REF,
@@ -341,12 +353,10 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 					continue;
 				}
 
-		//		if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {// let CtTypeAccess be constant related changes
 				if (srcNode instanceof CtVariableAccess || srcNode instanceof CtTypeAccess) {
 					if (operation.getDstNode() instanceof CtVariableAccess
 							|| operation.getDstNode() instanceof CtTypeAccess
 							) {
-						// repairPatterns.incrementFeatureCounter(WRONG_VAR_REF, operationUpdate);
 						
 						if(srcNode instanceof CtVariableAccess && operation.getDstNode() instanceof CtVariableAccess) {
 
@@ -383,244 +393,33 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						continue;
 				}
 
-				// Update a method invocation
 				if (dstNode instanceof CtInvocation || dstNode instanceof CtConstructorCall) {
-					boolean wasMethodDefUpdated = false;
 
-					String srcCallMethodName;
-					CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
-					List<CtTypeReference> srcCallArguments;
-					List<CtTypeReference> srcCallArgumentsFromExec;
-					List<CtTypeReference> srcCallRealArguments;
+				     String srcCallMethodName;
+				     CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
+				
+				     if(srcNode instanceof CtInvocation) {
+					    srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
+				     } else {	
+					    String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
+					    srcCallMethodName=namespace[namespace.length-1];
+				     }
+				
+				     String dstCallMethodName;
+				     CtElement dst = dstNode;
+
+				     CtTargetedExpression dstInvocation = null;
+				     if (dstNode instanceof CtInvocation) {
+					    dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
+					    dstInvocation = (CtTargetedExpression) dstNode;
+				    } else {		
+					    String[] namespace=((CtConstructorCall) dstNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
+					    dstCallMethodName=namespace[namespace.length-1];	
+					    dstInvocation = (CtTargetedExpression) dstNode;
+				    }
 					
-					if (srcNode instanceof CtInvocation) {
-						srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
-						srcCallArgumentsFromExec = ((CtInvocation) srcNode).getExecutable().getParameters();
-						srcCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
-						srcCallRealArguments = ((CtInvocation) srcNode).getArguments();
-					} else {	
-						String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
-						srcCallMethodName=namespace[namespace.length-1];
-						srcCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
-						srcCallRealArguments = ((CtConstructorCall) srcNode).getArguments();
-						srcCallArgumentsFromExec = ((CtConstructorCall) srcNode).getExecutable().getParameters();
-					}
-					
-					String dstCallMethodName;
-					CtElement dst = dstNode;
-					List<CtTypeReference> dstCallArguments;
-					List<CtTypeReference> dstCallArgumentsFromExec;
-					List<CtTypeReference> dstCallRealArguments;
-
-					CtTargetedExpression dstInvocation = null;
-					if (dstNode instanceof CtInvocation) {
-						dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
-						dstCallArguments = ((CtInvocation) dstNode).getActualTypeArguments();
-						dstCallArgumentsFromExec = ((CtInvocation) dstNode).getExecutable().getParameters();
-						dstInvocation = (CtTargetedExpression) dstNode;
-						dstCallRealArguments = ((CtInvocation) dstNode).getArguments();
-
-					} else {		
-						String[] namespace=((CtConstructorCall) dstNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
-						dstCallMethodName=namespace[namespace.length-1];	
-						dstCallArguments = ((CtConstructorCall) dstNode).getActualTypeArguments();
-						dstCallRealArguments = ((CtConstructorCall) dstNode).getArguments();
-						dstCallArgumentsFromExec = ((CtConstructorCall) dstNode).getExecutable().getParameters();
-						dstInvocation = (CtTargetedExpression) dstNode;
-					}
-
-					for (Operation operation2 : operations) {
-						if (operation2 instanceof InsertOperation) {
-							CtElement insertedNode = operation2.getSrcNode();
-							// See whether a method signature was modified
-							if (insertedNode instanceof CtParameter) {
-								CtElement ctElement = ((InsertOperation) operation2).getParent();
-								if (ctElement instanceof CtMethod) {
-									CtMethod oldMethod = (CtMethod) ctElement;
-									CtMethod newMethod = insertedNode.getParent(CtMethod.class);
-
-									if (oldMethod.getSimpleName().equals(srcCallMethodName)
-											&& newMethod.getSimpleName().equals(dstCallMethodName)) {
-										boolean oldParEquals = true;
-										List<CtParameter> oldMethodPars = oldMethod.getParameters();
-										for (int k = 0; k < oldMethodPars.size(); k++) {
-											CtTypeReference methodParType = oldMethodPars.get(k).getType();
-											if (k < srcCallArguments.size()) {
-												CtTypeReference methodCallArgType = srcCallArguments.get(k);
-												if (!methodParType.getQualifiedName()
-														.equals(methodCallArgType.getQualifiedName())) {
-													oldParEquals = false;
-													break;
-												}
-											}
-										}
-										if (oldParEquals) {
-											boolean newParEquals = true;
-											List<CtParameter> newMethodPars = newMethod.getParameters();
-											for (int k = 0; k < newMethodPars.size(); k++) {
-												CtTypeReference methodParType = newMethodPars.get(k).getType();
-												if (k < dstCallArguments.size()) {
-													CtTypeReference methodCallArgType = dstCallArguments.get(k);
-													if (!methodParType.getQualifiedName()
-															.equals(methodCallArgType.getQualifiedName())) {
-														newParEquals = false;
-														break;
-													}
-												}
-											} // not sure
-											if (newParEquals) {
-												wasMethodDefUpdated = true;
-											}
-										}
-									}
-								}
-								
-								if (ctElement instanceof CtConstructor) {
-									CtConstructor oldConstructor= (CtConstructor) ctElement;
-									CtConstructor newConstructor= insertedNode.getParent(CtConstructor.class);
-
-									if (oldConstructor.getSimpleName().equals(srcCallMethodName)
-											&& newConstructor.getSimpleName().equals(dstCallMethodName)) {
-										boolean oldParEquals = true;
-										List<CtParameter> oldMethodPars = oldConstructor.getParameters();
-										for (int k = 0; k < oldMethodPars.size(); k++) {
-											CtTypeReference methodParType = oldMethodPars.get(k).getType();
-											if (k < srcCallArguments.size()) {
-												CtTypeReference methodCallArgType = srcCallArguments.get(k);
-												if (!methodParType.getQualifiedName()
-														.equals(methodCallArgType.getQualifiedName())) {
-													oldParEquals = false;
-													break;
-												}
-											}
-										}
-										if (oldParEquals) {
-											boolean newParEquals = true;
-											List<CtParameter> newMethodPars = newConstructor.getParameters();
-											for (int k = 0; k < newMethodPars.size(); k++) {
-												CtTypeReference methodParType = newMethodPars.get(k).getType();
-												if (k < dstCallArguments.size()) {
-													CtTypeReference methodCallArgType = dstCallArguments.get(k);
-													if (!methodParType.getQualifiedName()
-															.equals(methodCallArgType.getQualifiedName())) {
-														newParEquals = false;
-														break;
-													}
-												}
-											} // not sure
-											if (newParEquals) {
-												wasMethodDefUpdated = true;
-											}
-										}
-									}
-								}
-							}
-						}
+					if (!whethermethoddefupdated(srcNode, dstNode)) {
 						
-						if (operation2 instanceof DeleteOperation) {
-							CtElement deleteNode = operation2.getSrcNode();
-							// See whether a method signature was modified
-							if (deleteNode instanceof CtParameter) {
-								CtElement ctElement = deleteNode.getParent(CtMethod.class);
-								if (ctElement instanceof CtMethod) {
-									CtMethod oldMethod = (CtMethod) ctElement;
-									CtMethod newMethod;
-									
-									ITree rightTreemethod= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldMethod); 
-
-									if(rightTreemethod==null)
-										newMethod=null;
-									else newMethod = (CtMethod) rightTreemethod.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-
-									if (oldMethod.getSimpleName().equals(srcCallMethodName)
-											&& newMethod.getSimpleName().equals(dstCallMethodName)) {
-										boolean oldParEquals = true;
-										List<CtParameter> oldMethodPars = oldMethod.getParameters();
-										for (int k = 0; k < oldMethodPars.size(); k++) {
-											CtTypeReference methodParType = oldMethodPars.get(k).getType();
-											if (k < srcCallArguments.size()) {
-												CtTypeReference methodCallArgType = srcCallArguments.get(k);
-												if (!methodParType.getQualifiedName()
-														.equals(methodCallArgType.getQualifiedName())) {
-													oldParEquals = false;
-													break;
-												}
-											}
-										}
-										if (oldParEquals) {
-											boolean newParEquals = true;
-											List<CtParameter> newMethodPars = newMethod.getParameters();
-											for (int k = 0; k < newMethodPars.size(); k++) {
-												CtTypeReference methodParType = newMethodPars.get(k).getType();
-												if (k < dstCallArguments.size()) {
-													CtTypeReference methodCallArgType = dstCallArguments.get(k);
-													if (!methodParType.getQualifiedName()
-															.equals(methodCallArgType.getQualifiedName())) {
-														newParEquals = false;
-														break;
-													}
-												}
-											} // not sure
-											if (newParEquals) {
-												wasMethodDefUpdated = true;
-											}
-										}
-									}
-								}
-								
-								ctElement = deleteNode.getParent(CtConstructor.class);
-								if (ctElement instanceof CtConstructor) {
-									CtConstructor oldConstructor = (CtConstructor) ctElement;
-									CtConstructor newConstructor;
-									
-									ITree rightTreemethod= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldConstructor); 
-
-									if(rightTreemethod==null)
-										newConstructor=null;
-									else newConstructor = (CtConstructor) rightTreemethod.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
-
-									if (oldConstructor.getSimpleName().equals(srcCallMethodName)
-											&& newConstructor.getSimpleName().equals(dstCallMethodName)) {
-										boolean oldParEquals = true;
-										List<CtParameter> oldMethodPars = oldConstructor.getParameters();
-										for (int k = 0; k < oldMethodPars.size(); k++) {
-											CtTypeReference methodParType = oldMethodPars.get(k).getType();
-											if (k < srcCallArguments.size()) {
-												CtTypeReference methodCallArgType = srcCallArguments.get(k);
-												if (!methodParType.getQualifiedName()
-														.equals(methodCallArgType.getQualifiedName())) {
-													oldParEquals = false;
-													break;
-												}
-											}
-										}
-										if (oldParEquals) {
-											boolean newParEquals = true;
-											List<CtParameter> newMethodPars = newConstructor.getParameters();
-											for (int k = 0; k < newMethodPars.size(); k++) {
-												CtTypeReference methodParType = newMethodPars.get(k).getType();
-												if (k < dstCallArguments.size()) {
-													CtTypeReference methodCallArgType = dstCallArguments.get(k);
-													if (!methodParType.getQualifiedName()
-															.equals(methodCallArgType.getQualifiedName())) {
-														newParEquals = false;
-														break;
-													}
-												}
-											} // not sure
-											if (newParEquals) {
-												wasMethodDefUpdated = true;
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-
-					if (!wasMethodDefUpdated) {
-						// Let's check if the Target of the expression are the same, otherwise we
-						// discard this case
 						if (srcInvocation != null && dstInvocation != null && srcInvocation.getTarget() != null
 								&& dstInvocation.getTarget() != null
 								&& !srcInvocation.getTarget().equals(dstInvocation.getTarget())) {
@@ -631,29 +430,14 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(parentLine);
                         
 						if (!srcCallMethodName.equals(dstCallMethodName)) {
-							// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
 							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 									new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
-											lineTree,
-											//
-											new PropertyPair("Change", "differentMethodName")));
+											lineTree, new PropertyPair("Change", "differentMethodName")));
 
 						} else {
-//							if (
-//							// srcCallArguments.size() != dstCallArguments.size()
-//							// horrible workaround
-//							// || srcCallArgumentsFromExec.size() != dstCallArgumentsFromExec.size()
-//							// ||
-//							srcCallRealArguments.size() != dstCallRealArguments.size()
-//
-//							) {
-								// repairPatterns.incrementFeatureCounter(WRONG_METHOD_REF, operation);
-								repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
-												lineTree,
-												//
-												new PropertyPair("Change", "SameNamedifferentArgument")));
-//							}
+												lineTree, new PropertyPair("Change", "SameNamedifferentArgument")));
 						}
 						
 						List<CtExpression> invocationArgumentsold = new ArrayList<>();
@@ -1581,6 +1365,249 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		}
 	}
 	
+	public boolean whethermethoddefupdated(CtElement srcNode, CtElement dstNode) {
+		
+		 boolean wasMethodDefUpdated = false;
+
+	     String srcCallMethodName;
+	     CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
+	     List<CtTypeReference> srcCallArguments;
+	     List<CtTypeReference> srcCallArgumentsFromExec;
+	     List<CtTypeReference> srcCallRealArguments;
+	
+	     if(srcNode instanceof CtInvocation) {
+		    srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
+		    srcCallArgumentsFromExec = ((CtInvocation) srcNode).getExecutable().getParameters();
+		    srcCallArguments = ((CtInvocation) srcNode).getActualTypeArguments();
+		    srcCallRealArguments = ((CtInvocation) srcNode).getArguments();
+	     } else {	
+		    String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
+		    srcCallMethodName=namespace[namespace.length-1];
+		    srcCallArguments = ((CtConstructorCall) srcNode).getActualTypeArguments();
+		    srcCallRealArguments = ((CtConstructorCall) srcNode).getArguments();
+		    srcCallArgumentsFromExec = ((CtConstructorCall) srcNode).getExecutable().getParameters();
+	     }
+	
+	     String dstCallMethodName;
+	     CtElement dst = dstNode;
+	     List<CtTypeReference> dstCallArguments;
+	     List<CtTypeReference> dstCallArgumentsFromExec;
+	     List<CtTypeReference> dstCallRealArguments;
+
+	     CtTargetedExpression dstInvocation = null;
+	     if (dstNode instanceof CtInvocation) {
+		    dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
+		    dstCallArguments = ((CtInvocation) dstNode).getActualTypeArguments();
+		    dstCallArgumentsFromExec = ((CtInvocation) dstNode).getExecutable().getParameters();
+		    dstInvocation = (CtTargetedExpression) dstNode;
+		    dstCallRealArguments = ((CtInvocation) dstNode).getArguments();
+	    } else {		
+		    String[] namespace=((CtConstructorCall) dstNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
+		    dstCallMethodName=namespace[namespace.length-1];	
+		    dstCallArguments = ((CtConstructorCall) dstNode).getActualTypeArguments();
+		    dstCallRealArguments = ((CtConstructorCall) dstNode).getArguments();
+		    dstCallArgumentsFromExec = ((CtConstructorCall) dstNode).getExecutable().getParameters();
+		    dstInvocation = (CtTargetedExpression) dstNode;
+	    }
+
+	    for (Operation operation2 : operations) {
+		   if (operation2 instanceof InsertOperation) {
+			   CtElement insertedNode = operation2.getSrcNode();
+			   if (insertedNode instanceof CtParameter) {
+				  CtElement ctElement = ((InsertOperation) operation2).getParent();
+				  if (ctElement instanceof CtMethod) {
+					   CtMethod oldMethod = (CtMethod) ctElement;
+					   CtMethod newMethod = insertedNode.getParent(CtMethod.class);
+
+					   if (oldMethod.getSimpleName().equals(srcCallMethodName)
+							&& newMethod.getSimpleName().equals(dstCallMethodName)) {
+						    boolean oldParEquals = true;
+						    List<CtParameter> oldMethodPars = oldMethod.getParameters();
+						    for (int k = 0; k < oldMethodPars.size(); k++) {
+							   CtTypeReference methodParType = oldMethodPars.get(k).getType();
+							   if (k < srcCallArguments.size()) {
+								  CtTypeReference methodCallArgType = srcCallArguments.get(k);
+								  if (!methodParType.getQualifiedName()
+										.equals(methodCallArgType.getQualifiedName())) {
+									oldParEquals = false;
+									break;
+								  }
+							   }
+						    }
+						    
+						    if (oldParEquals) {
+							   boolean newParEquals = true;
+							   List<CtParameter> newMethodPars = newMethod.getParameters();
+							   for (int k = 0; k < newMethodPars.size(); k++) {
+								  CtTypeReference methodParType = newMethodPars.get(k).getType();
+								  if (k < dstCallArguments.size()) {
+									 CtTypeReference methodCallArgType = dstCallArguments.get(k);
+									 if (!methodParType.getQualifiedName()
+											.equals(methodCallArgType.getQualifiedName())) {
+										newParEquals = false;
+										break;
+									 }
+								  }
+							    } 
+							   
+							   if (newParEquals) {
+								wasMethodDefUpdated = true;
+							   }
+						   }
+					  }
+				  }
+				
+				  if(ctElement instanceof CtConstructor) {
+					  CtConstructor oldConstructor= (CtConstructor) ctElement;
+					  CtConstructor newConstructor= insertedNode.getParent(CtConstructor.class);
+
+					  if (oldConstructor.getSimpleName().equals(srcCallMethodName)
+							&& newConstructor.getSimpleName().equals(dstCallMethodName)) {
+						  boolean oldParEquals = true;
+						  List<CtParameter> oldMethodPars = oldConstructor.getParameters();
+						  for (int k = 0; k < oldMethodPars.size(); k++) {
+							  CtTypeReference methodParType = oldMethodPars.get(k).getType();
+							  if (k < srcCallArguments.size()) {
+								 CtTypeReference methodCallArgType = srcCallArguments.get(k);
+								 if (!methodParType.getQualifiedName()
+										.equals(methodCallArgType.getQualifiedName())) {
+									oldParEquals = false;
+									break;
+								 }
+							  }
+						   }
+						  
+						   if (oldParEquals) {
+							   boolean newParEquals = true;
+							   List<CtParameter> newMethodPars = newConstructor.getParameters();
+						  	   for (int k = 0; k < newMethodPars.size(); k++) {
+								  CtTypeReference methodParType = newMethodPars.get(k).getType();
+								  if (k < dstCallArguments.size()) {
+									 CtTypeReference methodCallArgType = dstCallArguments.get(k);
+									 if (!methodParType.getQualifiedName()
+											.equals(methodCallArgType.getQualifiedName())) {
+										newParEquals = false;
+										break;
+									 }
+								  }
+							} 
+						  	   
+							if (newParEquals) {
+								wasMethodDefUpdated = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (operation2 instanceof DeleteOperation) {
+			
+			CtElement deleteNode = operation2.getSrcNode();
+			if (deleteNode instanceof CtParameter) {
+				CtElement ctElement = deleteNode.getParent(CtMethod.class);
+				if (ctElement instanceof CtMethod) {
+					CtMethod oldMethod = (CtMethod) ctElement;
+					CtMethod newMethod;
+					
+					ITree rightTreemethod= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldMethod); 
+
+					if(rightTreemethod==null)
+						newMethod=null;
+					else newMethod = (CtMethod) rightTreemethod.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+					if (oldMethod.getSimpleName().equals(srcCallMethodName)
+							&& newMethod.getSimpleName().equals(dstCallMethodName)) {
+						boolean oldParEquals = true;
+						List<CtParameter> oldMethodPars = oldMethod.getParameters();
+						for (int k = 0; k < oldMethodPars.size(); k++) {
+							CtTypeReference methodParType = oldMethodPars.get(k).getType();
+							if (k < srcCallArguments.size()) {
+								CtTypeReference methodCallArgType = srcCallArguments.get(k);
+								if (!methodParType.getQualifiedName()
+										.equals(methodCallArgType.getQualifiedName())) {
+									oldParEquals = false;
+									break;
+								}
+							}
+						}
+						
+						if (oldParEquals) {
+							boolean newParEquals = true;
+							List<CtParameter> newMethodPars = newMethod.getParameters();
+							for (int k = 0; k < newMethodPars.size(); k++) {
+								CtTypeReference methodParType = newMethodPars.get(k).getType();
+								if (k < dstCallArguments.size()) {
+									CtTypeReference methodCallArgType = dstCallArguments.get(k);
+									if (!methodParType.getQualifiedName()
+											.equals(methodCallArgType.getQualifiedName())) {
+										newParEquals = false;
+										break;
+									}
+								}
+							} 
+
+							if (newParEquals) {
+								wasMethodDefUpdated = true;
+							}
+						}
+					}
+				}
+				
+				ctElement = deleteNode.getParent(CtConstructor.class);
+				if (ctElement instanceof CtConstructor) {
+					CtConstructor oldConstructor = (CtConstructor) ctElement;
+					CtConstructor newConstructor;
+					
+					ITree rightTreemethod= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldConstructor); 
+
+					if(rightTreemethod==null)
+						newConstructor=null;
+					else newConstructor = (CtConstructor) rightTreemethod.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+					if (oldConstructor.getSimpleName().equals(srcCallMethodName)
+							&& newConstructor.getSimpleName().equals(dstCallMethodName)) {
+						boolean oldParEquals = true;
+						List<CtParameter> oldMethodPars = oldConstructor.getParameters();
+						for (int k = 0; k < oldMethodPars.size(); k++) {
+							CtTypeReference methodParType = oldMethodPars.get(k).getType();
+							if (k < srcCallArguments.size()) {
+								CtTypeReference methodCallArgType = srcCallArguments.get(k);
+								if (!methodParType.getQualifiedName()
+										.equals(methodCallArgType.getQualifiedName())) {
+									oldParEquals = false;
+									break;
+								}
+							}
+						}
+						if (oldParEquals) {
+							boolean newParEquals = true;
+							List<CtParameter> newMethodPars = newConstructor.getParameters();
+							for (int k = 0; k < newMethodPars.size(); k++) {
+								CtTypeReference methodParType = newMethodPars.get(k).getType();
+								if (k < dstCallArguments.size()) {
+									CtTypeReference methodCallArgType = dstCallArguments.get(k);
+									if (!methodParType.getQualifiedName()
+											.equals(methodCallArgType.getQualifiedName())) {
+										newParEquals = false;
+										break;
+									}
+								}
+							} 
+
+							if (newParEquals) {
+								wasMethodDefUpdated = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	 }
+	    
+	 return wasMethodDefUpdated;
+  }
+	
 	public boolean whetherparentchanged(CtElement parent) {
 		
 		boolean parentchanged=false;
@@ -1752,6 +1779,5 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		}
 		
 		return null;	
-	}
-	
+	}	
 }
