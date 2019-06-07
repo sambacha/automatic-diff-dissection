@@ -47,11 +47,9 @@ import gumtree.spoon.diff.operations.UpdateOperation;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtDo;
-import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
-import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtSwitch;
 import spoon.reflect.code.CtWhile;
@@ -365,7 +363,8 @@ public class DiffContextAnalyzer {
 	 */
 
 	@SuppressWarnings({ "unchecked", "unused", "rawtypes" })
-	private void seInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext, Diff diff, CtElement affectedelement) {
+	private void seInformation(Operation operation, CodeFeatureDetector cresolver, JsonObject opContext, Diff diff, CtElement affectedelement
+			, ReturnTypePainter painter) {
 
 		Cntx bugContext = new Cntx<>();
 
@@ -381,7 +380,8 @@ public class DiffContextAnalyzer {
 		} 
 
 		if (affectedCtElement != null) {
-			Cntx iContext = cresolver.analyzeFeatures(affectedelement);
+			Cntx iContext = cresolver.analyzeFeatures(affectedelement, painter.getAllExpressions(),
+					painter.getRootLogicalExpressions(), painter.getAllBinaryOperators());
 			opContext.add("cntx", iContext.toJSON());
 		}
 		
@@ -455,7 +455,9 @@ public class DiffContextAnalyzer {
 
 			List<NodePainter> painters = new ArrayList();
 			painters.add(new FaultyElementPatternPainter(patternInstancesOriginal));
-			painters.add(new ReturnTypePainter(getAffectedCtElement));
+			
+			ReturnTypePainter painterforreturn = new ReturnTypePainter(getAffectedCtElement);
+			painters.add(painterforreturn);
 
 			JsonObject jsonInstance = new JsonObject();
 			JsonArray affected = new JsonArray();
@@ -468,7 +470,7 @@ public class DiffContextAnalyzer {
 
 			ast_affected.add(jsonInstance);
 
-			JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement);
+			JsonObject opContext = getContextInformation(diff, cresolver, opi, getAffectedCtElement, painterforreturn);
 
 			jsonInstance.add("context", opContext);
 		}
@@ -563,11 +565,11 @@ public class DiffContextAnalyzer {
 	}
 
 	public JsonObject getContextInformation(Diff diff, CodeFeatureDetector cresolver, Operation opi,
-			CtElement getAffectedCtElement) {
+			CtElement getAffectedCtElement, ReturnTypePainter painter) {
 
 		JsonObject opContext = new JsonObject();
 
-		seInformation(opi, cresolver, opContext, diff, getAffectedCtElement);
+		seInformation(opi, cresolver, opContext, diff, getAffectedCtElement, painter);
 
 		return opContext;
 	}

@@ -18,8 +18,6 @@ import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtSwitch;
-import spoon.reflect.code.CtThisAccess;
-import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtWhile;
 import spoon.reflect.declaration.CtElement;
@@ -113,8 +111,6 @@ public class LogicalExpressionAnalyzer {
 			return (((CtFor) element).getExpression());
 		} else if (element instanceof CtDo) {
 			return (((CtDo) element).getLoopingExpression());
-//		} else if (element instanceof CtConditional) {
-//			return (((CtConditional) element).getCondition());
 		} else if (element instanceof CtForEach) {
 			return (((CtForEach) element).getExpression());
 		} else if (element instanceof CtSwitch) {

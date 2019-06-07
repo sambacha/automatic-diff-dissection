@@ -30,7 +30,19 @@ public class ReturnTypePainter implements NodePainter {
 		allExpressions = LogicalExpressionAnalyzer.getAllExpressions(faultyLine);
 		allBinOperators = LogicalExpressionAnalyzer.getAllBinaryOperators(faultyLine);
 	}
+	
+	public List<CtExpression> getRootLogicalExpressions () {
+		return this.allrootlogicalexpers;
+	}
+	
+	public List<CtExpression> getAllExpressions () {
+		return this.allExpressions;
+	}
 
+	public List<CtBinaryOperator> getAllBinaryOperators () {
+		return this.allBinOperators;
+	}
+	
 	@Override
 	public void paint(ITree tree, JsonObject jsontree) {
 
@@ -44,21 +56,6 @@ public class ReturnTypePainter implements NodePainter {
 			else
 				if (exp.getType() != null)
 					type = exp.getType().getQualifiedName();
-			// Let's try to infer the type
-//			if (exp instanceof CtBinaryOperator) {
-//				// let's check if it;s logical operator
-//				CtBinaryOperator binOp = (CtBinaryOperator) exp;
-//				if (binOp.getKind().equals(BinaryOperatorKind.AND) || binOp.getKind().equals(BinaryOperatorKind.OR)
-//						|| binOp.getKind().equals(BinaryOperatorKind.EQ)
-//						|| binOp.getKind().equals(BinaryOperatorKind.GE)
-//						|| binOp.getKind().equals(BinaryOperatorKind.GT)
-//						|| binOp.getKind().equals(BinaryOperatorKind.INSTANCEOF)
-//						|| binOp.getKind().equals(BinaryOperatorKind.LE)
-//						|| binOp.getKind().equals(BinaryOperatorKind.LT)
-//						|| binOp.getKind().equals(BinaryOperatorKind.NE))
-//				type = Boolean.class.getCanonicalName();
-//
-//			}
 			
 			jsontree.addProperty("return_type", type);
 			
