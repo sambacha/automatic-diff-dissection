@@ -65,6 +65,9 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 	@Override
 	public void detect(RepairPatterns repairPatterns) {
+		
+		List<CtElement> alreadyconsidered = new ArrayList<CtElement>();
+
 		for (int i = 0; i < operations.size(); i++) {
 
 			Operation operation = operations.get(i);
@@ -91,12 +94,22 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											}
 										}
 									}
-		
-									if (srcNode.getParent() == ((InsertOperation) operation2).getParent()) {
-										newElementReplacementOfTheVar = node2;
-									}
 								}
 							}
+							
+							for (int j = 0; j < operations.size(); j++) {
+								Operation operation2 = operations.get(j);
+								if (operation2 instanceof InsertOperation) {
+									CtElement node2 = operation2.getSrcNode();
+											
+									if (srcNode.getParent() == ((InsertOperation) operation2).getParent()
+											&& !alreadyconsidered.contains(node2)) {
+											newElementReplacementOfTheVar = node2;
+											alreadyconsidered.add(node2);
+											break;
+									}
+								}
+						    }
 							
 							if (!wasVariableWrapped) {
 
