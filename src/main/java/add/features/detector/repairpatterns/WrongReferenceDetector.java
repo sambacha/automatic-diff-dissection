@@ -350,25 +350,30 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 				     String srcCallMethodName;
 				     CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
+				     List<CtTypeReference> srcCallRealArguments;
 				
 				     if(srcNode instanceof CtInvocation) {
 					    srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
+						srcCallRealArguments = ((CtInvocation) srcNode).getArguments();
 				     } else {	
 					    String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
 					    srcCallMethodName=namespace[namespace.length-1];
+						srcCallRealArguments = ((CtConstructorCall) srcNode).getArguments();
 				     }
 				
 				     String dstCallMethodName;
 				     CtElement dst = dstNode;
-
+					 List<CtTypeReference> dstCallRealArguments;
 				     CtTargetedExpression dstInvocation = null;
 				     if (dstNode instanceof CtInvocation) {
 					    dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
 					    dstInvocation = (CtTargetedExpression) dstNode;
+						dstCallRealArguments = ((CtInvocation) dstNode).getArguments();
 				    } else {		
 					    String[] namespace=((CtConstructorCall) dstNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
 					    dstCallMethodName=namespace[namespace.length-1];	
 					    dstInvocation = (CtTargetedExpression) dstNode;
+						dstCallRealArguments = ((CtConstructorCall) dstNode).getArguments();
 				    }
 					
 					if (!whethermethoddefupdated(srcNode, dstNode)) {
@@ -388,7 +393,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 											lineTree, new PropertyPair("Change", "differentMethodName")));
 
 						} else {
-							repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
+							if (srcCallRealArguments.size() != dstCallRealArguments.size())
+							      repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
 												lineTree, new PropertyPair("Change", "SameNamedifferentArgument")));
 						}
@@ -536,7 +542,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						  if(whetherConsiderInitial) {
 
 							   if (srcNode instanceof CtInvocation) {
-								   
+								   								   
 								   if(newElementReplacementOfTheVar instanceof CtInvocation &&  
 										((CtInvocation)srcNode).getExecutable().getSimpleName().
 										equals(((CtInvocation)newElementReplacementOfTheVar).getExecutable().getSimpleName())
@@ -652,25 +658,29 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 					 String srcCallMethodName;
 				     CtTargetedExpression srcInvocation = (CtTargetedExpression) srcNode;
-				
+					 List<CtTypeReference> srcCallRealArguments;
 				     if(srcNode instanceof CtInvocation) {
 					    srcCallMethodName = ((CtInvocation) srcNode).getExecutable().getSimpleName();
+						srcCallRealArguments = ((CtInvocation) srcNode).getArguments();
 				     } else {	
 					    String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
 					    srcCallMethodName=namespace[namespace.length-1];
+						srcCallRealArguments = ((CtConstructorCall) srcNode).getArguments();
 				     }
 				
 				     String dstCallMethodName;
 				     CtElement dst = dstNode;
-
+					 List<CtTypeReference> dstCallRealArguments;
 				     CtTargetedExpression dstInvocation = null;
 				     if (dstNode instanceof CtInvocation) {
 					    dstCallMethodName = ((CtInvocation) dstNode).getExecutable().getSimpleName();
 					    dstInvocation = (CtTargetedExpression) dstNode;
+						dstCallRealArguments = ((CtInvocation) dstNode).getArguments();    
 				    } else {		
 					    String[] namespace=((CtConstructorCall) dstNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
 					    dstCallMethodName=namespace[namespace.length-1];	
 					    dstInvocation = (CtTargetedExpression) dstNode;
+						dstCallRealArguments = ((CtConstructorCall) dstNode).getArguments();
 				    }
 
 					if (!whethermethoddefupdated(srcNode, dstNode)) {
@@ -689,9 +699,11 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
 											lineTree, new PropertyPair("Change", "differentMethodName")));
 						} else {
+							if (srcCallRealArguments.size() != dstCallRealArguments.size()) {
 							   repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 										new PatternInstance(WRONG_METHOD_REF, operation, dst, srcInvocation, parentLine,
 											lineTree, new PropertyPair("Change", "SameNamedifferentArgument")));
+						    }
 						}
 					}
 				}
