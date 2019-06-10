@@ -83,7 +83,6 @@ public class LogicalExpressionAnalyzer {
     private static boolean analyzeWhetherAE(CtExpression expression) {
 		
 		try {
-
 			List<BinaryOperatorKind> opKinds = new ArrayList<>();
 			opKinds.add(BinaryOperatorKind.DIV);
 			opKinds.add(BinaryOperatorKind.PLUS);

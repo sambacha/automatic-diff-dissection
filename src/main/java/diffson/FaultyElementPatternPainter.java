@@ -23,8 +23,10 @@ public class FaultyElementPatternPainter implements NodePainter {
 
 	public FaultyElementPatternPainter(List<PatternInstance> instances) {
 		// Collect all nodes and get the operator
-		Boolean includeMetadata = PDDConfigurationProperties.getPropertyBoolean("include_pattern_metadata");
+	//	Boolean includeMetadata = PDDConfigurationProperties.getPropertyBoolean("include_pattern_metadata");
 
+		Boolean includeMetadata = true;
+		
 		for (PatternInstance patternInstance : instances) {
 			for (CtElement susp : patternInstance.getFaulty()) {
 				String patternLabel = createPatternLabel(includeMetadata, patternInstance);

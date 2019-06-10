@@ -75,7 +75,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
 					if (srcNode instanceof CtVariableAccess 
-							|| srcNode instanceof CtInvocation || srcNode instanceof CtConstructorCall||
+							|| srcNode instanceof CtInvocation || srcNode instanceof CtConstructorCall ||
 							srcNode instanceof CtTypeAccess) {
 					 if (srcNode.getMetadata("delete") != null) {
 						CtElement statementParent = srcNode.getParent(CtStatement.class);
@@ -143,7 +143,6 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									metadata = new PropertyPair[] { propertyOldElemet };
                                 
 								Boolean whetherConsiderInitial=false;
-								
 								if(metadata.length==2) {
 									
 									if(newElementReplacementOfTheVar instanceof CtFieldRead) {
@@ -235,17 +234,20 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								   String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
 								   String originalconstructorname =namespace [namespace.length-1];	
 								   
-								   String[] namespacenew=((CtConstructorCall) newElementReplacementOfTheVar).getExecutable().getSignature().split("\\(")[0].split("\\.");
-								   String newconstructorname =namespacenew [namespacenew.length-1];	
+								   String newconstructorname="";
+								   if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
+								        String[] namespacenew=((CtConstructorCall) newElementReplacementOfTheVar).getExecutable().
+								        		getSignature().split("\\(")[0].split("\\.");
+								        newconstructorname =namespacenew [namespacenew.length-1];	
+								   }
 										
 								   if(newElementReplacementOfTheVar instanceof CtConstructorCall &&  
 										originalconstructorname.equals(newconstructorname)
 										&&((CtConstructorCall) srcNode).getArguments().size()==((CtConstructorCall)newElementReplacementOfTheVar).getArguments().size())
 								   { }
 								   else  {
-									   
 									   if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
-										   
+
 										   if (!originalconstructorname.equals(newconstructorname)) {
 												repairPatterns.incrementFeatureCounterInstance(WRONG_METHOD_REF,
 														new PatternInstance(WRONG_METHOD_REF, operationDelete, patch, susp, parentLine,
@@ -455,7 +457,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 			if (operation instanceof DeleteOperation) {
 				Operation operationDelete = operation;
 				CtElement srcNode = operationDelete.getSrcNode();
-
+              
 				if ((srcNode instanceof CtVariableAccess || srcNode instanceof CtInvocation ||
 						srcNode instanceof CtConstructorCall || srcNode instanceof CtTypeAccess) && invocationArgumentsold.contains(srcNode)
 						&&  srcNode.getParent()==source) { 
@@ -488,7 +490,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						 }
 				    }
 							
-					if (!wasVariableWrapped) {
+					if (!wasVariableWrapped && !whethersametypewithsamename(srcNode, newElementReplacementOfTheVar)) {
 
 						CtElement susp = operationDelete.getSrcNode();
 						CtElement patch = null;
@@ -590,8 +592,12 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							   String[] namespace=((CtConstructorCall) srcNode).getExecutable().getSignature().split("\\(")[0].split("\\.");
 							   String originalconstructorname =namespace [namespace.length-1];	
 							   
-							   String[] namespacenew=((CtConstructorCall) newElementReplacementOfTheVar).getExecutable().getSignature().split("\\(")[0].split("\\.");
-							   String newconstructorname =namespacenew [namespacenew.length-1];	
+							   String newconstructorname="";
+							   if(newElementReplacementOfTheVar instanceof CtConstructorCall) {
+							        String[] namespacenew=((CtConstructorCall) newElementReplacementOfTheVar).getExecutable().
+							        		getSignature().split("\\(")[0].split("\\.");
+							        newconstructorname =namespacenew [namespacenew.length-1];	
+							   }
 									
 							   if(newElementReplacementOfTheVar instanceof CtConstructorCall &&  
 									originalconstructorname.equals(newconstructorname)
@@ -728,6 +734,38 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 				}
 			}
 		}
+	}
+	
+	private boolean whethersametypewithsamename(CtElement oldelement, CtElement newelement) {
+		
+		if(oldelement!=null && newelement!=null) {
+		
+		  if(oldelement instanceof CtVariableAccess && newelement instanceof CtVariableAccess) {
+			 if(((CtVariableAccess)oldelement).getVariable().getSimpleName().
+					equals(((CtVariableAccess)newelement).getVariable().getSimpleName()))
+				return true;
+		  }
+		
+		  if(oldelement instanceof CtTypeAccess && newelement instanceof CtTypeAccess) {
+			 if(((CtTypeAccess)oldelement).getType().getSimpleName().
+					equals(((CtTypeAccess)newelement).getType().getSimpleName()))
+				return true;
+		  }
+			
+		  if(oldelement instanceof CtInvocation && newelement instanceof CtInvocation) {
+			 if(((CtInvocation)oldelement).getExecutable().getSignature().
+					equals(((CtInvocation)newelement).getExecutable().getSignature()))
+				return true;
+		  }
+		
+		  if(oldelement instanceof CtConstructorCall && newelement instanceof CtConstructorCall) {
+			 if(((CtConstructorCall)oldelement).getExecutable().getSignature().
+					equals(((CtConstructorCall)newelement).getExecutable().getSignature()))
+				return true;
+		  }
+		}
+		
+		return false;
 	}
 	
 	private void detectWrapsMethod(List<CtExpression> invocationArgumentsold, List<CtExpression> invocationArgumentsnew, 

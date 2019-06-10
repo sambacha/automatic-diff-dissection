@@ -15,7 +15,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
 import org.apache.log4j.Logger;
 import com.github.gumtreediff.tree.ITree;
 import com.google.gson.Gson;
@@ -131,8 +130,11 @@ public class DiffContextAnalyzer {
 			if (".DS_Store".equals(fileModif.getName()))
 				continue;
 
-			if (PDDConfigurationProperties.getPropertyBoolean("excludetests")
-					&& (fileModif.getName().toLowerCase().indexOf("test")!=-1))
+//			if (PDDConfigurationProperties.getPropertyBoolean("excludetests")
+//					&& (fileModif.getName().toLowerCase().indexOf("test")!=-1))
+//				continue;
+			
+			if (fileModif.getName().toLowerCase().indexOf("test")!=-1)
 				continue;
 
 			String pathname = fileModif.getAbsolutePath() + File.separator + difffile.getName() + "_"
@@ -196,7 +198,7 @@ public class DiffContextAnalyzer {
 
 		Diff resukltDiff = null;
 		try {
-			resukltDiff = future.get(30, TimeUnit.SECONDS);
+			resukltDiff = future.get(50, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			log.error("job was interrupted");
 		} catch (ExecutionException e) {
@@ -272,7 +274,7 @@ public class DiffContextAnalyzer {
 
 		JsonObject resukltDiff = null;
 		try {
-			resukltDiff = future.get(4, TimeUnit.MINUTES);
+			resukltDiff = future.get(8, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			log.error("job was interrupted");
 		} catch (ExecutionException e) {
