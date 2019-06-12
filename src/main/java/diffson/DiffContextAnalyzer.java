@@ -198,7 +198,7 @@ public class DiffContextAnalyzer {
 
 		Diff resukltDiff = null;
 		try {
-			resukltDiff = future.get(50, TimeUnit.SECONDS);
+			resukltDiff = future.get(60, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			log.error("job was interrupted");
 		} catch (ExecutionException e) {
@@ -208,6 +208,15 @@ public class DiffContextAnalyzer {
 		}
 
 		executorService.shutdown();
+		
+		try {
+		    if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+		        executorService.shutdownNow();
+		    } 
+		} catch (InterruptedException e) {
+		    executorService.shutdownNow();
+		}
+		
 		return resukltDiff;
 
 	}
@@ -274,7 +283,7 @@ public class DiffContextAnalyzer {
 
 		JsonObject resukltDiff = null;
 		try {
-			resukltDiff = future.get(8, TimeUnit.MINUTES);
+			resukltDiff = future.get(5, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			log.error("job was interrupted");
 		} catch (ExecutionException e) {
@@ -284,6 +293,15 @@ public class DiffContextAnalyzer {
 		}
 
 		executorService.shutdown();
+		
+		try {
+		    if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+		        executorService.shutdownNow();
+		    } 
+		} catch (InterruptedException e) {
+		    executorService.shutdownNow();
+		}
+		
 		return resukltDiff;
 	}
 
