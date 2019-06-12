@@ -82,7 +82,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						if (statementParent.getMetadata("delete") == null) {
 							CtElement newElementReplacementOfTheVar = null;
 							boolean wasVariableWrapped = false;
-							
+							boolean wasVarUnWrapted = false;
 							for (int j = 0; j < operations.size(); j++) {
 								Operation operation2 = operations.get(j);
 								if (operation2 instanceof InsertOperation) {
@@ -91,6 +91,21 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 										if (((InsertOperation) operation2).getParent() != null) {
 											if (srcNode.getParent() == ((InsertOperation) operation2).getParent()) {
 												wasVariableWrapped = whethervarwrapped(srcNode, node2);
+												if(wasVariableWrapped)
+												   alreadyconsidered.add(node2);
+											}
+										}
+									}
+									
+									if (node2 instanceof CtVariableAccess || node2 instanceof CtTypeAccess || 
+											node2 instanceof CtInvocation || node2 instanceof CtConstructorCall) {
+										if(srcNode instanceof CtInvocation || srcNode instanceof CtConstructorCall) {	
+											if (((InsertOperation) operation2).getParent() != null) {
+												if (srcNode.getParent() == ((InsertOperation) operation2).getParent()) {
+													wasVarUnWrapted = whethervarunwrapped(srcNode, node2);
+													if(wasVarUnWrapted)
+													   alreadyconsidered.add(node2);
+												}
 											}
 										}
 									}
@@ -111,7 +126,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 								}
 						    }
 							
-							if (!wasVariableWrapped) {
+							if (!wasVariableWrapped && !wasVarUnWrapted ) {
 
 								CtElement susp = operationDelete.getSrcNode();
 								CtElement patch = null;
@@ -147,7 +162,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 									
 									if(newElementReplacementOfTheVar instanceof CtFieldRead) {
 										
-										if(whethervariablenewlydeclared((CtFieldRead)newElementReplacementOfTheVar))
+										if(whethervariablenewlydeclared((CtFieldRead) newElementReplacementOfTheVar))
 											continue;
 									}
 										
@@ -464,6 +479,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 					CtElement newElementReplacementOfTheVar = null;
 					boolean wasVariableWrapped = false;
+					boolean wasVarUnWrapted = false;
+
 					for (int j = 0; j < diff.getAllOperations().size(); j++) {
 						Operation operation2 = diff.getAllOperations().get(j);
 						if (operation2 instanceof InsertOperation) {
@@ -472,8 +489,20 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 							if ((node2 instanceof CtInvocation || node2 instanceof CtConstructorCall) && 
 									invocationArgumentsnew.contains(node2) && node2.getParent()==destination) {
 								wasVariableWrapped = whethervarwrapped(srcNode, node2);
+								
+								if(wasVariableWrapped)
+									alreadyconsidered.add(node2);
 							}
-						 }
+							
+							if ((node2 instanceof CtVariableAccess || node2 instanceof CtTypeAccess || 
+									node2 instanceof CtInvocation || node2 instanceof CtConstructorCall) 
+									&& (srcNode instanceof CtInvocation || srcNode instanceof CtConstructorCall) &&
+									invocationArgumentsnew.contains(node2) && node2.getParent()==destination) {
+										wasVarUnWrapted = whethervarunwrapped(srcNode, node2);
+										if(wasVarUnWrapted)
+											 alreadyconsidered.add(node2);
+							}
+					    }
 				    }
 					
 					for (int j = 0; j < diff.getAllOperations().size(); j++) {
@@ -490,7 +519,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						 }
 				    }
 							
-					if (!wasVariableWrapped && !whethersametypewithsamename(srcNode, newElementReplacementOfTheVar)) {
+					if (!wasVariableWrapped && !wasVarUnWrapted && !whethersametypewithsamename(srcNode, newElementReplacementOfTheVar)) {
 
 						CtElement susp = operationDelete.getSrcNode();
 						CtElement patch = null;
@@ -1658,6 +1687,62 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		}
 	
 		return wasVariableWrapped;
+	}
+	
+    private boolean whethervarunwrapped(CtElement srcNode, CtElement node2) {
+		
+		boolean wasVariableUnWrapped = false;
+
+		List<CtExpression> invocationArguments = new ArrayList<>();
+		if (srcNode instanceof CtInvocation) {
+			invocationArguments = ((CtInvocation) srcNode).getArguments();
+		}
+		if (srcNode instanceof CtConstructorCall) {
+			invocationArguments = ((CtConstructorCall) srcNode).getArguments();
+		}
+		
+		for (CtExpression ctExpression : invocationArguments) {
+			if (node2 instanceof CtVariableAccess
+					&& ctExpression instanceof CtVariableAccess) {
+				CtVariableAccess dstVariableAccess = (CtVariableAccess) node2;
+				CtVariableAccess srcVariableAccess = (CtVariableAccess) ctExpression;
+				if (srcVariableAccess.getVariable().getSimpleName().equals(
+						dstVariableAccess.getVariable().getSimpleName())) {
+					wasVariableUnWrapped = true;
+					break;
+				}
+			} else if (node2 instanceof CtTypeAccess
+						&& ctExpression instanceof CtTypeAccess) {
+					CtTypeAccess dstTypeAccess = (CtTypeAccess) node2;
+					CtTypeAccess srcTypeAccess = (CtTypeAccess) ctExpression;
+					if (srcTypeAccess.getAccessedType().getSimpleName().equals(
+							dstTypeAccess.getAccessedType().getSimpleName())) {
+						wasVariableUnWrapped = true;
+						break;
+					}
+			 } else if (node2 instanceof CtInvocation
+						&& ctExpression instanceof CtInvocation) {
+					CtInvocation newinvocation = (CtInvocation) node2;
+					CtInvocation otherinvocation = (CtInvocation) ctExpression;
+					if (newinvocation.getExecutable().getSignature().equals(
+							otherinvocation.getExecutable().getSignature())) {
+						wasVariableUnWrapped = true;
+						break;
+					}
+			   } else if (node2 instanceof CtConstructorCall
+						&& ctExpression instanceof CtConstructorCall) {
+					CtConstructorCall newcall = (CtConstructorCall) node2;
+					CtConstructorCall othercall = (CtConstructorCall) ctExpression;
+					
+					if (newcall.getExecutable().getSignature().equals(
+							othercall.getExecutable().getSignature())) {
+						wasVariableUnWrapped = true;
+						break;
+					}
+			   }
+		}
+	
+		return wasVariableUnWrapped;
 	}
 	
 	private boolean whetherargumentnumberdifferent (CtElement inputelement) {
