@@ -319,7 +319,9 @@ public class RepairPatternUtils {
 	
 	public static CtElement getElementInOld(Diff diff, CtElement elementInNew) {
 		ITree leftTree = MappingAnalysis.getLeftFromRightNodeMapped(diff, elementInNew);
-		CtElement oldElement = (CtElement) leftTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+		CtElement oldElement = null;
+		if(leftTree!=null)
+		    oldElement = (CtElement) leftTree.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
 
 		return oldElement;
 	}

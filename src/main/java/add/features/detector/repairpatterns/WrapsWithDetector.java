@@ -11,6 +11,7 @@ import add.entities.RepairPatterns;
 import add.features.detector.spoon.RepairPatternUtils;
 import add.features.detector.spoon.SpoonHelper;
 import gumtree.spoon.builder.SpoonGumTreeBuilder;
+import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.DeleteOperation;
 import gumtree.spoon.diff.operations.InsertOperation;
 import gumtree.spoon.diff.operations.MoveOperation;
@@ -398,7 +399,7 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(), suspLeft.get(0));
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation)) {
-							  if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+							  if(RepairPatternUtils.getElementInOld(diff, ctExpression)!=null && (RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
 									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
 									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
 									  RepairPatternUtils.getElementInOld(diff, ctInvocation.getParent())) {
@@ -422,8 +423,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						for (CtExpression ctExpression : invocationArguments) {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
-
-								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
+								
+								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression) &&
+										whetherconsinderthemethodunrap(ctExpression, ctInvocation))
 								{
 								   CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
 										operation.getSrcNode());
@@ -514,7 +516,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 							if (ctExpression.getMetadata("isMoved") != null
 									&& ctExpression.getMetadata("movingSrc") != null) {
 
-								if(RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
+								if(whetherconsindertheconstructorunrap(ctExpression, ctConstructor) && 
+										RepairPatternUtils.getIsMovedExpressionInStatemnt(diff, statementParent, ctExpression))
 								{
 								   CtElement lineP = MappingAnalysis.getParentLine(new LineFilter(),
 										operation.getSrcNode());
@@ -529,6 +532,58 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 				}
 			}
 		}
+	}
+	
+	 private boolean whetherconsindertheconstructorunrap (CtExpression oldexpression, CtConstructorCall ctCall) {
+		ITree treenewexpression= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldexpression); 
+
+		if(treenewexpression==null)
+			return false;
+		
+		CtElement newexpression= (CtElement) treenewexpression.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+		
+		CtStatement oldparent = oldexpression.getParent(new LineFilter());
+		CtStatement newparent = newexpression.getParent(new LineFilter());
+		
+//		System.out.println(oldexpression);
+//		System.out.println(newexpression);
+//
+//		System.out.println(RepairPatternUtils.getElementInOld(diff, newexpression.getParent()));
+//		System.out.println(ctInvocation.getParent());
+
+		if((RepairPatternUtils.getElementInOld(diff, newexpression.getParent())!= null &&
+				RepairPatternUtils.getElementInOld(diff, newexpression.getParent()) == ctCall.getParent())||
+				(oldparent instanceof CtConstructorCall && newparent instanceof CtAssignment))
+			return true;
+		else return false;	
+	}
+	
+	private boolean whetherconsinderthemethodunrap (CtExpression oldexpression, CtInvocation ctInvocation) {
+		ITree treenewexpression= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldexpression); 
+
+		if(treenewexpression==null)
+			return false;
+		
+		CtElement newexpression= (CtElement) treenewexpression.getMetadata(SpoonGumTreeBuilder.SPOON_OBJECT);
+
+		CtStatement oldparent = oldexpression.getParent(new LineFilter());
+		CtStatement newparent = newexpression.getParent(new LineFilter());
+		
+//		System.out.println(oldexpression);
+//		System.out.println(newexpression);
+//
+//		System.out.println(RepairPatternUtils.getElementInOld(diff, newexpression.getParent()));
+//		System.out.println(ctInvocation.getParent());
+		
+		
+//		System.out.println(oldparent);
+//		System.out.println(newparent);
+
+		if((RepairPatternUtils.getElementInOld(diff, newexpression.getParent())!= null &&
+				RepairPatternUtils.getElementInOld(diff, newexpression.getParent()) == ctInvocation.getParent()) ||
+				(oldparent instanceof CtInvocation && newparent instanceof CtAssignment))
+			return true;
+		else return false;	
 	}
 
 	private void detectWrapsLoop(Operation operation, RepairPatterns repairPatterns) {
