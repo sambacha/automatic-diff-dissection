@@ -491,7 +491,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 						ITree lineTree = MappingAnalysis.getFormatedTreeFromControlFlow(lineP);
 						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctConstructor)) {
 							
-							 if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+							 if(RepairPatternUtils.getElementInOld(diff, ctExpression)!=null && 
+									 (RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
 									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
 									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
 									  RepairPatternUtils.getElementInOld(diff, ctConstructor.getParent())) {
@@ -545,14 +546,8 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 		CtStatement oldparent = oldexpression.getParent(new LineFilter());
 		CtStatement newparent = newexpression.getParent(new LineFilter());
 		
-//		System.out.println(oldexpression);
-//		System.out.println(newexpression);
-//
-//		System.out.println(RepairPatternUtils.getElementInOld(diff, newexpression.getParent()));
-//		System.out.println(ctInvocation.getParent());
-
-		if((RepairPatternUtils.getElementInOld(diff, newexpression.getParent())!= null &&
-				RepairPatternUtils.getElementInOld(diff, newexpression.getParent()) == ctCall.getParent())||
+		if((RepairPatternUtils.getElementInOld(diff, newparent)!= null &&
+				RepairPatternUtils.getElementInOld(diff, newparent) == oldparent)||
 				(oldparent instanceof CtConstructorCall && newparent instanceof CtAssignment))
 			return true;
 		else return false;	
@@ -569,18 +564,9 @@ public class WrapsWithDetector extends AbstractPatternDetector {
 		CtStatement oldparent = oldexpression.getParent(new LineFilter());
 		CtStatement newparent = newexpression.getParent(new LineFilter());
 		
-//		System.out.println(oldexpression);
-//		System.out.println(newexpression);
-//
-//		System.out.println(RepairPatternUtils.getElementInOld(diff, newexpression.getParent()));
-//		System.out.println(ctInvocation.getParent());
-		
-		
-//		System.out.println(oldparent);
-//		System.out.println(newparent);
-
-		if((RepairPatternUtils.getElementInOld(diff, newexpression.getParent())!= null &&
-				RepairPatternUtils.getElementInOld(diff, newexpression.getParent()) == ctInvocation.getParent()) ||
+		if((RepairPatternUtils.getElementInOld(diff, newparent)!= null &&
+				RepairPatternUtils.getElementInOld(diff, newparent) == oldparent
+				) ||
 				(oldparent instanceof CtInvocation && newparent instanceof CtAssignment))
 			return true;
 		else return false;	

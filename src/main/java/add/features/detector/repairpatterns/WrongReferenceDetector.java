@@ -952,7 +952,8 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 						if(RepairPatternUtils.getIsInvocationInStatemnt(diff, lineP, ctInvocation) &&
 						   invocationArgumentsold.contains(ctExpression) && ctExpression.getParent()==source) {
 
-							 if((RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
+							 if(RepairPatternUtils.getElementInOld(diff, ctExpression)!=null && 
+									 (RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtConstructorCall ||
 									  RepairPatternUtils.getElementInOld(diff, ctExpression).getParent() instanceof CtInvocation)
 									  && RepairPatternUtils.getElementInOld(diff, ctExpression).getParent()!=
 									  RepairPatternUtils.getElementInOld(diff, ctInvocation.getParent())) {
@@ -999,7 +1000,7 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		}
 	}
 	
-	 private boolean whetherconsindertheconstructorunrap (CtExpression oldexpression, CtConstructorCall ctCall) {
+	private boolean whetherconsindertheconstructorunrap (CtExpression oldexpression, CtConstructorCall ctCall) {
 		ITree treenewexpression= MappingAnalysis.getRightFromLeftNodeMapped(diff, oldexpression); 
 
 		if(treenewexpression==null)
@@ -1009,15 +1010,9 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 		
 		CtStatement oldparent = oldexpression.getParent(new LineFilter());
 		CtStatement newparent = newexpression.getParent(new LineFilter());
-		
-//		System.out.println(oldexpression);
-//		System.out.println(newexpression);
-//
-//		System.out.println(RepairPatternUtils.getElementInOld(diff, newexpression.getParent()));
-//		System.out.println(ctInvocation.getParent());
 
-		if((RepairPatternUtils.getElementInOld(diff, newexpression.getParent())!= null &&
-				RepairPatternUtils.getElementInOld(diff, newexpression.getParent()) == ctCall.getParent())||
+		if((RepairPatternUtils.getElementInOld(diff, newparent)!= null &&
+				RepairPatternUtils.getElementInOld(diff, newparent) == oldparent)||
 				(oldparent instanceof CtConstructorCall && newparent instanceof CtAssignment))
 			return true;
 		else return false;	
@@ -1033,19 +1028,10 @@ public class WrongReferenceDetector extends AbstractPatternDetector {
 
 		CtStatement oldparent = oldexpression.getParent(new LineFilter());
 		CtStatement newparent = newexpression.getParent(new LineFilter());
-		
-//		System.out.println(oldexpression);
-//		System.out.println(newexpression);
-//
-//		System.out.println(RepairPatternUtils.getElementInOld(diff, newexpression.getParent()));
-//		System.out.println(ctInvocation.getParent());
-		
-		
-//		System.out.println(oldparent);
-//		System.out.println(newparent);
 
-		if((RepairPatternUtils.getElementInOld(diff, newexpression.getParent())!= null &&
-				RepairPatternUtils.getElementInOld(diff, newexpression.getParent()) == ctInvocation.getParent()) ||
+		if((RepairPatternUtils.getElementInOld(diff, newparent)!= null &&
+				RepairPatternUtils.getElementInOld(diff, newparent) == oldparent
+				) ||
 				(oldparent instanceof CtInvocation && newparent instanceof CtAssignment))
 			return true;
 		else return false;	
