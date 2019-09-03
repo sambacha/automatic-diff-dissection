@@ -11,22 +11,22 @@ import gumtree.spoon.diff.operations.Operation;
  */
 public abstract class AbstractPatternDetector {
 
-	protected List<Operation> operations;
+    protected List<Operation> operations;
 
-	protected Diff diff;
+    protected Diff diff;
 
-	AbstractPatternDetector(List<Operation> operations) {
-		this.operations = operations;
-	}
+    AbstractPatternDetector(List<Operation> operations) {
+        this.operations = operations;
+    }
 
-	public abstract void detect(RepairPatterns repairPatterns);
+    public abstract void detect(RepairPatterns repairPatterns);
 
-	public Diff getDiff() {
-		return diff;
-	}
+    public Diff getDiff() {
+        return diff;
+    }
 
-	public void setDiff(Diff diff) {
-		this.diff = diff;
-	}
+    public void setDiff(Diff diff) {
+        this.diff = diff;
+    }
 
 }
