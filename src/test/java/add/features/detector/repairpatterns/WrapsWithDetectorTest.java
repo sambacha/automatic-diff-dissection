@@ -14,12 +14,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- *
- * Tests for the features wrapsIf, wrapsIfElse, wrapsElse, wrapsTryCatch,
- * wrapsMethod, wrapsLoop, unwrapIfElse, unwrapTryCatch and unwrapMethod
- */
 public class WrapsWithDetectorTest {
 
 	@Test

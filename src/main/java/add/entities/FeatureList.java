@@ -8,9 +8,6 @@ import org.json.JSONObject;
 import add.main.Config;
 import add.main.Constants;
 
-/**
- * Created by fermadeiral
- */
 public class FeatureList {
 
     private List<Feature> featureList;

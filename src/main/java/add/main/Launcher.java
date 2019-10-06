@@ -23,9 +23,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import gumtree.spoon.diff.Diff;
 
-/**
- * Created by tdurieux
- */
 public class Launcher {
     private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Launcher.class);
 

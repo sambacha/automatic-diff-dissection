@@ -4,9 +4,6 @@ import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.visitor.Filter;
 
-/**
- * Created by fermadeiral
- */
 public class NullCheckFilter implements Filter<CtBinaryOperator> {
 
     public NullCheckFilter() {}

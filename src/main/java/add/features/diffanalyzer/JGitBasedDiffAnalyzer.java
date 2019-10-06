@@ -18,9 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import add.main.Utils;
 
-/**
- * Created by tdurieux
- */
 public class JGitBasedDiffAnalyzer {
     private static Logger LOGGER = LoggerFactory.getLogger(JGitBasedDiffAnalyzer.class);
 

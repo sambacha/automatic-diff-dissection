@@ -21,13 +21,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import fr.inria.coming.codefeatures.CodeFeatures;
+import add.features.codefeatures.CodeFeatures;
 
-/**
- * 
- * @author Matias Martinez
- *
- */
 public class FeatureJSONTest {
 
 	@Before

@@ -3,9 +3,6 @@ package add.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by fermadeiral
- */
 public class Constants {
 
     public static final Map<String, BugInfo> BUG_ID_T0_INFO_MAP = initBugIdToInfo();

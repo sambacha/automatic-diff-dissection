@@ -16,9 +16,6 @@ import add.features.diffanalyzer.Changes;
 import add.features.diffanalyzer.JGitBasedDiffAnalyzer;
 import add.main.Config;
 
-/**
- * Created by tdurieux
- */
 public class MetricExtractor extends FeatureAnalyzer {
 
     private Metrics metrics;

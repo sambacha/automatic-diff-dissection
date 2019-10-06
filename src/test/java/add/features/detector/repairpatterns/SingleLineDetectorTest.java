@@ -7,11 +7,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- *
- * Tests for the feature singleLine
- */
 public class SingleLineDetectorTest {
 
     /**

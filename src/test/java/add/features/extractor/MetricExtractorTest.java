@@ -8,9 +8,6 @@ import add.entities.Metrics;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by tdurieux
- */
 public class MetricExtractorTest {
 
     @Test

@@ -12,12 +12,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by tdurieux
- *
- * Tests for the features expLogicMod, expLogicExpand, expLogicReduce, and
- * expArithMod
- */
 public class ExpressionFixDetectorTest {
 
 	@Test

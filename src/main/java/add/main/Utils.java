@@ -12,9 +12,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by fermadeiral
- */
+
 public class Utils {
     private static Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 

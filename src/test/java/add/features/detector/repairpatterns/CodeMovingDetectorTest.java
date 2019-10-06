@@ -8,11 +8,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by tdurieux
- *
- * Tests for the feature codeMove
- */
 public class CodeMovingDetectorTest {
 
     @Test

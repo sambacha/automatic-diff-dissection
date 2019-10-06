@@ -7,11 +7,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- *
- * Tests for the features condBlockOthersAdd, condBlockRetAdd, condBlockExcAdd and condBlockRem
- */
 public class ConditionalBlockDetectorTest {
 
     @Test

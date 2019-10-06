@@ -7,9 +7,6 @@ import add.entities.RepairActions;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- */
 public class RepairActionDetectorTest {
 
     @Test

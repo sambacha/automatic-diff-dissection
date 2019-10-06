@@ -13,11 +13,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by tdurieux
- *
- * Tests for the features wrongVarRef and wrongMethodRef
- */
 public class WrongReferenceDetectorTest {
 
 	@Test

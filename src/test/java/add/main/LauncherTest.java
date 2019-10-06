@@ -6,9 +6,6 @@ import com.martiansoftware.jsap.JSAPException;
 
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- */
 public class LauncherTest {
 
     @Test

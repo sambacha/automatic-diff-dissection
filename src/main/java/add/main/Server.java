@@ -14,9 +14,6 @@ import add.features.detector.repairpatterns.RepairPatternDetector;
 import add.features.extractor.MetricExtractor;
 import fi.iki.elonen.NanoHTTPD;
 
-/**
- * Created by tdurieux
- */
 public class Server extends NanoHTTPD {
 
     public Server() throws IOException {

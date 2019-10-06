@@ -20,9 +20,6 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.visitor.filter.TypeFilter;
 
-/**
- * Created by fermadeiral
- */
 public class RepairPatternUtilsTest {
 
     @Test

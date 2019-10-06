@@ -7,9 +7,6 @@ import java.util.Set;
 
 import org.eclipse.jgit.diff.Edit;
 
-/**
- * Created by tdurieux
- */
 public class Changes {
     List<Change> oldChanges = new ArrayList<>();
     List<Change> newChanges = new ArrayList<>();

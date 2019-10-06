@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -33,16 +32,10 @@ import add.features.detector.repairpatterns.RepairPatternDetector;
 import add.features.detector.repairpatterns.WrapsWithDetector;
 import add.features.detector.repairpatterns.WrongReferenceDetector;
 import add.main.Config;
+import add.main.ExtractorProperties;
 import add.utils.TestUtils;
-import fr.inria.coming.codefeatures.CodeFeatures;
-import fr.inria.coming.main.ComingProperties;
 import gumtree.spoon.diff.Diff;
 
-/**
- * 
- * @author Matias Martinez
- *
- */
 public class SuspiciousASTFaultyTest {
 
 	public static void assertMarkedlAST(JsonObject resultjson, String patternName, String label, String type) {
@@ -190,8 +183,8 @@ public class SuspiciousASTFaultyTest {
 		File fileInput = new File(input);
 		System.out.println(input);
 
-		ComingProperties.setProperty("max_synthesis_step", "100000");
-		ComingProperties.properties.setProperty("max_synthesis_step", "100000");
+		ExtractorProperties.setProperty("max_synthesis_step", "100000");
+		ExtractorProperties.properties.setProperty("max_synthesis_step", "100000");
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 		Map<String, Diff> diffOfcommit = new HashMap();
 		// Compute the diff of the revision
@@ -748,7 +741,7 @@ public class SuspiciousASTFaultyTest {
 	@Test
 	public void testD4JMath_88() throws Exception {
 		String diffId = "Math_88";
-		ComingProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
+		ExtractorProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
 		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
@@ -827,7 +820,7 @@ public class SuspiciousASTFaultyTest {
 	@Test
 	public void testD4JTime_11() throws Exception {
 		String diffId = "Time_11";
-		ComingProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
+		ExtractorProperties.properties.setProperty("MAX_AST_CHANGES_PER_FILE", "200");
 		JsonObject resultjson = getJsonDataD4j(diffId);
 
 		System.out.println(resultjson);
@@ -911,7 +904,7 @@ public class SuspiciousASTFaultyTest {
 
 		DiffContextAnalyzer analyzer = new DiffContextAnalyzer();
 
-		File fileDiff = new File(ComingProperties.getProperty("icse15difffolder") + "/" + diffId);
+		File fileDiff = new File(ExtractorProperties.getProperty("icse15difffolder") + "/" + diffId);
 		Map<String, Diff> diffOfcommit = new HashMap();
 		analyzer.processDiff(fileDiff, diffOfcommit);
 
@@ -3626,7 +3619,7 @@ public class SuspiciousASTFaultyTest {
 
 		String input = getCompletePath("icse2015", diffId);
 		// We force to analyze the test, there we have the pattern instance
-		ComingProperties.properties.setProperty("excludetests", "false");
+		ExtractorProperties.properties.setProperty("excludetests", "false");
 		List<RepairPatterns> patterns = analyze(input);
 
 		RepairPatterns repairPatterns = patterns.get(0);

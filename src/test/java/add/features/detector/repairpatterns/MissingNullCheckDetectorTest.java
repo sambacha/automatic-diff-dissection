@@ -12,11 +12,6 @@ import add.entities.RepairPatterns;
 import add.main.Config;
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- *
- * Tests for the features missNullCheckP and missNullCheckN
- */
 public class MissingNullCheckDetectorTest {
 
 	/**

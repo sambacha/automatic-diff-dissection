@@ -15,9 +15,6 @@ import add.main.Config;
 import add.main.Constants;
 import add.utils.TestUtils;
 
-/**
- * Created by fermadeiral
- */
 public class JGitBasedDiffAnalyzerTest {
 
     @Test

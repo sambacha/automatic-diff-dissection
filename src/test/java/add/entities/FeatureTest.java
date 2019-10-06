@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-/**
- * Created by tdurieux
- */
 public class FeatureTest {
 
     @Test

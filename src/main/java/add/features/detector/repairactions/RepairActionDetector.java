@@ -11,9 +11,6 @@ import gumtree.spoon.diff.operations.Operation;
 import gumtree.spoon.diff.operations.UpdateOperation;
 import spoon.reflect.declaration.CtElement;
 
-/**
- * Created by fermadeiral
- */
 public class RepairActionDetector extends EditScriptBasedDetector {
 
     private RepairActions repairActions;
